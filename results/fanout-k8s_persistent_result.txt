@@ -1,0 +1,49 @@
+TASK [echo_end] ****************************************************************
+[0;32mok: [104.199.29.225] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate               320000 #", 
+        "# Message rate per publisher host       266 #", 
+        "# Fanout                                300 #", 
+        "# Message size                         2048 #", 
+        "# Message type                   persistent #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                4 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+    ]
+}[0m
+--
+RESULT ****************************************
+Errors occured during run:
+   4600 Error caught while running traffic. Aborting. Error msg: \
+   4596 CLIENT 000001: Error details - RC: Fail, Sub Code: SOLCLIENT_SUBCODE_NO_MORE_NON_DURABLE_QUEUE_OR_TE, Response Code: 503, Error String: No More Non-Durable Queue or Topic Endpoint\
+      4 Errors occured during run:\
+      1 CLIENT 000001: Error details - RC: Fail, Sub Code: SOLCLIENT_SUBCODE_NO_MORE_NON_DURABLE_QUEUE_OR_TE, Response Code: 503, Error String: No More Non-Durable Queue or Topic Endpoint', Undefined, Undefined, Undefined]"
+      1 CLIENT 000001: Error details - RC: Fail, Sub Code: SOLCLIENT_SUBCODE_NO_MORE_NON_DURABLE_QUEUE_OR_TE, Response Code: 503, Error String: No More Non-Durable Queue or Topic Endpoint', Undefined, Undefined]"
+      1 CLIENT 000001: Error details - RC: Fail, Sub Code: SOLCLIENT_SUBCODE_NO_MORE_NON_DURABLE_QUEUE_OR_TE, Response Code: 503, Error String: No More Non-Durable Queue or Topic Endpoint', Undefined]"
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [104.199.29.225] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate               150000 #", 
+        "# Message rate per publisher host      7500 #", 
+        "# Fanout                                  5 #", 
+        "# Message size                         2048 #", 
+        "# Message type                   persistent #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                4 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+    ]
+}[0m
+--
+RESULT ****************************************
+Sum across all publishers:     29980 (msgs/sec)
+Sum across all  consumers:    149479 (msgs/sec)
+
+allowed error margin = 5 %
+target rate - error margin = 142500
+Achieved rate 149479 >= 142500
+Test: OK

@@ -1,0 +1,19 @@
+TASK [echo_end] ****************************************************************
+[0;32mok: [104.199.29.225] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate               390000 #", 
+        "# Message rate per publisher host    390000 #", 
+        "# Fanout                                  1 #", 
+        "# Message size                          100 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                1 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:    390002 (msgs/sec)
+Sum across all  consumers:    389459 (msgs/sec)
+
+386100 <= 389459
+Test: OK

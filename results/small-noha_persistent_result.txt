@@ -1,0 +1,594 @@
+TASK [echo_end] ****************************************************************
+[0;32mok: [104.199.29.225] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                 2000 #", 
+        "# Message rate per publisher host       100 #", 
+        "# Fanout                                 10 #", 
+        "# Message size                       102400 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                2 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:       192 (msgs/sec)
+Sum across all  consumers:     1,919 (msgs/sec)
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [104.199.29.225] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                  600 #", 
+        "# Message rate per publisher host       300 #", 
+        "# Fanout                                  1 #", 
+        "# Message size                       102400 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                2 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:       408 (msgs/sec)
+Sum across all  consumers:       407 (msgs/sec)
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [104.199.29.225] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                 1000 #", 
+        "# Message rate per publisher host       250 #", 
+        "# Fanout                                  2 #", 
+        "# Message size                       102400 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                2 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:       361 (msgs/sec)
+Sum across all  consumers:       718 (msgs/sec)
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [104.199.29.225] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                 2000 #", 
+        "# Message rate per publisher host        20 #", 
+        "# Fanout                                 50 #", 
+        "# Message size                       102400 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                2 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:        32 (msgs/sec)
+Sum across all  consumers:     1,608 (msgs/sec)
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [104.199.29.225] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                 1500 #", 
+        "# Message rate per publisher host       150 #", 
+        "# Fanout                                  5 #", 
+        "# Message size                       102400 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                2 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:       288 (msgs/sec)
+Sum across all  consumers:     1,441 (msgs/sec)
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [104.199.29.225] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                90000 #", 
+        "# Message rate per publisher host      3000 #", 
+        "# Fanout                                 10 #", 
+        "# Message size                         1024 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                3 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:     8,997 (msgs/sec)
+Sum across all  consumers:    89,922 (msgs/sec)
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [104.199.29.225] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                20000 #", 
+        "# Message rate per publisher host     10000 #", 
+        "# Fanout                                  1 #", 
+        "# Message size                         1024 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                2 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:    19,374 (msgs/sec)
+Sum across all  consumers:    19,373 (msgs/sec)
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [104.199.29.225] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                35000 #", 
+        "# Message rate per publisher host      8750 #", 
+        "# Fanout                                  2 #", 
+        "# Message size                         1024 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                2 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:    17,474 (msgs/sec)
+Sum across all  consumers:    34,942 (msgs/sec)
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [104.199.29.225] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate               125000 #", 
+        "# Message rate per publisher host      1250 #", 
+        "# Fanout                                 50 #", 
+        "# Message size                         1024 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                2 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:     2,484 (msgs/sec)
+Sum across all  consumers:   123,760 (msgs/sec)
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [104.199.29.225] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                70000 #", 
+        "# Message rate per publisher host      7000 #", 
+        "# Fanout                                  5 #", 
+        "# Message size                         1024 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                2 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:    12,989 (msgs/sec)
+Sum across all  consumers:    64,932 (msgs/sec)
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [104.199.29.225] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                10000 #", 
+        "# Message rate per publisher host       500 #", 
+        "# Fanout                                 10 #", 
+        "# Message size                        20480 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                2 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:       992 (msgs/sec)
+Sum across all  consumers:     9,912 (msgs/sec)
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [104.199.29.225] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                 3500 #", 
+        "# Message rate per publisher host      1750 #", 
+        "# Fanout                                  1 #", 
+        "# Message size                        20480 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                2 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:     3,488 (msgs/sec)
+Sum across all  consumers:     3,488 (msgs/sec)
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [104.199.29.225] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                 6000 #", 
+        "# Message rate per publisher host      1500 #", 
+        "# Fanout                                  2 #", 
+        "# Message size                        20480 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                2 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:     2,992 (msgs/sec)
+Sum across all  consumers:     5,984 (msgs/sec)
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [104.199.29.225] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                10000 #", 
+        "# Message rate per publisher host       100 #", 
+        "# Fanout                                 50 #", 
+        "# Message size                        20480 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                2 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:       192 (msgs/sec)
+Sum across all  consumers:     9,608 (msgs/sec)
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [104.199.29.225] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                 8000 #", 
+        "# Message rate per publisher host       800 #", 
+        "# Fanout                                  5 #", 
+        "# Message size                        20480 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                2 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:     1,600 (msgs/sec)
+Sum across all  consumers:     8,001 (msgs/sec)
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [104.199.29.225] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                67000 #", 
+        "# Message rate per publisher host      2233 #", 
+        "# Fanout                                 10 #", 
+        "# Message size                         2048 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                3 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:     6,696 (msgs/sec)
+Sum across all  consumers:    66,958 (msgs/sec)
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [104.199.29.225] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                18000 #", 
+        "# Message rate per publisher host      9000 #", 
+        "# Fanout                                  1 #", 
+        "# Message size                         2048 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                2 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:    17,265 (msgs/sec)
+Sum across all  consumers:    17,254 (msgs/sec)
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [104.199.29.225] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                30000 #", 
+        "# Message rate per publisher host      7500 #", 
+        "# Fanout                                  2 #", 
+        "# Message size                         2048 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                2 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:    14,990 (msgs/sec)
+Sum across all  consumers:    29,977 (msgs/sec)
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [104.199.29.225] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate               110000 #", 
+        "# Message rate per publisher host      1100 #", 
+        "# Fanout                                 50 #", 
+        "# Message size                         2048 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                2 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:     2,190 (msgs/sec)
+Sum across all  consumers:   109,010 (msgs/sec)
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [104.199.29.225] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                55000 #", 
+        "# Message rate per publisher host      3666 #", 
+        "# Fanout                                  5 #", 
+        "# Message size                         2048 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                3 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:    10,992 (msgs/sec)
+Sum across all  consumers:    54,957 (msgs/sec)
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [104.199.29.225] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                50000 #", 
+        "# Message rate per publisher host      1666 #", 
+        "# Fanout                                 10 #", 
+        "# Message size                         4096 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                3 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:     4,992 (msgs/sec)
+Sum across all  consumers:    49,921 (msgs/sec)
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [104.199.29.225] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                15000 #", 
+        "# Message rate per publisher host      7500 #", 
+        "# Fanout                                  1 #", 
+        "# Message size                         4096 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                2 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:    14,966 (msgs/sec)
+Sum across all  consumers:    14,961 (msgs/sec)
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [104.199.29.225] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                28000 #", 
+        "# Message rate per publisher host      7000 #", 
+        "# Fanout                                  2 #", 
+        "# Message size                         4096 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                2 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:    13,566 (msgs/sec)
+Sum across all  consumers:    27,116 (msgs/sec)
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [104.199.29.225] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                54000 #", 
+        "# Message rate per publisher host       540 #", 
+        "# Fanout                                 50 #", 
+        "# Message size                         4096 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                2 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:     1,072 (msgs/sec)
+Sum across all  consumers:    53,598 (msgs/sec)
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [104.199.29.225] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                40000 #", 
+        "# Message rate per publisher host      2666 #", 
+        "# Fanout                                  5 #", 
+        "# Message size                         4096 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                3 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:     7,992 (msgs/sec)
+Sum across all  consumers:    39,958 (msgs/sec)
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [104.199.29.225] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                 2500 #", 
+        "# Message rate per publisher host       125 #", 
+        "# Fanout                                 10 #", 
+        "# Message size                        51200 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                2 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:       240 (msgs/sec)
+Sum across all  consumers:     2,402 (msgs/sec)
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [104.199.29.225] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                 1100 #", 
+        "# Message rate per publisher host       550 #", 
+        "# Fanout                                  1 #", 
+        "# Message size                        51200 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                2 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:       968 (msgs/sec)
+Sum across all  consumers:       963 (msgs/sec)
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [104.199.29.225] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                 2000 #", 
+        "# Message rate per publisher host       500 #", 
+        "# Fanout                                  2 #", 
+        "# Message size                        51200 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                2 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:       867 (msgs/sec)
+Sum across all  consumers:     1,728 (msgs/sec)
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [104.199.29.225] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                 2000 #", 
+        "# Message rate per publisher host        20 #", 
+        "# Fanout                                 50 #", 
+        "# Message size                        51200 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                2 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:        32 (msgs/sec)
+Sum across all  consumers:     1,608 (msgs/sec)
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [104.199.29.225] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                 4000 #", 
+        "# Message rate per publisher host       400 #", 
+        "# Fanout                                  5 #", 
+        "# Message size                        51200 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                2 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:       745 (msgs/sec)
+Sum across all  consumers:     3,701 (msgs/sec)
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [104.199.29.225] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate               100000 #", 
+        "# Message rate per publisher host      5000 #", 
+        "# Fanout                                 10 #", 
+        "# Message size                          512 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                2 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:     9,979 (msgs/sec)
+Sum across all  consumers:    99,726 (msgs/sec)
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [104.199.29.225] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                20000 #", 
+        "# Message rate per publisher host     10000 #", 
+        "# Fanout                                  1 #", 
+        "# Message size                          512 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                2 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:    19,965 (msgs/sec)
+Sum across all  consumers:    19,962 (msgs/sec)
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [104.199.29.225] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                35000 #", 
+        "# Message rate per publisher host      8750 #", 
+        "# Fanout                                  2 #", 
+        "# Message size                          512 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                2 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:    17,466 (msgs/sec)
+Sum across all  consumers:    34,924 (msgs/sec)
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [104.199.29.225] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate               135000 #", 
+        "# Message rate per publisher host      1350 #", 
+        "# Fanout                                 50 #", 
+        "# Message size                          512 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                2 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:     2,633 (msgs/sec)
+Sum across all  consumers:   131,117 (msgs/sec)
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [104.199.29.225] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                70000 #", 
+        "# Message rate per publisher host      7000 #", 
+        "# Fanout                                  5 #", 
+        "# Message size                          512 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                2 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:    13,001 (msgs/sec)
+Sum across all  consumers:    64,993 (msgs/sec)

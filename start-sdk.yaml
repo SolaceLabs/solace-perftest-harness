@@ -1,0 +1,165 @@
+---
+- hosts: subhost1, subhost2, subhost3, subhost4, pubhost1, pubhost2, pubhost3, pubhost4
+  remote_user: "{{ user }}"
+  vars:
+    #main setup variables - can be overriden by calling script
+    user: 'ubuntu' #default user for perf host log in
+    script_path: '/home/{{ user }}/pubSubTools'
+
+    #variables controlling the test type - most of these are being overwritten by calling scripts
+    runlength: 120 #default run length for each test
+    mt: persistent #default message type: direct, nonpersistent or persistent
+    msg_size: 1024 # default message payload size
+    #how many individual consumers on each topic:
+    sdk_fanout: 5 #default fanout number
+    #how many hosts to run publishers and subscribers on:
+    parallel_hosts: 1 #default publisher and consumer hosts
+    #set the overall msg rate you want to achieve (incl fanout):
+    overall_msg_rate: 60000 #default message rate to achieve
+    #more or less constant and calculated values...
+    sdk_consumer_threads: 1 #default=1, increase, if you need some load balancing
+    
+    ##section for calculating values based on input variables ##
+    #set the number of consumers to the same number as the publishers:
+    HOST_COUNT_INVENTORY: "{{ (groups['pubhost1'] | length) +
+    (groups['pubhost2'] | length) + (groups['pubhost3'] | length) +
+    (groups['pubhost4'] | length) }}" #calculates how many pub hosts are active
+    HOST_COUNT: "{{ [HOST_COUNT_INVENTORY, parallel_hosts] | min }}"
+    msg_rate: "{{ (overall_msg_rate / (HOST_COUNT | int) /
+    (sdk_fanout | int)) | int }}" # rate per publisher host
+    #set sdk_publishers equal to the number of cores on the test hosts:
+    sdk_publishers: 8 #default number of clients on each publisher hosts
+    #set actual number of publishers to the lower of the two for really small msg rates:
+    act_publishers: "{{ [msg_rate, sdk_publishers] | min }}"
+    sdk_consumers: "{{ act_publishers }}" #default number of clients on each consumer hosts - needs to match publishers!
+    sdk_credentials: '-cu=sdkperf@default -cp=...' #default sdkperf login creds
+    async_retries: "{{ runlength / 10 + 5 | round | int }}" #how long ansible is waiting for the sdks to finish (in 10s intervals).
+    
+    # some variables for pretty printing variables/test parameters
+    filler: "            "
+    str_msg_size: "{{ ([filler, msg_size] |join)[-8:] }}"
+    str_overall_rate: "{{ ([filler, overall_msg_rate] | join)[-8:] }}"
+    str_msg_rate: "{{ ([filler, msg_rate] | join)[-8:] }}"
+    str_mt: "{{ ([filler, mt] | join)[-13:] }}"
+    str_fanout: "{{ ([filler, sdk_fanout] | join)[-8:] }}"
+    str_host_count_inv: "{{ ([filler, HOST_COUNT_INVENTORY] | join)[-2:] }}"
+    str_parallel_hosts: "{{ ([filler, parallel_hosts] | join)[-8:] }}"
+    str_publishers: "{{ ([filler, act_publishers] | join)[-8:] }}"
+    
+  ######################
+  ######## MAIN ########
+  ######################
+  tasks:
+  - name: 'echo_start'
+    debug:
+      msg:
+        - "#############################################"
+        - "# Overall message rate             {{ str_overall_rate }} #"
+        - "# Message rate per publisher host  {{ str_msg_rate }} #"
+        - "# Fanout                           {{ str_fanout }} #"
+        - "# Message size                     {{ str_msg_size }} #"
+        - "# Message type                {{ str_mt }} #"
+        - "# Number of publisher hosts in inventory {{ str_host_count_inv }} #"
+        - "# Parallel hosts (pub/sub)         {{ str_parallel_hosts }} #"
+        - "# Parallel processes per host      {{ str_publishers }} #"
+        - "#############################################"
+    run_once: true
+    tags: debug
+  - name: 'create pubSubTools'
+    file:
+      path: "/home/{{ user }}/pubSubTools"
+      state: directory
+      mode: 0755
+  - name: 'copy sdkperf'
+    copy:
+      src: ./pubSubTools/{{ item.src }}
+      dest: "{{ script_path }}/{{ item.dest }}"
+      owner: "{{ user }}"
+      group: "{{ user }}"
+      mode: "u+x"
+    with_items:
+      - { src: LICENSES, dest: LICENSES }
+      - { src: sdkperf_c, dest: sdkperf_c }
+  - name: 'copy scripts'
+    copy:
+      src: ./scripts/{{ item.src }}
+      dest: "{{ script_path }}/{{ item.dest }}"
+      owner: "{{ user }}"
+      group: "{{ user }}"
+      mode: "u+x"
+    with_items:
+      - { src: sdkpublisher.sh, dest: sdkpublisher.sh }
+      - { src: sdkconsumers.sh, dest: sdkconsumers.sh }
+  - name: 'run consumer'
+    shell:  "{{ script_path }}/sdkconsumers.sh {{ runlength + 10 }} {{ sdk_consumers }} {{ item.topic }} {{ sdk_fanout }} -cip={{ vmrs }} {{ sdk_credentials }} -cc={{ sdk_consumer_threads }} -mt={{ mt }} | tee sdk.log"
+    when: "item.groups in group_names and
+    ( item.index|int <= parallel_hosts )"
+    async: "{{ runlength + 20 }}"
+    poll: 0
+    args:
+      chdir: "{{ script_path }}/"
+      executable: "/bin/bash"
+    register: "sub"
+    with_items:
+      - { index: 1, topic: 'topic1', groups: 'subhost1' }
+      - { index: 2, topic: 'topic2', groups: 'subhost2' }
+      - { index: 3, topic: 'topic3', groups: 'subhost3' }
+      - { index: 4, topic: 'topic4', groups: 'subhost4' }
+  - name: 'run publishers'
+    shell:  "{{ script_path }}/sdkpublisher.sh {{ runlength }} {{ msg_rate }} {{ act_publishers }} 999999999 {{ item.topic }} -cip={{ vmrs }} {{ sdk_credentials}} -msa={{ msg_size }} -mt={{ mt }} | tee sdk.log"
+    when: "item.groups in group_names and
+    ( item.index|int <= parallel_hosts )"
+    async: "{{ runlength + 5 }}"
+    poll: 10
+    args:
+      chdir: "{{ script_path }}/"
+      executable: "/bin/bash"
+    register: "pub"
+    with_items:
+      - { index: 1, topic: 'topic1', groups: 'pubhost1' }
+      - { index: 2, topic: 'topic2', groups: 'pubhost2' }
+      - { index: 3, topic: 'topic3', groups: 'pubhost3' }
+      - { index: 4, topic: 'topic4', groups: 'pubhost4' }
+
+  - name: 'check publishers'
+    async_status:
+      jid: "{{ item.ansible_job_id }}"
+    ignore_errors: True
+    register: "pub_result"
+    until: pub_result.finished
+    retries: "{{ async_retries | int }}"
+    delay: 10
+    failed_when: pub_result.rc != 0
+    when: not item | skipped
+    with_items: "{{ pub.results }}"
+
+  - name: 'display pub results'
+    debug: msg="{{ pub_result.results| map(attribute='stdout') | list }}"
+
+  - name: 'check consumers'
+    async_status:
+      jid: "{{ item.ansible_job_id }}"
+    ignore_errors: True
+    register: "sub_result"
+    until: sub_result.finished
+    retries: "{{ async_retries | int }}"
+    delay: 10
+    when: not item | skipped
+    with_items: "{{ sub.results }}"
+  - name: 'display sub results'
+    debug: msg="{{ sub_result.results | map(attribute='stdout') | list }}"
+
+  - name: 'echo_end'
+    debug:
+      msg:
+        - "#############################################"
+        - "# Overall message rate             {{ str_overall_rate }} #"
+        - "# Message rate per publisher host  {{ str_msg_rate }} #"
+        - "# Fanout                           {{ str_fanout }} #"
+        - "# Message size                     {{ str_msg_size }} #"
+        - "# Message type                {{ str_mt }} #"
+        - "# Number of publisher hosts in inventory {{ str_host_count_inv }} #"
+        - "# Parallel hosts (pub/sub)         {{ str_parallel_hosts }} #"
+        - "# Parallel processes per host      {{ str_publishers }} #"
+        - "#############################################"
+    run_once: true

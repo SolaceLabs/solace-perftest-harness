@@ -1,0 +1,874 @@
+TASK [echo_end] ****************************************************************
+[0;32mok: [10.132.0.8] => {[0m
+[0;32m    "msg": [[0m
+[0;32m        "#############################################", [0m
+[0;32m        "# Overall message rate                 1000 #", [0m
+[0;32m        "# Message rate per publisher host       250 #", [0m
+[0;32m        "# Fanout                                  1 #", [0m
+[0;32m        "# Message size                       102400 #", [0m
+[0;32m        "# Message type                   persistent #", [0m
+[0;32m        "# Number of publisher hosts in inventory  4 #", [0m
+[0;32m        "# Parallel hosts (pub/sub)                4 #", [0m
+[0;32m        "# Parallel processes per host             8 #", [0m
+[0;32m        "#############################################"[0m
+[0;32m    ][0m
+[0;32m}[0m
+--
+RESULT ****************************************
+Sum across all publishers:      1942 (msgs/sec)
+Sum across all  consumers:       940 (msgs/sec)
+
+allowed error margin = 5 %
+target rate - error margin = 950
+Achieved rate 940 < 950
+Test: Fail
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [10.132.0.8] => {[0m
+[0;32m    "msg": [[0m
+[0;32m        "#############################################", [0m
+[0;32m        "# Overall message rate                 2100 #", [0m
+[0;32m        "# Message rate per publisher host       262 #", [0m
+[0;32m        "# Fanout                                  2 #", [0m
+[0;32m        "# Message size                       102400 #", [0m
+[0;32m        "# Message type                   persistent #", [0m
+[0;32m        "# Number of publisher hosts in inventory  4 #", [0m
+[0;32m        "# Parallel hosts (pub/sub)                4 #", [0m
+[0;32m        "# Parallel processes per host             8 #", [0m
+[0;32m        "#############################################"[0m
+[0;32m    ][0m
+[0;32m}[0m
+--
+RESULT ****************************************
+Sum across all publishers:      2047 (msgs/sec)
+Sum across all  consumers:      2048 (msgs/sec)
+
+allowed error margin = 5 %
+target rate - error margin = 1995
+Achieved rate 2048 >= 1995
+Test: OK
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [10.132.0.8] => {[0m
+[0;32m    "msg": [[0m
+[0;32m        "#############################################", [0m
+[0;32m        "# Overall message rate                 5000 #", [0m
+[0;32m        "# Message rate per publisher host       250 #", [0m
+[0;32m        "# Fanout                                  5 #", [0m
+[0;32m        "# Message size                       102400 #", [0m
+[0;32m        "# Message type                   persistent #", [0m
+[0;32m        "# Number of publisher hosts in inventory  4 #", [0m
+[0;32m        "# Parallel hosts (pub/sub)                4 #", [0m
+[0;32m        "# Parallel processes per host             8 #", [0m
+[0;32m        "#############################################"[0m
+[0;32m    ][0m
+[0;32m}[0m
+--
+RESULT ****************************************
+Sum across all publishers:      1983 (msgs/sec)
+Sum across all  consumers:      4963 (msgs/sec)
+
+allowed error margin = 5 %
+target rate - error margin = 4750
+Achieved rate 4963 >= 4750
+Test: OK
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [10.132.0.8] => {[0m
+[0;32m    "msg": [[0m
+[0;32m        "#############################################", [0m
+[0;32m        "# Overall message rate                 6000 #", [0m
+[0;32m        "# Message rate per publisher host       150 #", [0m
+[0;32m        "# Fanout                                 10 #", [0m
+[0;32m        "# Message size                       102400 #", [0m
+[0;32m        "# Message type                   persistent #", [0m
+[0;32m        "# Number of publisher hosts in inventory  4 #", [0m
+[0;32m        "# Parallel hosts (pub/sub)                4 #", [0m
+[0;32m        "# Parallel processes per host             8 #", [0m
+[0;32m        "#############################################"[0m
+[0;32m    ][0m
+[0;32m}[0m
+--
+RESULT ****************************************
+Sum across all publishers:      1151 (msgs/sec)
+Sum across all  consumers:      5767 (msgs/sec)
+
+allowed error margin = 5 %
+target rate - error margin = 5700
+Achieved rate 5767 >= 5700
+Test: OK
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [10.132.0.8] => {[0m
+[0;32m    "msg": [[0m
+[0;32m        "#############################################", [0m
+[0;32m        "# Overall message rate                10000 #", [0m
+[0;32m        "# Message rate per publisher host       100 #", [0m
+[0;32m        "# Fanout                                 50 #", [0m
+[0;32m        "# Message size                       102400 #", [0m
+[0;32m        "# Message type                   persistent #", [0m
+[0;32m        "# Number of publisher hosts in inventory  4 #", [0m
+[0;32m        "# Parallel hosts (pub/sub)                2 #", [0m
+[0;32m        "# Parallel processes per host             8 #", [0m
+[0;32m        "#############################################"[0m
+[0;32m    ][0m
+[0;32m}[0m
+--
+RESULT ****************************************
+Sum across all publishers:       383 (msgs/sec)
+Sum across all  consumers:      9618 (msgs/sec)
+
+allowed error margin = 5 %
+target rate - error margin = 9500
+Achieved rate 9618 >= 9500
+Test: OK
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [10.132.0.8] => {[0m
+[0;32m    "msg": [[0m
+[0;32m        "#############################################", [0m
+[0;32m        "# Overall message rate                 2000 #", [0m
+[0;32m        "# Message rate per publisher host       500 #", [0m
+[0;32m        "# Fanout                                  1 #", [0m
+[0;32m        "# Message size                        51200 #", [0m
+[0;32m        "# Message type                   persistent #", [0m
+[0;32m        "# Number of publisher hosts in inventory  4 #", [0m
+[0;32m        "# Parallel hosts (pub/sub)                4 #", [0m
+[0;32m        "# Parallel processes per host             8 #", [0m
+[0;32m        "#############################################"[0m
+[0;32m    ][0m
+[0;32m}[0m
+--
+RESULT ****************************************
+Sum across all publishers:      3967 (msgs/sec)
+Sum across all  consumers:      1984 (msgs/sec)
+
+allowed error margin = 5 %
+target rate - error margin = 1900
+Achieved rate 1984 >= 1900
+Test: OK
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [10.132.0.8] => {[0m
+[0;32m    "msg": [[0m
+[0;32m        "#############################################", [0m
+[0;32m        "# Overall message rate                 4000 #", [0m
+[0;32m        "# Message rate per publisher host       500 #", [0m
+[0;32m        "# Fanout                                  2 #", [0m
+[0;32m        "# Message size                        51200 #", [0m
+[0;32m        "# Message type                   persistent #", [0m
+[0;32m        "# Number of publisher hosts in inventory  4 #", [0m
+[0;32m        "# Parallel hosts (pub/sub)                4 #", [0m
+[0;32m        "# Parallel processes per host             8 #", [0m
+[0;32m        "#############################################"[0m
+[0;32m    ][0m
+[0;32m}[0m
+--
+RESULT ****************************************
+Sum across all publishers:      3967 (msgs/sec)
+Sum across all  consumers:      3969 (msgs/sec)
+
+allowed error margin = 5 %
+target rate - error margin = 3800
+Achieved rate 3969 >= 3800
+Test: OK
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [10.132.0.8] => {[0m
+[0;32m    "msg": [[0m
+[0;32m        "#############################################", [0m
+[0;32m        "# Overall message rate                 9500 #", [0m
+[0;32m        "# Message rate per publisher host       475 #", [0m
+[0;32m        "# Fanout                                  5 #", [0m
+[0;32m        "# Message size                        51200 #", [0m
+[0;32m        "# Message type                   persistent #", [0m
+[0;32m        "# Number of publisher hosts in inventory  4 #", [0m
+[0;32m        "# Parallel hosts (pub/sub)                4 #", [0m
+[0;32m        "# Parallel processes per host             8 #", [0m
+[0;32m        "#############################################"[0m
+[0;32m    ][0m
+[0;32m}[0m
+--
+RESULT ****************************************
+Sum across all publishers:      3775 (msgs/sec)
+Sum across all  consumers:      9443 (msgs/sec)
+
+allowed error margin = 5 %
+target rate - error margin = 9025
+Achieved rate 9443 >= 9025
+Test: OK
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [10.132.0.8] => {[0m
+[0;32m    "msg": [[0m
+[0;32m        "#############################################", [0m
+[0;32m        "# Overall message rate                12700 #", [0m
+[0;32m        "# Message rate per publisher host       317 #", [0m
+[0;32m        "# Fanout                                 10 #", [0m
+[0;32m        "# Message size                        51200 #", [0m
+[0;32m        "# Message type                   persistent #", [0m
+[0;32m        "# Number of publisher hosts in inventory  4 #", [0m
+[0;32m        "# Parallel hosts (pub/sub)                4 #", [0m
+[0;32m        "# Parallel processes per host             8 #", [0m
+[0;32m        "#############################################"[0m
+[0;32m    ][0m
+[0;32m}[0m
+--
+RESULT ****************************************
+Sum across all publishers:      2495 (msgs/sec)
+Sum across all  consumers:     12486 (msgs/sec)
+
+allowed error margin = 5 %
+target rate - error margin = 12065
+Achieved rate 12486 >= 12065
+Test: OK
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [10.132.0.8] => {[0m
+[0;32m    "msg": [[0m
+[0;32m        "#############################################", [0m
+[0;32m        "# Overall message rate                17000 #", [0m
+[0;32m        "# Message rate per publisher host       170 #", [0m
+[0;32m        "# Fanout                                 50 #", [0m
+[0;32m        "# Message size                        51200 #", [0m
+[0;32m        "# Message type                   persistent #", [0m
+[0;32m        "# Number of publisher hosts in inventory  4 #", [0m
+[0;32m        "# Parallel hosts (pub/sub)                2 #", [0m
+[0;32m        "# Parallel processes per host             8 #", [0m
+[0;32m        "#############################################"[0m
+[0;32m    ][0m
+[0;32m}[0m
+--
+RESULT ****************************************
+Sum across all publishers:       671 (msgs/sec)
+Sum across all  consumers:     16816 (msgs/sec)
+
+allowed error margin = 5 %
+target rate - error margin = 16150
+Achieved rate 16816 >= 16150
+Test: OK
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [10.132.0.8] => {[0m
+[0;32m    "msg": [[0m
+[0;32m        "#############################################", [0m
+[0;32m        "# Overall message rate                 5000 #", [0m
+[0;32m        "# Message rate per publisher host      1250 #", [0m
+[0;32m        "# Fanout                                  1 #", [0m
+[0;32m        "# Message size                        20480 #", [0m
+[0;32m        "# Message type                   persistent #", [0m
+[0;32m        "# Number of publisher hosts in inventory  4 #", [0m
+[0;32m        "# Parallel hosts (pub/sub)                4 #", [0m
+[0;32m        "# Parallel processes per host             8 #", [0m
+[0;32m        "#############################################"[0m
+[0;32m    ][0m
+[0;32m}[0m
+--
+RESULT ****************************************
+Sum across all publishers:      9983 (msgs/sec)
+Sum across all  consumers:      4991 (msgs/sec)
+
+allowed error margin = 5 %
+target rate - error margin = 4750
+Achieved rate 4991 >= 4750
+Test: OK
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [10.132.0.8] => {[0m
+[0;32m    "msg": [[0m
+[0;32m        "#############################################", [0m
+[0;32m        "# Overall message rate                13000 #", [0m
+[0;32m        "# Message rate per publisher host      1625 #", [0m
+[0;32m        "# Fanout                                  2 #", [0m
+[0;32m        "# Message size                        20480 #", [0m
+[0;32m        "# Message type                   persistent #", [0m
+[0;32m        "# Number of publisher hosts in inventory  4 #", [0m
+[0;32m        "# Parallel hosts (pub/sub)                4 #", [0m
+[0;32m        "# Parallel processes per host             8 #", [0m
+[0;32m        "#############################################"[0m
+[0;32m    ][0m
+[0;32m}[0m
+--
+RESULT ****************************************
+Sum across all publishers:     10273 (msgs/sec)
+Sum across all  consumers:     10220 (msgs/sec)
+
+allowed error margin = 5 %
+target rate - error margin = 12350
+Achieved rate 10220 < 12350
+Test: Fail
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [10.132.0.8] => {[0m
+[0;32m    "msg": [[0m
+[0;32m        "#############################################", [0m
+[0;32m        "# Overall message rate                25000 #", [0m
+[0;32m        "# Message rate per publisher host      1250 #", [0m
+[0;32m        "# Fanout                                  5 #", [0m
+[0;32m        "# Message size                        20480 #", [0m
+[0;32m        "# Message type                   persistent #", [0m
+[0;32m        "# Number of publisher hosts in inventory  4 #", [0m
+[0;32m        "# Parallel hosts (pub/sub)                4 #", [0m
+[0;32m        "# Parallel processes per host             8 #", [0m
+[0;32m        "#############################################"[0m
+[0;32m    ][0m
+[0;32m}[0m
+--
+RESULT ****************************************
+Sum across all publishers:      9983 (msgs/sec)
+Sum across all  consumers:     24955 (msgs/sec)
+
+allowed error margin = 5 %
+target rate - error margin = 23750
+Achieved rate 24955 >= 23750
+Test: OK
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [10.132.0.8] => {[0m
+[0;32m    "msg": [[0m
+[0;32m        "#############################################", [0m
+[0;32m        "# Overall message rate                30000 #", [0m
+[0;32m        "# Message rate per publisher host       750 #", [0m
+[0;32m        "# Fanout                                 10 #", [0m
+[0;32m        "# Message size                        20480 #", [0m
+[0;32m        "# Message type                   persistent #", [0m
+[0;32m        "# Number of publisher hosts in inventory  4 #", [0m
+[0;32m        "# Parallel hosts (pub/sub)                4 #", [0m
+[0;32m        "# Parallel processes per host             8 #", [0m
+[0;32m        "#############################################"[0m
+[0;32m    ][0m
+[0;32m}[0m
+--
+RESULT ****************************************
+Sum across all publishers:      5951 (msgs/sec)
+Sum across all  consumers:     29766 (msgs/sec)
+
+allowed error margin = 5 %
+target rate - error margin = 28500
+Achieved rate 29766 >= 28500
+Test: OK
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [10.132.0.8] => {[0m
+[0;32m    "msg": [[0m
+[0;32m        "#############################################", [0m
+[0;32m        "# Overall message rate                40000 #", [0m
+[0;32m        "# Message rate per publisher host       400 #", [0m
+[0;32m        "# Fanout                                 50 #", [0m
+[0;32m        "# Message size                        20480 #", [0m
+[0;32m        "# Message type                   persistent #", [0m
+[0;32m        "# Number of publisher hosts in inventory  4 #", [0m
+[0;32m        "# Parallel hosts (pub/sub)                2 #", [0m
+[0;32m        "# Parallel processes per host             8 #", [0m
+[0;32m        "#############################################"[0m
+[0;32m    ][0m
+[0;32m}[0m
+--
+RESULT ****************************************
+Sum across all publishers:      1599 (msgs/sec)
+Sum across all  consumers:     40006 (msgs/sec)
+
+allowed error margin = 5 %
+target rate - error margin = 38000
+Achieved rate 40006 >= 38000
+Test: OK
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [10.132.0.8] => {[0m
+[0;32m    "msg": [[0m
+[0;32m        "#############################################", [0m
+[0;32m        "# Overall message rate                26000 #", [0m
+[0;32m        "# Message rate per publisher host      6500 #", [0m
+[0;32m        "# Fanout                                  1 #", [0m
+[0;32m        "# Message size                         4096 #", [0m
+[0;32m        "# Message type                   persistent #", [0m
+[0;32m        "# Number of publisher hosts in inventory  4 #", [0m
+[0;32m        "# Parallel hosts (pub/sub)                4 #", [0m
+[0;32m        "# Parallel processes per host             8 #", [0m
+[0;32m        "#############################################"[0m
+[0;32m    ][0m
+[0;32m}[0m
+--
+RESULT ****************************************
+Sum across all publishers:     51964 (msgs/sec)
+Sum across all  consumers:     25912 (msgs/sec)
+
+allowed error margin = 5 %
+target rate - error margin = 24700
+Achieved rate 25912 >= 24700
+Test: OK
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [10.132.0.8] => {[0m
+[0;32m    "msg": [[0m
+[0;32m        "#############################################", [0m
+[0;32m        "# Overall message rate                50000 #", [0m
+[0;32m        "# Message rate per publisher host      6250 #", [0m
+[0;32m        "# Fanout                                  2 #", [0m
+[0;32m        "# Message size                         4096 #", [0m
+[0;32m        "# Message type                   persistent #", [0m
+[0;32m        "# Number of publisher hosts in inventory  4 #", [0m
+[0;32m        "# Parallel hosts (pub/sub)                4 #", [0m
+[0;32m        "# Parallel processes per host             8 #", [0m
+[0;32m        "#############################################"[0m
+[0;32m    ][0m
+[0;32m}[0m
+--
+RESULT ****************************************
+Sum across all publishers:     49983 (msgs/sec)
+Sum across all  consumers:     49967 (msgs/sec)
+
+allowed error margin = 5 %
+target rate - error margin = 47500
+Achieved rate 49967 >= 47500
+Test: OK
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [10.132.0.8] => {[0m
+[0;32m    "msg": [[0m
+[0;32m        "#############################################", [0m
+[0;32m        "# Overall message rate               118000 #", [0m
+[0;32m        "# Message rate per publisher host      5900 #", [0m
+[0;32m        "# Fanout                                  5 #", [0m
+[0;32m        "# Message size                         4096 #", [0m
+[0;32m        "# Message type                   persistent #", [0m
+[0;32m        "# Number of publisher hosts in inventory  4 #", [0m
+[0;32m        "# Parallel hosts (pub/sub)                4 #", [0m
+[0;32m        "# Parallel processes per host             8 #", [0m
+[0;32m        "#############################################"[0m
+[0;32m    ][0m
+[0;32m}[0m
+--
+RESULT ****************************************
+Sum across all publishers:     45610 (msgs/sec)
+Sum across all  consumers:    113929 (msgs/sec)
+
+allowed error margin = 5 %
+target rate - error margin = 112100
+Achieved rate 113929 >= 112100
+Test: OK
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [10.132.0.8] => {[0m
+[0;32m    "msg": [[0m
+[0;32m        "#############################################", [0m
+[0;32m        "# Overall message rate               123000 #", [0m
+[0;32m        "# Message rate per publisher host      3075 #", [0m
+[0;32m        "# Fanout                                 10 #", [0m
+[0;32m        "# Message size                         4096 #", [0m
+[0;32m        "# Message type                   persistent #", [0m
+[0;32m        "# Number of publisher hosts in inventory  4 #", [0m
+[0;32m        "# Parallel hosts (pub/sub)                4 #", [0m
+[0;32m        "# Parallel processes per host             8 #", [0m
+[0;32m        "#############################################"[0m
+[0;32m    ][0m
+[0;32m}[0m
+--
+RESULT ****************************************
+Sum across all publishers:     24575 (msgs/sec)
+Sum across all  consumers:    122891 (msgs/sec)
+
+allowed error margin = 5 %
+target rate - error margin = 116850
+Achieved rate 122891 >= 116850
+Test: OK
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [10.132.0.8] => {[0m
+[0;32m    "msg": [[0m
+[0;32m        "#############################################", [0m
+[0;32m        "# Overall message rate               290000 #", [0m
+[0;32m        "# Message rate per publisher host      2900 #", [0m
+[0;32m        "# Fanout                                 50 #", [0m
+[0;32m        "# Message size                         4096 #", [0m
+[0;32m        "# Message type                   persistent #", [0m
+[0;32m        "# Number of publisher hosts in inventory  4 #", [0m
+[0;32m        "# Parallel hosts (pub/sub)                2 #", [0m
+[0;32m        "# Parallel processes per host             8 #", [0m
+[0;32m        "#############################################"[0m
+[0;32m    ][0m
+[0;32m}[0m
+--
+RESULT ****************************************
+Sum across all publishers:     11583 (msgs/sec)
+Sum across all  consumers:    289473 (msgs/sec)
+
+allowed error margin = 5 %
+target rate - error margin = 275500
+Achieved rate 289473 >= 275500
+Test: OK
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [10.132.0.8] => {[0m
+[0;32m    "msg": [[0m
+[0;32m        "#############################################", [0m
+[0;32m        "# Overall message rate                38000 #", [0m
+[0;32m        "# Message rate per publisher host      9500 #", [0m
+[0;32m        "# Fanout                                  1 #", [0m
+[0;32m        "# Message size                         2048 #", [0m
+[0;32m        "# Message type                   persistent #", [0m
+[0;32m        "# Number of publisher hosts in inventory  4 #", [0m
+[0;32m        "# Parallel hosts (pub/sub)                4 #", [0m
+[0;32m        "# Parallel processes per host             8 #", [0m
+[0;32m        "#############################################"[0m
+[0;32m    ][0m
+[0;32m}[0m
+--
+RESULT ****************************************
+Sum across all publishers:     75962 (msgs/sec)
+Sum across all  consumers:     37894 (msgs/sec)
+
+allowed error margin = 5 %
+target rate - error margin = 36100
+Achieved rate 37894 >= 36100
+Test: OK
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [10.132.0.8] => {[0m
+[0;32m    "msg": [[0m
+[0;32m        "#############################################", [0m
+[0;32m        "# Overall message rate                80000 #", [0m
+[0;32m        "# Message rate per publisher host     10000 #", [0m
+[0;32m        "# Fanout                                  2 #", [0m
+[0;32m        "# Message size                         2048 #", [0m
+[0;32m        "# Message type                   persistent #", [0m
+[0;32m        "# Number of publisher hosts in inventory  4 #", [0m
+[0;32m        "# Parallel hosts (pub/sub)                4 #", [0m
+[0;32m        "# Parallel processes per host             8 #", [0m
+[0;32m        "#############################################"[0m
+[0;32m    ][0m
+[0;32m}[0m
+--
+RESULT ****************************************
+Sum across all publishers:     77232 (msgs/sec)
+Sum across all  consumers:     77066 (msgs/sec)
+
+allowed error margin = 5 %
+target rate - error margin = 76000
+Achieved rate 77066 >= 76000
+Test: OK
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [10.132.0.8] => {[0m
+[0;32m    "msg": [[0m
+[0;32m        "#############################################", [0m
+[0;32m        "# Overall message rate               150000 #", [0m
+[0;32m        "# Message rate per publisher host      7500 #", [0m
+[0;32m        "# Fanout                                  5 #", [0m
+[0;32m        "# Message size                         2048 #", [0m
+[0;32m        "# Message type                   persistent #", [0m
+[0;32m        "# Number of publisher hosts in inventory  4 #", [0m
+[0;32m        "# Parallel hosts (pub/sub)                4 #", [0m
+[0;32m        "# Parallel processes per host             8 #", [0m
+[0;32m        "#############################################"[0m
+[0;32m    ][0m
+[0;32m}[0m
+--
+RESULT ****************************************
+Sum across all publishers:     59965 (msgs/sec)
+Sum across all  consumers:    149619 (msgs/sec)
+
+allowed error margin = 5 %
+target rate - error margin = 142500
+Achieved rate 149619 >= 142500
+Test: OK
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [10.132.0.8] => {[0m
+[0;32m    "msg": [[0m
+[0;32m        "#############################################", [0m
+[0;32m        "# Overall message rate               270000 #", [0m
+[0;32m        "# Message rate per publisher host      6750 #", [0m
+[0;32m        "# Fanout                                 10 #", [0m
+[0;32m        "# Message size                         2048 #", [0m
+[0;32m        "# Message type                   persistent #", [0m
+[0;32m        "# Number of publisher hosts in inventory  4 #", [0m
+[0;32m        "# Parallel hosts (pub/sub)                4 #", [0m
+[0;32m        "# Parallel processes per host             8 #", [0m
+[0;32m        "#############################################"[0m
+[0;32m    ][0m
+[0;32m}[0m
+--
+RESULT ****************************************
+Sum across all publishers:     53731 (msgs/sec)
+Sum across all  consumers:    267715 (msgs/sec)
+
+allowed error margin = 5 %
+target rate - error margin = 256500
+Achieved rate 267715 >= 256500
+Test: OK
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [10.132.0.8] => {[0m
+[0;32m    "msg": [[0m
+[0;32m        "#############################################", [0m
+[0;32m        "# Overall message rate               520000 #", [0m
+[0;32m        "# Message rate per publisher host      5200 #", [0m
+[0;32m        "# Fanout                                 50 #", [0m
+[0;32m        "# Message size                         2048 #", [0m
+[0;32m        "# Message type                   persistent #", [0m
+[0;32m        "# Number of publisher hosts in inventory  4 #", [0m
+[0;32m        "# Parallel hosts (pub/sub)                2 #", [0m
+[0;32m        "# Parallel processes per host             8 #", [0m
+[0;32m        "#############################################"[0m
+[0;32m    ][0m
+[0;32m}[0m
+--
+RESULT ****************************************
+Sum across all publishers:     20799 (msgs/sec)
+Sum across all  consumers:    260916 (msgs/sec)
+
+allowed error margin = 5 %
+target rate - error margin = 494000
+Achieved rate 260916 < 494000
+Test: Fail
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [10.132.0.8] => {[0m
+[0;32m    "msg": [[0m
+[0;32m        "#############################################", [0m
+[0;32m        "# Overall message rate                51000 #", [0m
+[0;32m        "# Message rate per publisher host     12750 #", [0m
+[0;32m        "# Fanout                                  1 #", [0m
+[0;32m        "# Message size                         1024 #", [0m
+[0;32m        "# Message type                   persistent #", [0m
+[0;32m        "# Number of publisher hosts in inventory  4 #", [0m
+[0;32m        "# Parallel hosts (pub/sub)                4 #", [0m
+[0;32m        "# Parallel processes per host             8 #", [0m
+[0;32m        "#############################################"[0m
+[0;32m    ][0m
+[0;32m}[0m
+--
+RESULT ****************************************
+Sum across all publishers:    101917 (msgs/sec)
+Sum across all  consumers:     50898 (msgs/sec)
+
+allowed error margin = 5 %
+target rate - error margin = 48450
+Achieved rate 50898 >= 48450
+Test: OK
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [10.132.0.8] => {[0m
+[0;32m    "msg": [[0m
+[0;32m        "#############################################", [0m
+[0;32m        "# Overall message rate               103000 #", [0m
+[0;32m        "# Message rate per publisher host     12875 #", [0m
+[0;32m        "# Fanout                                  2 #", [0m
+[0;32m        "# Message size                         1024 #", [0m
+[0;32m        "# Message type                   persistent #", [0m
+[0;32m        "# Number of publisher hosts in inventory  4 #", [0m
+[0;32m        "# Parallel hosts (pub/sub)                4 #", [0m
+[0;32m        "# Parallel processes per host             8 #", [0m
+[0;32m        "#############################################"[0m
+[0;32m    ][0m
+[0;32m}[0m
+--
+RESULT ****************************************
+Sum across all publishers:     96286 (msgs/sec)
+Sum across all  consumers:     96146 (msgs/sec)
+
+allowed error margin = 5 %
+target rate - error margin = 97850
+Achieved rate 96146 < 97850
+Test: Fail
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [10.132.0.8] => {[0m
+[0;32m    "msg": [[0m
+[0;32m        "#############################################", [0m
+[0;32m        "# Overall message rate               200000 #", [0m
+[0;32m        "# Message rate per publisher host     10000 #", [0m
+[0;32m        "# Fanout                                  5 #", [0m
+[0;32m        "# Message size                         1024 #", [0m
+[0;32m        "# Message type                   persistent #", [0m
+[0;32m        "# Number of publisher hosts in inventory  4 #", [0m
+[0;32m        "# Parallel hosts (pub/sub)                4 #", [0m
+[0;32m        "# Parallel processes per host             8 #", [0m
+[0;32m        "#############################################"[0m
+[0;32m    ][0m
+[0;32m}[0m
+--
+RESULT ****************************************
+Sum across all publishers:     79597 (msgs/sec)
+Sum across all  consumers:    198612 (msgs/sec)
+
+allowed error margin = 5 %
+target rate - error margin = 190000
+Achieved rate 198612 >= 190000
+Test: OK
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [10.132.0.8] => {[0m
+[0;32m    "msg": [[0m
+[0;32m        "#############################################", [0m
+[0;32m        "# Overall message rate               300000 #", [0m
+[0;32m        "# Message rate per publisher host      7500 #", [0m
+[0;32m        "# Fanout                                 10 #", [0m
+[0;32m        "# Message size                         1024 #", [0m
+[0;32m        "# Message type                   persistent #", [0m
+[0;32m        "# Number of publisher hosts in inventory  4 #", [0m
+[0;32m        "# Parallel hosts (pub/sub)                4 #", [0m
+[0;32m        "# Parallel processes per host             8 #", [0m
+[0;32m        "#############################################"[0m
+[0;32m    ][0m
+[0;32m}[0m
+--
+RESULT ****************************************
+Sum across all publishers:     59833 (msgs/sec)
+Sum across all  consumers:    298287 (msgs/sec)
+
+allowed error margin = 5 %
+target rate - error margin = 285000
+Achieved rate 298287 >= 285000
+Test: OK
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [10.132.0.8] => {[0m
+[0;32m    "msg": [[0m
+[0;32m        "#############################################", [0m
+[0;32m        "# Overall message rate               540000 #", [0m
+[0;32m        "# Message rate per publisher host      5400 #", [0m
+[0;32m        "# Fanout                                 50 #", [0m
+[0;32m        "# Message size                         1024 #", [0m
+[0;32m        "# Message type                   persistent #", [0m
+[0;32m        "# Number of publisher hosts in inventory  4 #", [0m
+[0;32m        "# Parallel hosts (pub/sub)                2 #", [0m
+[0;32m        "# Parallel processes per host             8 #", [0m
+[0;32m        "#############################################"[0m
+[0;32m    ][0m
+[0;32m}[0m
+--
+RESULT ****************************************
+Sum across all publishers:     21599 (msgs/sec)
+Sum across all  consumers:    495994 (msgs/sec)
+
+allowed error margin = 5 %
+target rate - error margin = 513000
+Achieved rate 495994 < 513000
+Test: Fail
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [10.132.0.8] => {[0m
+[0;32m    "msg": [[0m
+[0;32m        "#############################################", [0m
+[0;32m        "# Overall message rate                57500 #", [0m
+[0;32m        "# Message rate per publisher host     14375 #", [0m
+[0;32m        "# Fanout                                  1 #", [0m
+[0;32m        "# Message size                          512 #", [0m
+[0;32m        "# Message type                   persistent #", [0m
+[0;32m        "# Number of publisher hosts in inventory  4 #", [0m
+[0;32m        "# Parallel hosts (pub/sub)                4 #", [0m
+[0;32m        "# Parallel processes per host             8 #", [0m
+[0;32m        "#############################################"[0m
+[0;32m    ][0m
+[0;32m}[0m
+--
+RESULT ****************************************
+Sum across all publishers:    113537 (msgs/sec)
+Sum across all  consumers:     56693 (msgs/sec)
+
+allowed error margin = 5 %
+target rate - error margin = 54625
+Achieved rate 56693 >= 54625
+Test: OK
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [10.132.0.8] => {[0m
+[0;32m    "msg": [[0m
+[0;32m        "#############################################", [0m
+[0;32m        "# Overall message rate               122000 #", [0m
+[0;32m        "# Message rate per publisher host     15250 #", [0m
+[0;32m        "# Fanout                                  2 #", [0m
+[0;32m        "# Message size                          512 #", [0m
+[0;32m        "# Message type                   persistent #", [0m
+[0;32m        "# Number of publisher hosts in inventory  4 #", [0m
+[0;32m        "# Parallel hosts (pub/sub)                4 #", [0m
+[0;32m        "# Parallel processes per host             8 #", [0m
+[0;32m        "#############################################"[0m
+[0;32m    ][0m
+[0;32m}[0m
+--
+RESULT ****************************************
+Sum across all publishers:    104343 (msgs/sec)
+Sum across all  consumers:    104190 (msgs/sec)
+
+allowed error margin = 5 %
+target rate - error margin = 115900
+Achieved rate 104190 < 115900
+Test: Fail
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [10.132.0.8] => {[0m
+[0;32m    "msg": [[0m
+[0;32m        "#############################################", [0m
+[0;32m        "# Overall message rate               220000 #", [0m
+[0;32m        "# Message rate per publisher host     11000 #", [0m
+[0;32m        "# Fanout                                  5 #", [0m
+[0;32m        "# Message size                          512 #", [0m
+[0;32m        "# Message type                   persistent #", [0m
+[0;32m        "# Number of publisher hosts in inventory  4 #", [0m
+[0;32m        "# Parallel hosts (pub/sub)                4 #", [0m
+[0;32m        "# Parallel processes per host             8 #", [0m
+[0;32m        "#############################################"[0m
+[0;32m    ][0m
+[0;32m}[0m
+--
+RESULT ****************************************
+Sum across all publishers:     83902 (msgs/sec)
+Sum across all  consumers:    209354 (msgs/sec)
+
+allowed error margin = 5 %
+target rate - error margin = 209000
+Achieved rate 209354 >= 209000
+Test: OK
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [10.132.0.8] => {[0m
+[0;32m    "msg": [[0m
+[0;32m        "#############################################", [0m
+[0;32m        "# Overall message rate               325000 #", [0m
+[0;32m        "# Message rate per publisher host      8125 #", [0m
+[0;32m        "# Fanout                                 10 #", [0m
+[0;32m        "# Message size                          512 #", [0m
+[0;32m        "# Message type                   persistent #", [0m
+[0;32m        "# Number of publisher hosts in inventory  4 #", [0m
+[0;32m        "# Parallel hosts (pub/sub)                4 #", [0m
+[0;32m        "# Parallel processes per host             8 #", [0m
+[0;32m        "#############################################"[0m
+[0;32m    ][0m
+[0;32m}[0m
+--
+RESULT ****************************************
+Sum across all publishers:     64610 (msgs/sec)
+Sum across all  consumers:    322185 (msgs/sec)
+
+allowed error margin = 5 %
+target rate - error margin = 308750
+Achieved rate 322185 >= 308750
+Test: OK
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [10.132.0.8] => {[0m
+[0;32m    "msg": [[0m
+[0;32m        "#############################################", [0m
+[0;32m        "# Overall message rate               550000 #", [0m
+[0;32m        "# Message rate per publisher host      5500 #", [0m
+[0;32m        "# Fanout                                 50 #", [0m
+[0;32m        "# Message size                          512 #", [0m
+[0;32m        "# Message type                   persistent #", [0m
+[0;32m        "# Number of publisher hosts in inventory  4 #", [0m
+[0;32m        "# Parallel hosts (pub/sub)                2 #", [0m
+[0;32m        "# Parallel processes per host             8 #", [0m
+[0;32m        "#############################################"[0m
+[0;32m    ][0m
+[0;32m}[0m
+--
+RESULT ****************************************
+Sum across all publishers:     21983 (msgs/sec)
+Sum across all  consumers:    549210 (msgs/sec)
+
+allowed error margin = 5 %
+target rate - error margin = 522500
+Achieved rate 549210 >= 522500
+Test: OK

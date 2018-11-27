@@ -1,0 +1,880 @@
+TASK [echo_end] ****************************************************************
+[0;32mok: [35.189.214.240] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate               525000 #", 
+        "# Message rate per publisher host    131250 #", 
+        "# Fanout                                  1 #", 
+        "# Message size                          100 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                4 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:    524994 (msgs/sec)
+Sum across all  consumers:    524959 (msgs/sec)
+
+519750 > 524959
+Test: Fail
+
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [35.189.214.240] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate              1350000 #", 
+        "# Message rate per publisher host     33750 #", 
+        "# Fanout                                 10 #", 
+        "# Message size                          100 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                4 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:    134976 (msgs/sec)
+Sum across all  consumers:   1349484 (msgs/sec)
+
+1336500 > 1349484
+Test: Fail
+
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [35.189.214.240] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate              1350000 #", 
+        "# Message rate per publisher host     13500 #", 
+        "# Fanout                                100 #", 
+        "# Message size                          100 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                1 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:     13496 (msgs/sec)
+Sum across all  consumers:   1349310 (msgs/sec)
+
+1336500 > 1349310
+Test: Fail
+
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [35.189.214.240] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate               900000 #", 
+        "# Message rate per publisher host    112500 #", 
+        "# Fanout                                  2 #", 
+        "# Message size                          100 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                4 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:    449984 (msgs/sec)
+Sum across all  consumers:    899851 (msgs/sec)
+
+891000 > 899851
+Test: Fail
+
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [35.189.214.240] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate              1350000 #", 
+        "# Message rate per publisher host     67500 #", 
+        "# Fanout                                  5 #", 
+        "# Message size                          100 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                4 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:    269984 (msgs/sec)
+Sum across all  consumers:   1349719 (msgs/sec)
+
+1336500 > 1349719
+Test: Fail
+
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [35.189.214.240] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate              1350000 #", 
+        "# Message rate per publisher host     13500 #", 
+        "# Fanout                                 50 #", 
+        "# Message size                          100 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                2 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:     26992 (msgs/sec)
+Sum across all  consumers:   1349260 (msgs/sec)
+
+1336500 > 1349260
+Test: Fail
+
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [35.189.214.240] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                 4000 #", 
+        "# Message rate per publisher host      1000 #", 
+        "# Fanout                                  1 #", 
+        "# Message size                       102400 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                4 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:      4000 (msgs/sec)
+Sum across all  consumers:      4001 (msgs/sec)
+
+3960 > 4001
+Test: Fail
+
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [35.189.214.240] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                 4600 #", 
+        "# Message rate per publisher host       115 #", 
+        "# Fanout                                 10 #", 
+        "# Message size                       102400 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                4 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:       448 (msgs/sec)
+Sum across all  consumers:      4483 (msgs/sec)
+
+4554 > 4483
+Test: Fail
+
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [35.189.214.240] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                 4700 #", 
+        "# Message rate per publisher host        47 #", 
+        "# Fanout                                100 #", 
+        "# Message size                       102400 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                1 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:        40 (msgs/sec)
+Sum across all  consumers:      4008 (msgs/sec)
+
+4653 > 4008
+Test: Fail
+
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [35.189.214.240] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                 4500 #", 
+        "# Message rate per publisher host       562 #", 
+        "# Fanout                                  2 #", 
+        "# Message size                       102400 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                4 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:      2240 (msgs/sec)
+Sum across all  consumers:      4481 (msgs/sec)
+
+4455 > 4481
+Test: Fail
+
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [35.189.214.240] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                 4600 #", 
+        "# Message rate per publisher host       230 #", 
+        "# Fanout                                  5 #", 
+        "# Message size                       102400 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                4 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:       896 (msgs/sec)
+Sum across all  consumers:      4482 (msgs/sec)
+
+4554 > 4482
+Test: Fail
+
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [35.189.214.240] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                 4700 #", 
+        "# Message rate per publisher host        47 #", 
+        "# Fanout                                 50 #", 
+        "# Message size                       102400 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                2 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:        80 (msgs/sec)
+Sum across all  consumers:      4008 (msgs/sec)
+
+4653 > 4008
+Test: Fail
+
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [35.189.214.240] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                40000 #", 
+        "# Message rate per publisher host     10000 #", 
+        "# Fanout                                  1 #", 
+        "# Message size                        10240 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                4 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:     40000 (msgs/sec)
+Sum across all  consumers:     40000 (msgs/sec)
+
+39600 > 40000
+Test: Fail
+
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [35.189.214.240] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                45000 #", 
+        "# Message rate per publisher host      1125 #", 
+        "# Fanout                                 10 #", 
+        "# Message size                        10240 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                4 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:      4480 (msgs/sec)
+Sum across all  consumers:     44803 (msgs/sec)
+
+44550 > 44803
+Test: Fail
+
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [35.189.214.240] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                46000 #", 
+        "# Message rate per publisher host       460 #", 
+        "# Fanout                                100 #", 
+        "# Message size                        10240 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                1 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:       456 (msgs/sec)
+Sum across all  consumers:     45610 (msgs/sec)
+
+45540 > 45610
+Test: Fail
+
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [35.189.214.240] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                44000 #", 
+        "# Message rate per publisher host      5500 #", 
+        "# Fanout                                  2 #", 
+        "# Message size                        10240 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                4 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:     21984 (msgs/sec)
+Sum across all  consumers:     43969 (msgs/sec)
+
+43560 > 43969
+Test: Fail
+
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [35.189.214.240] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                44000 #", 
+        "# Message rate per publisher host      2200 #", 
+        "# Fanout                                  5 #", 
+        "# Message size                        10240 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                4 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:      8800 (msgs/sec)
+Sum across all  consumers:     44002 (msgs/sec)
+
+43560 > 44002
+Test: Fail
+
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [35.189.214.240] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                46000 #", 
+        "# Message rate per publisher host       460 #", 
+        "# Fanout                                 50 #", 
+        "# Message size                        10240 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                2 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:       912 (msgs/sec)
+Sum across all  consumers:     45606 (msgs/sec)
+
+45540 > 45606
+Test: Fail
+
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [35.189.214.240] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate               300000 #", 
+        "# Message rate per publisher host     75000 #", 
+        "# Fanout                                  1 #", 
+        "# Message size                         1024 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                4 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:    297544 (msgs/sec)
+Sum across all  consumers:    297532 (msgs/sec)
+
+297000 > 297532
+Test: Fail
+
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [35.189.214.240] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate               410000 #", 
+        "# Message rate per publisher host     10250 #", 
+        "# Fanout                                 10 #", 
+        "# Message size                         1024 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                4 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:     40992 (msgs/sec)
+Sum across all  consumers:    409884 (msgs/sec)
+
+405900 > 409884
+Test: Fail
+
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [35.189.214.240] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate               490000 #", 
+        "# Message rate per publisher host      4900 #", 
+        "# Fanout                                100 #", 
+        "# Message size                         1024 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                1 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:      4896 (msgs/sec)
+Sum across all  consumers:    489509 (msgs/sec)
+
+485100 > 489509
+Test: Fail
+
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [35.189.214.240] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate               370000 #", 
+        "# Message rate per publisher host     46250 #", 
+        "# Fanout                                  2 #", 
+        "# Message size                         1024 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                4 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:    184382 (msgs/sec)
+Sum across all  consumers:    366720 (msgs/sec)
+
+366300 > 366720
+Test: Fail
+
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [35.189.214.240] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate               410000 #", 
+        "# Message rate per publisher host     20500 #", 
+        "# Fanout                                  5 #", 
+        "# Message size                         1024 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                4 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:     81984 (msgs/sec)
+Sum across all  consumers:    409914 (msgs/sec)
+
+405900 > 409914
+Test: Fail
+
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [35.189.214.240] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate               460000 #", 
+        "# Message rate per publisher host      4600 #", 
+        "# Fanout                                 50 #", 
+        "# Message size                         1024 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                2 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:      9200 (msgs/sec)
+Sum across all  consumers:    459940 (msgs/sec)
+
+455400 > 459940
+Test: Fail
+
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [35.189.214.240] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                20000 #", 
+        "# Message rate per publisher host      5000 #", 
+        "# Fanout                                  1 #", 
+        "# Message size                        20480 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                4 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:     19999 (msgs/sec)
+Sum across all  consumers:     20000 (msgs/sec)
+
+19800 > 20000
+Test: Fail
+
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [35.189.214.240] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                22000 #", 
+        "# Message rate per publisher host       550 #", 
+        "# Fanout                                 10 #", 
+        "# Message size                        20480 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                4 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:      2176 (msgs/sec)
+Sum across all  consumers:     21767 (msgs/sec)
+
+21780 > 21767
+Test: Fail
+
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [35.189.214.240] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                23000 #", 
+        "# Message rate per publisher host       230 #", 
+        "# Fanout                                100 #", 
+        "# Message size                        20480 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                1 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:       224 (msgs/sec)
+Sum across all  consumers:     22409 (msgs/sec)
+
+22770 > 22409
+Test: Fail
+
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [35.189.214.240] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                22000 #", 
+        "# Message rate per publisher host      2750 #", 
+        "# Fanout                                  2 #", 
+        "# Message size                        20480 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                4 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:     10976 (msgs/sec)
+Sum across all  consumers:     21858 (msgs/sec)
+
+21780 > 21858
+Test: Fail
+
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [35.189.214.240] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                22000 #", 
+        "# Message rate per publisher host      1100 #", 
+        "# Fanout                                  5 #", 
+        "# Message size                        20480 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                4 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:      4384 (msgs/sec)
+Sum across all  consumers:     21880 (msgs/sec)
+
+21780 > 21880
+Test: Fail
+
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [35.189.214.240] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                23000 #", 
+        "# Message rate per publisher host       230 #", 
+        "# Fanout                                 50 #", 
+        "# Message size                        20480 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                2 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:       448 (msgs/sec)
+Sum across all  consumers:     22408 (msgs/sec)
+
+22770 > 22408
+Test: Fail
+
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [35.189.214.240] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate               170000 #", 
+        "# Message rate per publisher host     42500 #", 
+        "# Fanout                                  1 #", 
+        "# Message size                         2048 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                4 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:    169984 (msgs/sec)
+Sum across all  consumers:    169986 (msgs/sec)
+
+168300 > 169986
+Test: Fail
+
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [35.189.214.240] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate               215000 #", 
+        "# Message rate per publisher host      5375 #", 
+        "# Fanout                                 10 #", 
+        "# Message size                         2048 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                4 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:     21472 (msgs/sec)
+Sum across all  consumers:    214727 (msgs/sec)
+
+212850 > 214727
+Test: Fail
+
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [35.189.214.240] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate               300000 #", 
+        "# Message rate per publisher host      3000 #", 
+        "# Fanout                                100 #", 
+        "# Message size                         2048 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                1 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:      3000 (msgs/sec)
+Sum across all  consumers:    273592 (msgs/sec)
+
+297000 > 273592
+Test: Fail
+
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [35.189.214.240] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate               200000 #", 
+        "# Message rate per publisher host     25000 #", 
+        "# Fanout                                  2 #", 
+        "# Message size                         2048 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                4 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:    100000 (msgs/sec)
+Sum across all  consumers:    200009 (msgs/sec)
+
+198000 > 200009
+Test: Fail
+
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [35.189.214.240] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate               215000 #", 
+        "# Message rate per publisher host     10750 #", 
+        "# Fanout                                  5 #", 
+        "# Message size                         2048 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                4 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:     42976 (msgs/sec)
+Sum across all  consumers:    214883 (msgs/sec)
+
+212850 > 214883
+Test: Fail
+
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [35.189.214.240] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate               230000 #", 
+        "# Message rate per publisher host      2300 #", 
+        "# Fanout                                 50 #", 
+        "# Message size                         2048 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                2 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:      4592 (msgs/sec)
+Sum across all  consumers:    229614 (msgs/sec)
+
+227700 > 229614
+Test: Fail
+
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [35.189.214.240] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                 8000 #", 
+        "# Message rate per publisher host      2000 #", 
+        "# Fanout                                  1 #", 
+        "# Message size                        51200 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                4 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:      7995 (msgs/sec)
+Sum across all  consumers:      7995 (msgs/sec)
+
+7920 > 7995
+Test: Fail
+
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [35.189.214.240] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                 9000 #", 
+        "# Message rate per publisher host       225 #", 
+        "# Fanout                                 10 #", 
+        "# Message size                        51200 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                4 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:       896 (msgs/sec)
+Sum across all  consumers:      8963 (msgs/sec)
+
+8910 > 8963
+Test: Fail
+
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [35.189.214.240] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                 9000 #", 
+        "# Message rate per publisher host        90 #", 
+        "# Fanout                                100 #", 
+        "# Message size                        51200 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                1 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:        88 (msgs/sec)
+Sum across all  consumers:      8808 (msgs/sec)
+
+8910 > 8808
+Test: Fail
+
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [35.189.214.240] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                 9000 #", 
+        "# Message rate per publisher host      1125 #", 
+        "# Fanout                                  2 #", 
+        "# Message size                        51200 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                4 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:      4480 (msgs/sec)
+Sum across all  consumers:      8961 (msgs/sec)
+
+8910 > 8961
+Test: Fail
+
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [35.189.214.240] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                 9000 #", 
+        "# Message rate per publisher host       450 #", 
+        "# Fanout                                  5 #", 
+        "# Message size                        51200 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                4 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:      1792 (msgs/sec)
+Sum across all  consumers:      8962 (msgs/sec)
+
+8910 > 8962
+Test: Fail
+
+--
+TASK [echo_end] ****************************************************************
+[0;32mok: [35.189.214.240] => {
+    "msg": [
+        "#############################################", 
+        "# Overall message rate                 9000 #", 
+        "# Message rate per publisher host        90 #", 
+        "# Fanout                                 50 #", 
+        "# Message size                        51200 #", 
+        "# Number of publisher hosts in inventory  4 #", 
+        "# Parallel hosts (pub/sub)                2 #", 
+        "# Parallel processes per host             8 #", 
+        "#############################################"
+--
+RESULT ****************************************
+Sum across all publishers:       176 (msgs/sec)
+Sum across all  consumers:      8808 (msgs/sec)
+
+8910 > 8808
+Test: Fail

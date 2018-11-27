@@ -1,0 +1,21 @@
+---
+# Ansible playbook to update host OS (CentOs) of VMRs
+- hosts: vmrs
+  remote_user: "{{ user }}"
+  vars:
+    #main setup variables
+    user: 'Christian' #default user for logging into hosts
+  ######################
+  ######## MAIN ########
+  ######################
+  tasks:
+  - name: 'update'
+    shell:  "sudo yum update -y"
+    args:
+      executable: "/bin/bash"
+    register: "update"
+    with_items:
+      - { groups: 'vmrs' }
+
+  - name: 'display update results'
+    debug: msg="{{ update.results| map(attribute='stdout') | list }}"
