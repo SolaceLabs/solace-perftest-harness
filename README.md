@@ -23,15 +23,15 @@ The Solace Virtual Message Router (VMR) provides enterprise-grade messaging capa
 # Each test need to be in the format:
 # msg_size:fanout_number:overall_msg_rate:number_of_publisher_hosts:msg_type
 # Several (up to 7) arrays/testsets can be passed in, if separated by ;
-# Example format for one test set:
-# testarray1=""\
-# "100:1:1300000:4:direct "\
-# "100:2:1550000:4:direct "\
-# "100:5:3000000:4:direct "\
-# "100:10:3300000:4:direct "\
-# "100:50:4000000:2:direct "\
-# "100:100:4000000:2:direct "\
-# ";" #need to  end with to separate the various test arrays;
+# Example format for one test set:<br/>
+# testarray1=""<br/>
+# "100:1:1300000:4:direct "<br/>
+# "100:2:1550000:4:direct "<br/>
+# "100:5:3000000:4:direct "<br/>
+# "100:10:3300000:4:direct "<br/>
+# "100:50:4000000:2:direct "<br/>
+# "100:100:4000000:2:direct "<br/>
+# ";" #need to  end with to separate the various test arrays;<br/>
 ```
 - The specific test set script calls the run-testset.sh script, which parses the arrays and runs each test by passing it to run-tests.sh
 - run-tests.sh is a wrapper around the Ansible playbook start-sdk.yaml, which pushed the necessary tools and scripts to your perf hosts and runs the publisher and consumer scripts asynchronously for a given time (e.g. each test for 180 seconds).
