@@ -13,10 +13,10 @@
 #Adjust the following according to your needs and infrastructure
 #number of cores to distribute your processes across - used by taskset to pin publishers to cores. 
 #Should match the number of cores on the perf host running the publishers.
-no_cores=4
+no_cores=8
 
 #set cleanup to false, if you need to debug something and look at the output
-cleanup_at_end="false"
+cleanup_at_end="true"
 
 #Change the following constants only,if you really have to
 name=sdkpublishers

@@ -3,8 +3,8 @@
 # and parsing achieved publisher and consumer rates
 
 #set cleanup to false, if you need to debug something and look at the output
-#cleanup_at_end="true"
-cleanup_at_end="false"
+cleanup_at_end="true"
+#cleanup_at_end="false"
 
 cleanup() {
   #clean up log and temp files afterwards
