@@ -1,7 +1,7 @@
 #!/bin/bash
-#Test set (direct messaging) to run against a medium GCE VMR group (4 cores)
-vmrs="10.132.0.3,10.132.0.14" #medium VMRs
-testsetprefix="medium-direct"
+#Test set (direct messaging) to run against a medium software broker (4 cores)
+vmrs="${1}" #broker IP/DNS
+testsetprefix="4core"
 msg_type="direct"
 
 testarray1=""\

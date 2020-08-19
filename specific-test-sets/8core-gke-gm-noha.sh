@@ -1,8 +1,7 @@
 #!/bin/bash
-#Test set (guaranteed messaging) to run against a large GKE VMR group (similar to 8 cores) (no redundancy)
-#vmrs="35.195.124.89" #large k8s VMRs
-vmrs="${1}"
-testsetprefix="large-gke-noha"
+#Test set (guaranteed messaging) to run against a large software broker (8 cores) (no redundancy)
+vmrs="${1}" #broker IP/DNS
+testsetprefix="8core-gke-noha"
 msg_type="persistent"
 
 testarray1=""\

@@ -1,7 +1,7 @@
 #!/bin/bash
 #Test set (guaranteed messaging) to run against a medium GCE VMR group (4 cores) (no redundancy)
-vmrs="10.132.0.3,10.132.0.14" #medium VMRs
-testsetprefix="medium-noha"
+vmrs="${1}" #broker IP/DNS
+testsetprefix="4core-noha"
 msg_type="persistent"
 
 testarray1=""\

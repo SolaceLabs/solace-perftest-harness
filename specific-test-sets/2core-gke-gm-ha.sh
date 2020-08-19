@@ -1,8 +1,7 @@
 #!/bin/bash
-#Test set (guaranteed messaging) to run against a small GKE VMR group (similar to 2 cores)
-#vmrs="35.195.159.62" #small VMR k8s cluster
-vmrs="35.189.238.185" #small VMRs k8s cluster with local SSDs
-testsetprefix="small-gke"
+#Test set (guaranteed messaging) to run against a small software broker (2 cores)
+vmrs="${1}" #broker IP/DNS
+testsetprefix="2core-gke-ha"
 msg_type="persistent"
 
 testarray1=""\

@@ -1,8 +1,7 @@
 #!/bin/bash
-#Test set (guaranteed messaging) to run against a large GKE VMR group (similar to 8 cores)
-#vmrs="10.132.0.45" #large GKE VMR
-vmrs="${1}"
-testsetprefix="large-centos-ext4"
+#Test set (guaranteed messaging) to run against a large software broker (8 cores)
+vmrs="${1}" #broker IP/DNS
+testsetprefix="8core-ha"
 msg_type="persistent"
 
 testarray1=""\
@@ -55,5 +54,4 @@ testarray7=""\
 "102400:50:10000:2:${msg_type} "\
 ";" #need to  end with to separate the various test arrays;
 
-#${BASH_SOURCE%/*}/../run-testset.sh ${vmrs} ${testsetprefix} ${msg_type} ";"${testarray2[@]}
 ${BASH_SOURCE%/*}/../run-testset.sh ${vmrs} ${testsetprefix} ${msg_type} ";"${testarray1[@]} ${testarray2[@]} ${testarray3[@]} ${testarray4[@]} ${testarray5[@]} ${testarray6[@]} ${testarray7[@]}

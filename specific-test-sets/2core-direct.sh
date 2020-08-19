@@ -1,7 +1,7 @@
 #!/bin/bash
-#Test set (direct messaging) to run against a small GCE VMR group (2 cores)
-vmrs="10.132.0.11,10.132.0.13" #small VMRs
-testsetprefix="small-direct"
+#Test set (direct messaging) to run against a small software broker (2 cores)
+vmrs="${1}" #broker IP/DNS
+testsetprefix="2core"
 msg_type="direct"
 
 testarray1=""\

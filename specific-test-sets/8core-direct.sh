@@ -1,8 +1,7 @@
 #!/bin/bash
-#Test set (direct messaging) to run against a large GKE VMR group (similar to 8 cores)
-#vmrs="10.132.0.45" #large GKE VMR
-vmrs="${1}" #large GKE VMR
-testsetprefix="large-gke"
+#Test set (direct messaging) to run against a large software broker (8 cores)
+vmrs="${1}" #broker IP/DNS
+testsetprefix="8core"
 msg_type="direct"
 
 testarray1=""\
@@ -67,4 +66,3 @@ testarray7=""\
 ";" #need to  end with to separate the various test arrays;
 
 ${BASH_SOURCE%/*}/../run-testset.sh ${vmrs} ${testsetprefix} ${msg_type} ";"${testarray1[@]} ${testarray2[@]} ${testarray3[@]} ${testarray4[@]} ${testarray5[@]} ${testarray6[@]} ${testarray7[@]}
-

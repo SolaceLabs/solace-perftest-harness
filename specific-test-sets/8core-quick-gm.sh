@@ -1,7 +1,7 @@
 #!/bin/bash
-#Quick test set (guaranteed messaging) to run against a large GKE VMR group (similar to 8 cores) (no redundancy)
-vmrs="${1}" #large k8s VMRs
-testsetprefix="quick-k8s"
+#Quick test set (guaranteed messaging) to run against a large software broker (8 cores) (no redundancy)
+vmrs="${1}" #broker IP/DNS
+testsetprefix="8core-quick"
 msg_type="persistent"
 
 testarray1=""\

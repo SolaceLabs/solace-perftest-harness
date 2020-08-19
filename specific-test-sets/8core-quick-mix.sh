@@ -1,8 +1,7 @@
 #!/bin/bash
-#Quick test set (mixed messaging) to run against a large GKE VMR group (similar to 8 cores)
-#vmrs="10.132.0.16" #large k8s VMRs
-vmrs="$1" #large k8s VMRs
-testsetprefix="quick-k8s-mixed"
+#Quick test set (mixed messaging) to run against a large software broker (8 cores)
+vmrs="$1" #broker IP/DNS
+testsetprefix="8core-quick"
 msg_type="mixed"
 msg_type1="persistent"
 msg_type2="direct"
