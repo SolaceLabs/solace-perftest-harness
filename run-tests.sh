@@ -13,8 +13,19 @@ cleanup() {
   rm -rf sum-sub.txt
 }
 
+checkdependencies() {
+  echo "Checking dependencies..."
+  for e in rm cat sed grep sort uniq awk print ansible-playbook; do
+    if ! command -v ${e} &> /dev/null; then
+      echo ${e} " not found in PATH. Please install or update PATH"
+      exit 1
+    fi
+  done 
+}
+
 export ANSIBLE_FORCE_COLOR=true
 export ANSIBLE_HOST_KEY_CHECKING=False
+checkdependencies
 cleanup
 echo "Running ansible-playbook start-sdk.yaml with args: " $@
 ansible-playbook -i host start-sdk.yaml $@ | tee run-tests.log

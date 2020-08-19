@@ -3,26 +3,21 @@
 ########################################################
 # Enter IP addresses of your perf hosts here...
 [pubhost1]
-perf1  #perf1
+blackbox  #perf1
 [subhost1]
-perf2  #perf2
+blackbox  #perf2
 
 [pubhost2]
-perf3  #perf3
 [subhost2]
-perf4  #perf4
-
 [pubhost3]
-perf5   #perf5
 [subhost3]
-perf6 #perf6
-
 [pubhost4]
-perf7  #perf7
 [subhost4]
-perf8  #perf8
 
 [pubhost5]
+
+[active_test_hosts]
+blackbox
 
 # Section for listing VMRs (optional)
 [vmrs]
