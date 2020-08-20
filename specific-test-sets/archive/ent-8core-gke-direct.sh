@@ -1,5 +1,5 @@
 #!/bin/bash
-#Test set (direct messaging) to run against a large software broker (8 cores)
+#Test set (direct messaging) to run against a large enterprise software broker (8 cores)
 vmrs="${1}" #broker IP/DNS
 testsetprefix="8core-gke"
 msg_type="direct"

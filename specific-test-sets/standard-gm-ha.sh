@@ -1,27 +1,27 @@
 #!/bin/bash
-#Test set (guaranteed messaging) to run against a small software broker (2 cores)
+#Test set (guaranteed messaging) to run against a small standard software broker (2 cores)
 vmrs="${1}" #broker IP/DNS
-testsetprefix="2core-gke-ha"
+testsetprefix="standard-ha"
 msg_type="persistent"
 
 testarray1=""\
-"512:1:15000:2:${msg_type} "\
-"512:2:30000:2:${msg_type} "\
-"512:5:63000:2:${msg_type} "\
+"512:1:10000:2:${msg_type} "\
+"512:2:20000:2:${msg_type} "\
+"512:5:50000:2:${msg_type} "\
 "512:10:95000:2:${msg_type} "\
 "512:50:135000:2:${msg_type} "\
 ";" #need to  end with to separate the various test arrays;
 testarray2=""\
-"1024:1:13000:2:${msg_type} "\
-"1024:2:26000:2:${msg_type} "\
-"1024:5:58000:2:${msg_type} "\
+"1024:1:10000:2:${msg_type} "\
+"1021:2:20000:2:${msg_type} "\
+"1024:5:50000:2:${msg_type} "\
 "1024:10:88000:2:${msg_type} "\
 "1024:50:122000:2:${msg_type} "\
 ";" #need to  end with to separate the various test arrays;
 testarray3=""\
-"2048:1:12000:2:${msg_type} "\
-"2048:2:23000:2:${msg_type} "\
-"2048:5:51000:2:${msg_type} "\
+"2048:1:10000:2:${msg_type} "\
+"2048:2:20000:2:${msg_type} "\
+"2048:5:50000:2:${msg_type} "\
 "2048:10:76000:2:${msg_type} "\
 "2048:50:105000:2:${msg_type} "\
 ";" #need to  end with to separate the various test arrays;

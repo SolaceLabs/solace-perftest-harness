@@ -1,7 +1,7 @@
 #!/bin/bash
-#Test set (guaranteed messaging) to run against a large software broker (8 cores)
+#Test set (guaranteed messaging) to run against a large enterprise software broker (8 cores)
 vmrs="${1}" #broker IP/DNS
-testsetprefix="8core-centos-ext4-ha"
+testsetprefix="8core-cos-ha"
 msg_type="persistent"
 
 testarray1=""\

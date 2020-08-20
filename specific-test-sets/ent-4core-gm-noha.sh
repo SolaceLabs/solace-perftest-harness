@@ -1,5 +1,5 @@
 #!/bin/bash
-#Test set (guaranteed messaging) to run against a medium GCE VMR group (4 cores) (no redundancy)
+#Test set (guaranteed messaging) to run against a medium enterprise software broker (4 cores) (no redundancy)
 vmrs="${1}" #broker IP/DNS
 testsetprefix="4core-noha"
 msg_type="persistent"

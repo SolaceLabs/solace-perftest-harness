@@ -1,5 +1,5 @@
 #!/bin/bash
-#Test set (direct messaging) to run against a medium software broker (4 cores)
+#Test set (direct messaging) to run against a medium enterprise software broker (4 cores)
 vmrs="${1}" #broker IP/DNS
 testsetprefix="4core"
 msg_type="direct"
