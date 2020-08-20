@@ -3,8 +3,8 @@
 vmrs="$1" #broker IP/DNS
 testsetprefix="8core-quick"
 msg_type="mixed"
-msg_type1="persistent"
-msg_type2="direct"
+msg_type1="direct"
+msg_type2="persistent"
 
 testarray1=""\
 "1024:1:716000:4:${msg_type1} "\

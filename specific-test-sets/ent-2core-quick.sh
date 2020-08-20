@@ -15,11 +15,11 @@ testarray1=""\
 "1024:100:490000:1:${msg_type1} "\
 ";" #need to  end with to separate the various test arrays;
 testarray2=""\
-"1024:1:20000:2:${msg_type2} "\
-"1024:2:35000:2:${msg_type2} "\
-"1024:5:70000:2:${msg_type2} "\
-"1024:10:90000:3:${msg_type2} "\
-"1024:50:125000:2:${msg_type2} "\
+"1024:1:20000:1:${msg_type2} "\
+"1024:2:35000:1:${msg_type2} "\
+"1024:5:70000:1:${msg_type2} "\
+"1024:10:90000:1:${msg_type2} "\
+"1024:50:125000:1:${msg_type2} "\
 ";" #need to  end with to separate the various test arrays;
 
 ${BASH_SOURCE%/*}/../run-testset.sh ${vmrs} ${testsetprefix} ${msg_type} ";"${testarray1[@]} ${testarray2[@]}
