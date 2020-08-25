@@ -1,2 +1,0 @@
-Sum across consumers: 67444.7 (msg/sec)',
-Sum across consumers: 67285.5 (msg/sec)',

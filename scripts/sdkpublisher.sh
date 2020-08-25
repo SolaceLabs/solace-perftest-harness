@@ -16,7 +16,7 @@
 no_cores=8
 
 #set cleanup to false, if you need to debug something and look at the output
-cleanup_at_end="false"
+cleanup_at_end="true"
 
 #Change the following constants only,if you really have to
 name=sdkpublishers
@@ -39,11 +39,11 @@ killallp() {
     trap '' INT TERM     # ignore INT and TERM while shutting down
     echo " "
     echo "**** Shutting down... ****"     # added double quotes
-    killall -2 sdkperf_c     # use when running script directly
+    killall -2 sdkperf_c  2>/dev/null     # use when running script directly
     sleep 3
-    killall -15 sdkperf_c      # use when running from ansible
+    killall -15 sdkperf_c 2>/dev/null     # use when running from ansible
     sleep 3
-    killall -9 sdkperf_c      # use when running from ansible
+    killall -9 sdkperf_c  2>/dev/null     # use when running from ansible
     wait
 }
 #wait for background processes to finish

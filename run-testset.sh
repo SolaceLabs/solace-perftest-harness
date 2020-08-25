@@ -30,6 +30,18 @@ allowed_error_margin=5 #allowed error margin in pct"
 log_dir=${BASH_SOURCE%/*}/temp #directory for temp files
 result_dir=${BASH_SOURCE%/*}/results #directory to store results in
 
+checkdependencies() {
+  echo "Checking dependencies..."
+  for e in rm cat sed grep ls dig let sleep ansible-playbook; do
+    if ! command -v ${e} &> /dev/null; then
+      echo ${e} " not found in PATH. Please install or update PATH"
+      exit 1
+    fi
+  done 
+}
+
+#main routine
+checkdependencies
 # Parse passed in test arrays
 testarray1=("`echo ${@} | cut -d ';' -f 2`")
 echo "testarray1=${testarray1}"
@@ -47,8 +59,15 @@ testarray7=("`echo ${@} | cut -d ';' -f 8`")
 echo "testarray7=${testarray7}"
 
 if [ -z "${vmrs}" ] || [[ ${vmrs} != *"."* ]]; then
-  echo "no valid router ip given to run against, exiting..."
-  exit 1
+  #not an ip, try to resolve
+  ip=$(dig ${vmrs} +short)
+  if [[ ${ip} != *"."* ]]; then
+  	echo "no valid router ip given to run against, exiting..."
+  	exit 1
+  else
+  	vmrs=${ip}
+  	echo "router ip set to: $vmrs"
+  fi
 else
   echo "router ip set to: $vmrs"
 fi

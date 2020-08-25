@@ -3,7 +3,7 @@
   remote_user: "{{ user }}"
   vars:
     #main setup variables - can be overriden by calling script
-    user: 'ubuntu' #default user for perf host log in
+    user: 'ansible' #default user for perf host log in
     script_path: '/home/{{ user }}/pubSubTools'
 
     #variables controlling the test type - most of these are being overwritten by calling scripts
