@@ -92,8 +92,10 @@ for testarray in ${testarray7} ${testarray6} ${testarray5} ${testarray4} ${testa
           #Call wrapper script for running a single test to determine the max publisher rate first
           ./run-test.sh -e '{"vmrs":'${vmrs}',"parallel_hosts":'${hosts}',"target_msg_rate":'0',"msg_size":'${msg_size}',"sdk_fanout":'0',"runlength":'${runlength}',"mt":"'${mt}'"}' | tee ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log
 		  publisherrate=`cat ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log | grep "all publishers:" | awk 'BEGIN { FS= " " }; { print $5 }'`
-		  msgrate=`echo ${publisherrate} | awk '{print int($1*0.829)}'`
-		  echo "Calculated max stable rate: " ${msgrate}
+		  msgrate=$(echo ${publisherrate} | awk '{print int($1*0.829)}' )
+		  
+		  echo "Calculated max stable rate:   " ${msgrate} " (msgs/sec)"
+		  echo
 
 		  #Now run test script again with calculated max stable rate for publishers and receivers
           ./run-test.sh -e '{"vmrs":'${vmrs}',"parallel_hosts":'${hosts}',"target_msg_rate":'${msgrate}',"msg_size":'${msg_size}',"sdk_fanout":'${fanout}',"runlength":'${runlength}',"mt":"'${mt}'"}' | tee ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log
