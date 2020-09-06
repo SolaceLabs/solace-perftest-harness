@@ -11,7 +11,8 @@
 #Adjust the following according to your needs and infrastructure
 #number of cores to distribute your processes across - used by taskset to pin consumers to cores. 
 #Should match the number of cores on the perf host running the consumers.
-no_cores=4 
+no_cores=2
+core_offset=6
 
 #set cleanup to false, if you need to debug something and look at the output
 cleanup_at_end="true"
@@ -89,11 +90,12 @@ cleanup
 
 echo "Starting ${number_of_clients} clients... (fanout: ${fanout})"
 #j controls the core the task will be pinned to
-j=1
+j=$core_offset
+last_core=$(expr ${core_offset} + ${no_cores})
 for i in `seq 1 ${number_of_clients}`; do
-  if [[ j -gt no_cores ]]; then
-    #if j gets greater than the cores available, restart at 1
-    j=1
+  if [[ $j -gt ${last_core} ]]; then
+    #if j gets greater than the cores available, restart at core_offset
+    j=${core_offset}
   fi
   #cores are actually numbered starting from 0, so use c for core number
   c=$((${j}-1))
