@@ -130,7 +130,7 @@
     retries: "{{ async_retries | int }}"
     delay: 10
     failed_when: pub_result.rc != 0
-    when: not item | skipped
+    when: not item is skipped
     with_items: "{{ pub.results }}"
 
   - name: 'display pub results'
@@ -144,7 +144,7 @@
     until: sub_result.finished
     retries: "{{ async_retries | int }}"
     delay: 10
-    when: not item | skipped
+    when: not item is skipped
     with_items: "{{ sub.results }}"
   - name: 'display sub results'
     debug: msg="{{ sub_result.results | map(attribute='stdout') | list }}"
