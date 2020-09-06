@@ -6,6 +6,12 @@ msg_type="mixed"
 msg_type1="direct"
 msg_type2="persistent"
 
+# Tests are being passed in as arrays. 
+# An array can have several tests separated by space.
+# Each test need to be in the format:
+# msg_size:fanout_number:overall_msg_rate:number_of_publisher_hosts:msg_type
+# Several (up to 7) arrays/testsets can be passed in, if separated by ;
+
 testarray2=""\
 "1024:1:550000:4:${msg_type1} "\
 "1024:2:790000:4:${msg_type1} "\

@@ -4,6 +4,12 @@ vmrs="${1}" #broker IP/DNS
 testsetprefix="2core-ha"
 msg_type="persistent"
 
+# Tests are being passed in as arrays. 
+# An array can have several tests separated by space.
+# Each test need to be in the format:
+# msg_size:fanout_number:overall_msg_rate:number_of_publisher_hosts:msg_type
+# Several (up to 7) arrays/testsets can be passed in, if separated by ;
+
 testarray1=""\
 "512:1:15000:1:${msg_type} "\
 "512:2:30000:1:${msg_type} "\
@@ -28,7 +34,7 @@ testarray3=""\
 testarray4=""\
 "4096:1:9000:1:${msg_type} "\
 "4096:2:19000:1:${msg_type} "\
-"4096:5:370000:1:${msg_type} "\
+"4096:5:37000:1:${msg_type} "\
 "4096:10:49000:1:${msg_type} "\
 "4096:50:68000:1:${msg_type} "\
 ";" #need to  end with to separate the various test arrays;
