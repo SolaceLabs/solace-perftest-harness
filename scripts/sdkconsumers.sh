@@ -3,7 +3,7 @@
 # The script takes the following arguments:
 # ./${name}.sh <timeout> <number_of_clients> <topic> <fanout> <add_args>
 # with timeout            = the time in seconds for how long to run the test
-#      number_of_clients  = how many client processes to run
+#      number_of_clients  = how many client processes to run (should match your publishers)
 #      topic              = the base topic prefix to subscribe to
 #      fanout             = the number of consumers on each topic
 #      add_args           = any additional arguments to pass to sdkperf
