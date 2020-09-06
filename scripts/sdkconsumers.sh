@@ -16,6 +16,10 @@ no_cores=4
 #set cleanup to false, if you need to debug something and look at the output
 cleanup_at_end="true"
 
+#use permanent queues or temporary topic endpoints
+entpoints="queues"
+#endpoints="topicendpoint"
+
 #Change the following constants only,if you really have to
 name=sdkconsumers
 
@@ -96,7 +100,11 @@ for i in `seq 1 ${number_of_clients}`; do
   for ((f=1; f<=${fanout}; f++)); do
     echo "fanout:${f}/${fanout}"
     if [[ ${add_args} == *"persistent"* ]]; then
-      taskset -c ${c} ./sdkperf_c -asw=255 -epl=${epl} -rc=${rc} -tte=1 -stl=${topic}_${i} -pe -pea=0 -nagle ${add_args} &> ${name}_stats_${i}_${f}.txt &
+      if [[ "${endpoints}" = "queues" ]]; then
+        taskset -c ${c} ./sdkperf_c -asw=255 -epl=${epl} -rc=${rc} -stl=${topic}_${i} -pe -sql=${topic}_${i} -pea=0 -nagle ${add_args} &> ${name}_stats_${i}_${f}.txt &
+	  else     
+        taskset -c ${c} ./sdkperf_c -asw=255 -epl=${epl} -rc=${rc} -stl=${topic}_${i} -pe -tte=1 -pea=0 -nagle ${add_args} &> ${name}_stats_${i}_${f}.txt &
+      fi
       echo
     else
       taskset -c ${c} ./sdkperf_c -asw=255 -epl=${epl} -rc=${rc}  -stl=${topic}_${i} -nagle ${add_args} &> ${name}_stats_${i}_${f}.txt &
