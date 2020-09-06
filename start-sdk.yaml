@@ -11,11 +11,11 @@
     mt: persistent #default message type: direct, nonpersistent or persistent
     msg_size: 1024 # default message payload size
     #how many individual consumers on each topic:
-    sdk_fanout: 5 #default fanout number
+    sdk_fanout: 1 #default fanout number
     #how many hosts to run publishers and subscribers on:
     parallel_hosts: 1 #default publisher and consumer hosts
-    #set the overall msg rate you want to achieve (incl fanout):
-    overall_msg_rate: 60000 #default message rate to achieve
+    #set the overall target msg rate you want to achieve (incl fanout):
+    target_msg_rate: 0 #default message rate to achieve
     #more or less constant and calculated values...
     sdk_consumer_threads: 1 #default=1, increase, if you need some load balancing
     
@@ -25,7 +25,7 @@
     (groups['pubhost2'] | length) + (groups['pubhost3'] | length) +
     (groups['pubhost4'] | length) }}" #calculates how many pub hosts are active
     HOST_COUNT: "{{ [HOST_COUNT_INVENTORY, parallel_hosts] | min }}"
-    msg_rate: "{{ (overall_msg_rate / ([HOST_COUNT, 1] | max | int) /
+    msg_rate: "{{ (target_msg_rate / ([HOST_COUNT, 1] | max | int) /
     ([sdk_fanout, 1] | max | int)) | int }}" # rate per publisher host
     #set sdk_publishers equal to the number of cores on the test hosts:
     sdk_publishers: 8 #default number of clients on each publisher hosts
@@ -38,7 +38,7 @@
     # some variables for pretty printing variables/test parameters
     filler: "            "
     str_msg_size: "{{ ([filler, msg_size] |join)[-8:] }}"
-    str_overall_rate: "{{ ([filler, overall_msg_rate] | join)[-8:] }}"
+    str_overall_rate: "{{ ([filler, target_msg_rate] | join)[-8:] }}"
     str_msg_rate: "{{ ([filler, msg_rate] | join)[-8:] }}"
     str_mt: "{{ ([filler, mt] | join)[-13:] }}"
     str_fanout: "{{ ([filler, sdk_fanout] | join)[-8:] }}"
@@ -54,7 +54,7 @@
     debug:
       msg:
         - "#############################################"
-        - "# Overall message rate             {{ str_overall_rate }} #"
+        - "# Target message rate              {{ str_overall_rate }} #"
         - "# Message rate per publisher host  {{ str_msg_rate }} #"
         - "# Fanout                           {{ str_fanout }} #"
         - "# Message size                     {{ str_msg_size }} #"
@@ -153,7 +153,7 @@
     debug:
       msg:
         - "#############################################"
-        - "# Overall message rate             {{ str_overall_rate }} #"
+        - "# Target message rate              {{ str_overall_rate }} #"
         - "# Message rate per publisher host  {{ str_msg_rate }} #"
         - "# Fanout                           {{ str_fanout }} #"
         - "# Message size                     {{ str_msg_size }} #"

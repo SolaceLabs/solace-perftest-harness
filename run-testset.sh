@@ -3,7 +3,7 @@
 # Tests are being passed in as arrays. 
 # An array can have several tests separated by space.
 # Each test need to be in the format:
-# msg_size:fanout_number:overall_msg_rate:number_of_publisher_hosts:msg_type
+# msg_size:fanout_number:target_msg_rate:number_of_publisher_hosts:msg_type
 # Several (up to 7) arrays/testsets can be passed in, if separated by ;
 # Example format for one test set:
 # testarray1=""\
@@ -91,7 +91,7 @@ for testarray in ${testarray7} ${testarray6} ${testarray5} ${testarray4} ${testa
             echo ""
           fi
           #Call wrapper script for running a single test
-          ./run-tests.sh -e '{"vmrs":'${vmrs}',"parallel_hosts":'${hosts}',"overall_msg_rate":'${msgrate}',"msg_size":'${msg_size}',"sdk_fanout":'${fanout}',"runlength":'${runlength}',"mt":"'${mt}'"}' | tee ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log
+          ./run-test.sh -e '{"vmrs":'${vmrs}',"parallel_hosts":'${hosts}',"target_msg_rate":'${msgrate}',"msg_size":'${msg_size}',"sdk_fanout":'${fanout}',"runlength":'${runlength}',"mt":"'${mt}'"}' | tee ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log
           #Parse and log results and check for success/failure
           receiver_rate=`cat ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log | grep "all  consumers:" | awk 'BEGIN { FS= " " }; { print $5 }'`
           echo "allowed error margin = ${allowed_error_margin} %" | tee -a ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log
