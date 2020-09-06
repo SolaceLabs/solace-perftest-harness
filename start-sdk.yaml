@@ -25,8 +25,8 @@
     (groups['pubhost2'] | length) + (groups['pubhost3'] | length) +
     (groups['pubhost4'] | length) }}" #calculates how many pub hosts are active
     HOST_COUNT: "{{ [HOST_COUNT_INVENTORY, parallel_hosts] | min }}"
-    msg_rate: "{{ (overall_msg_rate / (HOST_COUNT | int) /
-    (sdk_fanout | int)) | int }}" # rate per publisher host
+    msg_rate: "{{ (overall_msg_rate / ([HOST_COUNT, 1] | max | int) /
+    ([sdk_fanout, 1] | max | int)) | int }}" # rate per publisher host
     #set sdk_publishers equal to the number of cores on the test hosts:
     sdk_publishers: 8 #default number of clients on each publisher hosts
     #set actual number of publishers to the lower of the two for really small msg rates:
