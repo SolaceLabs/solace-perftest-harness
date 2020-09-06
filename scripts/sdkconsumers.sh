@@ -17,7 +17,7 @@ no_cores=4
 cleanup_at_end="true"
 
 #use permanent queues or temporary topic endpoints
-entpoints="queues"
+endpoints="queues"
 #endpoints="topicendpoint"
 
 #Change the following constants only,if you really have to
