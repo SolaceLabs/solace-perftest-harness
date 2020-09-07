@@ -103,7 +103,7 @@ for i in `seq 1 ${number_of_clients}`; do
     echo "fanout:${f}/${fanout}"
     if [[ ${add_args} == *"persistent"* ]]; then
       if [[ "${endpoints}" = "queues" ]]; then
-        taskset -c ${c} ./sdkperf_c -asw=255 -epl=${epl} -rc=${rc} -stl=${topic}_${i} -pe -sql=${topic}_${i} -pea=0 -nagle ${add_args} &> ${name}_stats_${i}_${f}.txt &
+        taskset -c ${c} ./sdkperf_c -asw=255 -epl=${epl} -rc=${rc} -stl=${topic}_${i} -pe -sql=${topic}_${i}_${f} -pea=0 -nagle ${add_args} &> ${name}_stats_${i}_${f}.txt &
 	  else     
         taskset -c ${c} ./sdkperf_c -asw=255 -epl=${epl} -rc=${rc} -stl=${topic}_${i} -pe -tte=1 -pea=0 -nagle ${add_args} &> ${name}_stats_${i}_${f}.txt &
       fi
