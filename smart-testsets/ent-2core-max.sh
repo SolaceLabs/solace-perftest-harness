@@ -14,9 +14,18 @@ msg_type2="persistent"
 
 testarray1=""\
 "100:1:1:${msg_type1} "\
+"100:2:1:${msg_type1} "\
+"100:5:1:${msg_type1} "\
+"100:10:1:${msg_type1} "\
+"100:50:1:${msg_type1} "\
+"100:100:1:${msg_type1} "\
 ";" #need to  end with to separate the various test arrays;
 testarray2=""\
 "1024:1:1:${msg_type2} "\
+"1024:2:1:${msg_type2} "\
+"1024:5:1:${msg_type2} "\
+"1024:10:1:${msg_type2} "\
+"1024:50:1:${msg_type2} "\
 ";" #need to  end with to separate the various test arrays;
 
-${BASH_SOURCE%/*}/../run-smart-testset.sh ${vmrs} ${testsetprefix} ${msg_type} ";"${testarray1[@]} ${testarray2[@]}
+${BASH_SOURCE%/*}/../run-smart-testset.sh ${vmrs} ${testsetprefix} ${msg_type} ";"${testarray2[@]}
