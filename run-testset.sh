@@ -43,19 +43,19 @@ checkdependencies() {
 #main routine
 checkdependencies
 # Parse passed in test arrays
-testarray1=("`echo ${@} | cut -d ';' -f 2`")
+testarray1=$(echo ${@} | cut -d ';' -f 2)
 echo "testarray1=${testarray1}"
-testarray2=("`echo ${@} | cut -d ';' -f 3`")
+testarray2=$(echo ${@} | cut -d ';' -f 3)
 echo "testarray2=${testarray2}"
-testarray3=("`echo ${@} | cut -d ';' -f 4`")
+testarray3=$(echo ${@} | cut -d ';' -f 4)
 echo "testarray3=${testarray3}"
-testarray4=("`echo ${@} | cut -d ';' -f 5`")
+testarray4=$(echo ${@} | cut -d ';' -f 5)
 echo "testarray4=${testarray4}"
-testarray5=("`echo ${@} | cut -d ';' -f 6`")
+testarray5=$(echo ${@} | cut -d ';' -f 6)
 echo "testarray5=${testarray5}"
-testarray6=("`echo ${@} | cut -d ';' -f 7`")
+testarray6=$(echo ${@} | cut -d ';' -f 7)
 echo "testarray6=${testarray6}"
-testarray7=("`echo ${@} | cut -d ';' -f 8`")
+testarray7=$(echo ${@} | cut -d ';' -f 8)
 echo "testarray7=${testarray7}"
 
 if [ -z "${vmrs}" ] || [[ ${vmrs} != *"."* ]]; then
@@ -74,8 +74,12 @@ fi
 
 
 echo "Running testset for ${testsetprefix} ${msg_type} on ${vmrs}"...
+xIFS=$IFS #remember internal field separator
+IFS=$';'  #set ifs to ; for this for loop
 for testarray in ${testarray7} ${testarray6} ${testarray5} ${testarray4} ${testarray3} ${testarray2} ${testarray1}; do
   if [ -n "${testarray}" ]; then
+    echo "testarray=${testarray}"
+    IFS=$xIFS #reset ifs for next for loop
     for parameters in ${testarray}; do
       if [ -n "${parameters}" ]; then
         # Parse parameters for a single test
