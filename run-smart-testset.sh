@@ -43,19 +43,19 @@ checkdependencies() {
 #main routine
 checkdependencies
 # Parse passed in test arrays
-testarray1=("`echo ${@} | cut -d ';' -f 2`")
+testarray1=$(echo ${@} | cut -d ';' -f 2)
 echo "testarray1=${testarray1}"
-testarray2=("`echo ${@} | cut -d ';' -f 3`")
+testarray2=$(echo ${@} | cut -d ';' -f 3)
 echo "testarray2=${testarray2}"
-testarray3=("`echo ${@} | cut -d ';' -f 4`")
+testarray3=$(echo ${@} | cut -d ';' -f 4)
 echo "testarray3=${testarray3}"
-testarray4=("`echo ${@} | cut -d ';' -f 5`")
+testarray4=$(echo ${@} | cut -d ';' -f 5)
 echo "testarray4=${testarray4}"
-testarray5=("`echo ${@} | cut -d ';' -f 6`")
+testarray5=$(echo ${@} | cut -d ';' -f 6)
 echo "testarray5=${testarray5}"
-testarray6=("`echo ${@} | cut -d ';' -f 7`")
+testarray6=$(echo ${@} | cut -d ';' -f 7)
 echo "testarray6=${testarray6}"
-testarray7=("`echo ${@} | cut -d ';' -f 8`")
+testarray7=$(echo ${@} | cut -d ';' -f 8)
 echo "testarray7=${testarray7}"
 
 if [ -z "${vmrs}" ] || [[ ${vmrs} != *"."* ]]; then
@@ -74,8 +74,26 @@ fi
 
 
 echo "Running testset for ${testsetprefix} ${msg_type} on ${vmrs}"...
+xIFS=$IFS
+IFS=$';'
 for testarray in ${testarray7} ${testarray6} ${testarray5} ${testarray4} ${testarray3} ${testarray2} ${testarray1}; do
   if [ -n "${testarray}" ]; then
+    echo "testarray=${testarray}"
+    # Take the whole array first and work out max publisher rates for given message size first
+    parameters=$(echo ${testarray} | cut -d ' ' -f 1)
+    # Parse parameters for a max publishers test
+    if [ -n "${parameters}" ]; then
+      echo "parameters=${parameters}"
+      msg_size=$(echo ${parameters} | cut -d : -f 1)
+      fanout=0
+      hosts=$(echo ${parameters} | cut -d : -f 3)
+      mt=$(echo ${parameters} | cut -d : -f 4)
+      #Call wrapper script for running a single test to determine the max publisher rate first
+      ./run-test.sh -e '{"vmrs":'${vmrs}',"parallel_hosts":'${hosts}',"target_msg_rate":'0',"msg_size":'${msg_size}',"sdk_fanout":'${fanout}',"runlength":'${runlength}',"mt":"'${mt}'"}' | tee ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log
+	  publisherrate=`cat ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log | grep "all publishers:" | awk 'BEGIN { FS= " " }; { print $5 }'`
+    fi
+    # Now parse the whole set and execute each test
+    IFS=$xIFS
     for parameters in ${testarray}; do
       if [ -n "${parameters}" ]; then
         # Parse parameters for a single test
@@ -89,13 +107,51 @@ for testarray in ${testarray7} ${testarray6} ${testarray5} ${testarray4} ${testa
             read -n 1 -s -r -p "[Press any key to hit it off]" #uncomment, if you want to be prompted before starting test 
             echo ""
           fi
-          #Call wrapper script for running a single test to determine the max publisher rate first
-          ./run-test.sh -e '{"vmrs":'${vmrs}',"parallel_hosts":'${hosts}',"target_msg_rate":'0',"msg_size":'${msg_size}',"sdk_fanout":'0',"runlength":'${runlength}',"mt":"'${mt}'"}' | tee ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log
-		  publisherrate=`cat ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log | grep "all publishers:" | awk 'BEGIN { FS= " " }; { print $5 }'`
 		  if [[ "${mt}" = "persistent" ]]; then
-		    msgrate=$(echo ${publisherrate} | awk '{print int($1*0.525)}' )
+		    case ${fanout} in 
+		      1)
+		        msgrate=$(echo ${publisherrate} | awk '{print int($1*0.525)}' ) # Need to find a formula on how to apply the fanout
+		        ;;
+		      2)
+		        msgrate=$(echo ${publisherrate} | awk '{print int($1*0.9)}' ) # Need to find a formula on how to apply the fanout
+		        ;;
+		      5)
+		        msgrate=$(echo ${publisherrate} | awk '{print int($1*1.9)}' ) # Need to find a formula on how to apply the fanout
+		        ;;
+		      10)
+		        msgrate=$(echo ${publisherrate} | awk '{print int($1*2.3)}' ) # Need to find a formula on how to apply the fanout
+		        ;;
+		      50)
+		        msgrate=$(echo ${publisherrate} | awk '{print int($1*3)}' ) # Need to find a formula on how to apply the fanout
+		        ;;
+		      *)
+		        msgrate=$(echo ${publisherrate} | awk '{print int($1)}' ) # Need to find a formula on how to apply the fanout
+		        ;;
+		    esac
 		  else
-		    msgrate=$(echo ${publisherrate} | awk '{print int($1*0.829)}' )
+		    case ${fanout} in 
+		      1)
+		        msgrate=$(echo ${publisherrate} | awk '{print int($1*0.83)}' ) # Need to find a formula on how to apply the fanout
+		        ;;
+		      2)
+		        msgrate=$(echo ${publisherrate} | awk '{print int($1*1)}' ) # Need to find a formula on how to apply the fanout
+		        ;;
+		      5)
+		        msgrate=$(echo ${publisherrate} | awk '{print int($1*2.5}' ) # Need to find a formula on how to apply the fanout
+		        ;;
+		      10)
+		        msgrate=$(echo ${publisherrate} | awk '{print int($1*3.75)}' ) # Need to find a formula on how to apply the fanout
+		        ;;
+		      50)
+		        msgrate=$(echo ${publisherrate} | awk '{print int($1*5)}' ) # Need to find a formula on how to apply the fanout
+		        ;;
+		      100)
+		        msgrate=$(echo ${publisherrate} | awk '{print int($1*5)}' ) # Need to find a formula on how to apply the fanout
+		        ;;
+		      *)
+		        msgrate=$(echo ${publisherrate} | awk '{print int($1)}' ) # Need to find a formula on how to apply the fanout
+		        ;;
+		    esac
 		  fi
 		  
 		  echo "Calculated max stable rate:   " ${msgrate} " (msgs/sec)"
