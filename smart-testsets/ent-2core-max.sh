@@ -28,4 +28,4 @@ testarray2=""\
 "1024:50:1:${msg_type2} "\
 ";" #need to  end with to separate the various test arrays;
 
-${BASH_SOURCE%/*}/../run-smart-testset.sh ${vmrs} ${testsetprefix} ${msg_type} ";"${testarray2[@]}
+${BASH_SOURCE%/*}/../run-smart-testset.sh ${vmrs} ${testsetprefix} ${msg_type} ";"${testarray1[@]} ${testarray2[@]}
