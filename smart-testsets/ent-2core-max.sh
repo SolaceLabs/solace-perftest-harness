@@ -1,7 +1,7 @@
 #!/bin/bash
 #Test set (direct messaging) to run against a small enterprise software broker (2 cores)
 vmrs="${1}" #broker IP/DNS
-testsetprefix="2core"
+testsetprefix="ent-2core-max"
 msg_type="mixed"
 msg_type1="direct"
 msg_type2="persistent"
