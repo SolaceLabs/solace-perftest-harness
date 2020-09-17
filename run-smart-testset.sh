@@ -18,6 +18,8 @@
 
 prompt_between_tests="false" #set to false, if you want to run tests fully automatic
 #prompt_between_tests="true" #set to false, if you want to run tests fully automatic
+#execute="false" #set to false, don't run all individual tests
+execute="true" #set to false, don't run all individual tests
 
 echo "Running run-smart-testset.sh with args: $@"
 vmrs="$1" #ip to connect to vmrs for testing
@@ -80,10 +82,11 @@ for testarray in ${testarray7} ${testarray6} ${testarray5} ${testarray4} ${testa
   if [ -n "${testarray}" ]; then
     echo "testarray=${testarray}"
     # Take the whole array first and work out max publisher rates for given message size first
-    parameters=$(echo ${testarray} | cut -d ' ' -f 1)
+    head_trimmed_testarray="$(echo -e "${testarray}" | sed -e 's/^[[:space:]]*//')"
+    parameters=$(echo ${head_trimmed_testarray} | cut -d ' ' -f 1)
     # Parse parameters for a max publishers test
     if [ -n "${parameters}" ]; then
-      echo "parameters=${parameters}"
+      echo "parameters for max publisher rate test=${parameters}"
       msg_size=$(echo ${parameters} | cut -d : -f 1)
       fanout=0
       hosts=$(echo ${parameters} | cut -d : -f 3)
@@ -92,94 +95,99 @@ for testarray in ${testarray7} ${testarray6} ${testarray5} ${testarray4} ${testa
       ./run-test.sh -e '{"vmrs":'${vmrs}',"parallel_hosts":'${hosts}',"target_msg_rate":'0',"msg_size":'${msg_size}',"sdk_fanout":'${fanout}',"runlength":'${runlength}',"mt":"'${mt}'"}' | tee ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log
 	  publisherrate=`cat ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log | grep "all publishers:" | awk 'BEGIN { FS= " " }; { print $5 }'`
     fi
-    # Now parse the whole set and execute each test
-    IFS=$xIFS
-    for parameters in ${testarray}; do
-      if [ -n "${parameters}" ]; then
-        # Parse parameters for a single test
-        echo "parameters=${parameters}"
-        msg_size=`echo ${parameters} | cut -d : -f 1`
-        fanout=`echo ${parameters} | cut -d : -f 2`
-        hosts=`echo ${parameters} | cut -d : -f 3`
-        mt=`echo ${parameters} | cut -d : -f 4`
-        if [ ! -z "${msg_size}" ] && [ ! -z "${fanout}" ] && [ ! -z "${hosts}" ] && [ ! -z "${mt}" ]; then
-          if [[ "${prompt_between_tests}" = "true" ]]; then
-            read -n 1 -s -r -p "[Press any key to hit it off]" #uncomment, if you want to be prompted before starting test 
-            echo ""
-          fi
-		  if [[ "${mt}" = "persistent" ]]; then
-		    case ${fanout} in 
-		      1)
-		        msgrate=$(echo ${publisherrate} | awk '{print int($1*0.525)}' ) # Need to find a formula on how to apply the fanout
-		        ;;
-		      2)
-		        msgrate=$(echo ${publisherrate} | awk '{print int($1*0.9)}' ) # Need to find a formula on how to apply the fanout
-		        ;;
-		      5)
-		        msgrate=$(echo ${publisherrate} | awk '{print int($1*1.9)}' ) # Need to find a formula on how to apply the fanout
-		        ;;
-		      10)
-		        msgrate=$(echo ${publisherrate} | awk '{print int($1*2.3)}' ) # Need to find a formula on how to apply the fanout
-		        ;;
-		      50)
-		        msgrate=$(echo ${publisherrate} | awk '{print int($1*3)}' ) # Need to find a formula on how to apply the fanout
-		        ;;
-		      *)
-		        msgrate=$(echo ${publisherrate} | awk '{print int($1)}' ) # Need to find a formula on how to apply the fanout
-		        ;;
-		    esac
-		  else
-		    case ${fanout} in 
-		      1)
-		        msgrate=$(echo ${publisherrate} | awk '{print int($1*0.83)}' ) # Need to find a formula on how to apply the fanout
-		        ;;
-		      2)
-		        msgrate=$(echo ${publisherrate} | awk '{print int($1*1)}' ) # Need to find a formula on how to apply the fanout
-		        ;;
-		      5)
-		        msgrate=$(echo ${publisherrate} | awk '{print int($1*2.5}' ) # Need to find a formula on how to apply the fanout
-		        ;;
-		      10)
-		        msgrate=$(echo ${publisherrate} | awk '{print int($1*3.75)}' ) # Need to find a formula on how to apply the fanout
-		        ;;
-		      50)
-		        msgrate=$(echo ${publisherrate} | awk '{print int($1*5)}' ) # Need to find a formula on how to apply the fanout
-		        ;;
-		      100)
-		        msgrate=$(echo ${publisherrate} | awk '{print int($1*5)}' ) # Need to find a formula on how to apply the fanout
-		        ;;
-		      *)
-		        msgrate=$(echo ${publisherrate} | awk '{print int($1)}' ) # Need to find a formula on how to apply the fanout
-		        ;;
-		    esac
-		  fi
-		  
-		  echo "Calculated max stable rate:   " ${msgrate} " (msgs/sec)"
-		  echo
-
-		  #Now run test script again with calculated max stable rate for publishers and receivers
-          ./run-test.sh -e '{"vmrs":'${vmrs}',"parallel_hosts":'${hosts}',"target_msg_rate":'${msgrate}',"msg_size":'${msg_size}',"sdk_fanout":'${fanout}',"runlength":'${runlength}',"mt":"'${mt}'"}' | tee ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log
-          #Parse and log results and check for success/failure
-          receiver_rate=`cat ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log | grep "all  consumers:" | awk 'BEGIN { FS= " " }; { print $5 }'`
-          echo "allowed error margin = ${allowed_error_margin} %" | tee -a ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log
-          let withinerrormargin="$msgrate - ( $msgrate / 100 * $allowed_error_margin )"
-          echo "target rate - error margin = ${withinerrormargin}" | tee -a ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log
-          if [[ $withinerrormargin -lt $receiver_rate ]]; then
-            echo "Achieved rate $receiver_rate >= $withinerrormargin" | tee -a ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log
-            echo "Test: OK" | tee -a ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log
-          else
-            echo "Achieved rate $receiver_rate < $withinerrormargin" | tee -a ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log
-            echo "Test: Fail" | tee -a ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log
-          fi
-          sleep 2 #delay to allow temp logs to finish writing
-          echo
-        else
-          echo "one of msg_size, fanout, hosts or mt is empty, skipping..."
-        fi
-      else
-        echo "parameters is empty, skipping..."
-      fi
-    done
+    #Check that we got an actual publisherrate
+    if [ ! "${publisherrate}" -eq "0" ]; then
+	  # Now parse the whole set and execute each test
+	  IFS=$xIFS
+	  for parameters in ${testarray}; do
+	    if [ -n "${parameters}" ]; then
+	      # Parse parameters for a single test
+	      echo "parameters for test (size,fanout,hosts,mt)=${parameters}"
+	      msg_size=`echo ${parameters} | cut -d : -f 1`
+	      fanout=`echo ${parameters} | cut -d : -f 2`
+	      hosts=`echo ${parameters} | cut -d : -f 3`
+	      mt=`echo ${parameters} | cut -d : -f 4`
+	      if [ ! -z "${msg_size}" ] && [ ! -z "${fanout}" ] && [ ! -z "${hosts}" ] && [ ! -z "${mt}" ]; then
+	        if [[ "${mt}" = "persistent" ]]; then
+			  case ${fanout} in 
+			    1)
+			      msgrate=$(echo ${publisherrate} | awk '{print int($1*0.525)}' ) # Need to find a formula on how to apply the fanout
+			      ;;
+			    2)
+			      msgrate=$(echo ${publisherrate} | awk '{print int($1*0.9)}' ) # Need to find a formula on how to apply the fanout
+			      ;;
+			    5)
+			      msgrate=$(echo ${publisherrate} | awk '{print int($1*1.9)}' ) # Need to find a formula on how to apply the fanout
+			      ;;
+			    10)
+			      msgrate=$(echo ${publisherrate} | awk '{print int($1*2.3)}' ) # Need to find a formula on how to apply the fanout
+			      ;;
+			    50)
+			      msgrate=$(echo ${publisherrate} | awk '{print int($1*3)}' ) # Need to find a formula on how to apply the fanout
+			      ;;
+			    *)
+			      msgrate=$(echo ${publisherrate} | awk '{print int($1)}' ) # Need to find a formula on how to apply the fanout
+			      ;;
+			  esac
+			else
+			  case ${fanout} in 
+		        1)
+			      msgrate=$(echo ${publisherrate} | awk '{print int($1*0.83)}' ) # Need to find a formula on how to apply the fanout
+			      ;;
+			    2)
+			      msgrate=$(echo ${publisherrate} | awk '{print int($1*1)}' ) # Need to find a formula on how to apply the fanout
+			      ;;
+			    5)
+			      msgrate=$(echo ${publisherrate} | awk '{print int($1*2.5)}' ) # Need to find a formula on how to apply the fanout
+			      ;;
+			    10)
+			      msgrate=$(echo ${publisherrate} | awk '{print int($1*3.75)}' ) # Need to find a formula on how to apply the fanout
+			      ;;
+			    50)
+			      msgrate=$(echo ${publisherrate} | awk '{print int($1*5)}' ) # Need to find a formula on how to apply the fanout
+			      ;;
+			    100)
+			      msgrate=$(echo ${publisherrate} | awk '{print int($1*5)}' ) # Need to find a formula on how to apply the fanout
+			      ;;
+			    *)
+			      msgrate=$(echo ${publisherrate} | awk '{print int($1)}' ) # Need to find a formula on how to apply the fanout
+			      ;;
+			  esac
+			fi
+            echo "Calculated max stable rate:   " ${msgrate} " (msgs/sec)"
+			echo
+	        if [[ "${prompt_between_tests}" = "true" ]]; then
+	          read -n 1 -s -r -p "[Press any key to hit it off]" #uncomment, if you want to be prompted before starting test 
+	          echo ""
+	        fi
+			if [ "${execute}" = "true" ]; then
+			  #Now run test script again with calculated max stable rate for publishers and receivers
+	          ./run-test.sh -e '{"vmrs":'${vmrs}',"parallel_hosts":'${hosts}',"target_msg_rate":'${msgrate}',"msg_size":'${msg_size}',"sdk_fanout":'${fanout}',"runlength":'${runlength}',"mt":"'${mt}'"}' | tee ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log
+	          #Parse and log results and check for success/failure
+	          receiver_rate=`cat ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log | grep "all  consumers:" | awk 'BEGIN { FS= " " }; { print $5 }'`
+	          echo "allowed error margin = ${allowed_error_margin} %" | tee -a ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log
+	          let withinerrormargin="$msgrate - ( $msgrate / 100 * $allowed_error_margin )"
+	          echo "target rate - error margin = ${withinerrormargin}" | tee -a ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log
+	          if [[ $withinerrormargin -lt $receiver_rate ]]; then
+	            echo "Achieved rate $receiver_rate >= $withinerrormargin" | tee -a ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log
+	            echo "Test: OK" | tee -a ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log
+	          else
+	            echo "Achieved rate $receiver_rate < $withinerrormargin" | tee -a ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log
+	            echo "Test: Fail" | tee -a ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log
+	          fi
+	          sleep 2 #delay to allow temp logs to finish writing
+	          echo
+	        fi
+	      else
+	        echo "one of msg_size, fanout, hosts or mt is empty, skipping..."
+	      fi
+	    else
+	      echo "parameters is empty, skipping..."
+	    fi
+	  done
+	else
+	  echo "Determination of max publisher rate failed, aborting..."
+	fi
   else
     echo "testarray is empty, skipping..."
   fi
