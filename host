@@ -2,22 +2,7 @@
 # Host file for running Solace perf tests against VMRs #
 ########################################################
 # Enter IP addresses of your perf hosts here...
-[pubhost1]
-blackbox  #perf1
-[subhost1]
-blackbox  #perf2
-
-[pubhost2]
-[subhost2]
-[pubhost3]
-[subhost3]
-[pubhost4]
-[subhost4]
-
-[pubhost5]
-
-[active_test_hosts]
+[pubhost]
 blackbox
-
-# Section for listing VMRs (optional)
-[vmrs]
+[subhost]
+blackbox
