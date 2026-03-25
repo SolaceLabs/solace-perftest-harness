@@ -3,6 +3,6 @@
 ########################################################
 # Enter IP addresses of your perf hosts here...
 [pubhost]
-blackbox
+emeaperf3.londonlab
 [subhost]
-blackbox
+emeaperf4.londonlab

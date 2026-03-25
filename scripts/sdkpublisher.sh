@@ -14,7 +14,7 @@
 #number of cores to distribute your processes across - used by taskset to pin publishers to cores. 
 #Should match the number of cores on the perf host running the publishers.
 no_cores=4
-core_offset=2
+core_offset=1
 
 #set cleanup to false, if you need to debug something and look at the output
 cleanup_at_end="true"

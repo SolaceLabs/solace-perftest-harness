@@ -3,7 +3,7 @@
   remote_user: "{{ user }}"
   vars:
     #main setup variables - can be overriden by calling script
-    user: 'ansible' #default user for perf host log in
+    user: 'choltfurth' #default user for perf host log in
     script_path: '/home/{{ user }}/pubSubTools'
 
     #variables controlling the test type - most of these are being overwritten by calling scripts
@@ -25,11 +25,11 @@
     HOST_COUNT_calc: "{{ [HOST_COUNT, 1] | max }}" #for calculations avoiding div by zero
     msg_rate: "{{ (target_msg_rate / (HOST_COUNT_calc | int) / (sdk_fanout_calc | int)) | int }}" # rate per publisher host
     #set sdk_publishers equal to the number of cores on the test hosts:
-    sdk_publishers: 8 #default number of clients on each publisher hosts
+    sdk_publishers: 4 #default number of clients on each publisher hosts
     #set actual number of publishers to the lower of the two for really small msg rates:
     act_publishers: "{{ [[ msg_rate, sdk_publishers] | min, 1] | max }}"
     sdk_consumers: "{{ act_publishers }}" #default number of clients on each consumer hosts - needs to match publishers!
-    sdk_credentials: '-cu=sdkperf@default -cp=...' #default sdkperf login creds
+    sdk_credentials: '-cu=perftestharness@perftest-harness -cp=default' #default sdkperf login creds
     async_retries: "{{ runlength / 10 + 5 | round | int }}" #how long ansible is waiting for the sdks to finish (in 10s intervals).
     
     # some variables for pretty printing variables/test parameters
