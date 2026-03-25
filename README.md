@@ -20,10 +20,17 @@ The Solace PubSub+ Event Broker provides enterprise-grade messaging capabilities
 - E.g. to test a standard broker in a singleton/stand-alone setup, simply run `specific-test-sets/standard-gm-noha.sh` from the root directory of the project.
 - Or To test an enterprise broker running with 4 cores in a HA setup, simply run `specific-test-sets/ent-4core-gm-ha.sh` from the root directory of the project.
 
+# To discover the maximum throughput of an unknown broker
+- Use `run-binsearch-testset.sh` when you don't know what rates to expect (new hardware, new configuration, or initial characterisation of a broker).
+- Instead of specifying a target rate, the script uses binary search to find the highest message rate the broker can sustain end-to-end for each scenario.
+- Test scripts in the `smart-testsets` folder use this format — each test entry omits the target rate: `msg_size:fanout:publisher_hosts:msg_type`
+- For each scenario the script runs up to 10 iterations, halving or doubling the search range based on whether the broker passed or failed, converging to within ~1,000 msgs/sec of the true maximum.
+- Upper bounds are set per message type (direct: 5,000,000 / nonpersistent: 2,000,000 / persistent: 1,000,000 msgs/sec) and can be adjusted at the top of the script.
+
 # How the tests work
 - The specific test set scripts are simply defining the tests that you want to run against the router, these are:
 ```
-# Tests are being passed in as arrays. 
+# Tests are being passed in as arrays.
 # An array can have several tests separated by space.
 # Each test need to be in the format:
 # msg_size:fanout_number:overall_msg_rate:number_of_publisher_hosts:msg_type
