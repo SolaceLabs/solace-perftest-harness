@@ -27,7 +27,7 @@
     #set sdk_publishers equal to the number of cores on the test hosts:
     sdk_publishers: 4 #default number of clients on each publisher hosts
     #set actual number of publishers to the lower of the two for really small msg rates:
-    act_publishers: "{{ [[ msg_rate, sdk_publishers] | min, 1] | max }}"
+    act_publishers: "{{ [[ msg_rate | int, sdk_publishers] | min, 1] | max }}"
     sdk_consumers: "{{ act_publishers }}" #default number of clients on each consumer hosts - needs to match publishers!
     sdk_credentials: '-cu=perftestharness@perftest-harness -cp=default' #default sdkperf login creds
     async_retries: "{{ runlength / 10 + 5 | round | int }}" #how long ansible is waiting for the sdks to finish (in 10s intervals).
