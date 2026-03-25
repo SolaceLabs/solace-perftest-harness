@@ -15,7 +15,7 @@ cleanup() {
 
 checkdependencies() {
   echo "Checking dependencies..."
-  for e in rm cat sed grep sort uniq awk print ansible-playbook; do
+  for e in rm cat sed grep sort uniq awk ansible-playbook; do
     if ! command -v ${e} &> /dev/null; then
       echo ${e} " not found in PATH. Please install or update PATH"
       exit 1
