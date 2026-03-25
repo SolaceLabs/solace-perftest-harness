@@ -101,7 +101,7 @@
     shell:  "{{ script_path }}/sdkpublisher.sh {{ runlength }} {{ msg_rate }} {{ act_publishers }} 999999999 {{ item.topic }} -cip={{ vmrs }} {{ sdk_credentials}} -msa={{ msg_size }} -mt={{ mt }} | tee sdk.log"
     when: "item.groups in group_names and
     ( item.index|int <= parallel_hosts )"
-    async: "{{ runlength + 5 }}"
+    async: "{{ runlength + 30 }}"
     poll: 10
     args:
       chdir: "{{ script_path }}/"
@@ -123,7 +123,7 @@
     with_items: "{{ pub.results }}"
 
   - name: 'display pub results'
-    debug: msg="{{ pub_result.results| map(attribute='stdout') | list }}"
+    debug: msg="{{ pub_result.results | map(attribute='stdout', default='(no output)') | list }}"
 
   - name: 'check consumers'
     async_status:
@@ -136,7 +136,7 @@
     when: not item is skipped
     with_items: "{{ sub.results }}"
   - name: 'display sub results'
-    debug: msg="{{ sub_result.results | map(attribute='stdout') | list }}"
+    debug: msg="{{ sub_result.results | map(attribute='stdout', default='(no output)') | list }}"
 
   - name: 'echo_end'
     debug:
