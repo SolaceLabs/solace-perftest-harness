@@ -125,7 +125,7 @@
   - name: 'display pub results'
     debug:
       msg: "{{ item.stdout | default('(no output)') }}"
-    loop: "{{ pub_result.results }}"
+    loop: "{{ pub.results }}"
     when: not item is skipped
 
   - name: 'check consumers'
