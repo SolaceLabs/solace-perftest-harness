@@ -96,7 +96,11 @@ find_max_rate() {
   # This tightens the search range before binary search, avoiding wasted iterations
   # when the true max is much lower than the upper bound (e.g. 20KB persistent).
   local probe_rate=$(( upper / 1024 ))
-  [ ${probe_rate} -lt 100 ] && probe_rate=100
+  # Ensure probe start represents at least 100 publish msgs/sec (avoids sdkperf
+  # ramp-up noise causing false failures at very low rates for high-fanout scenarios).
+  local probe_min=$(( 100 * fanout ))
+  [ ${probe_min} -lt 100 ] && probe_min=100
+  [ ${probe_rate} -lt ${probe_min} ] && probe_rate=${probe_min}
   local probe_iter=0
 
   echo ""
