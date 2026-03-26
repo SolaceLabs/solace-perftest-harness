@@ -1,12 +1,12 @@
-# Solace PubSub+ Performance Test Harness
+# Solace Performance Test Harness
 
-A test harness for characterising and validating the message throughput of Solace PubSub+ Event Brokers — both software brokers and hardware appliances. Uses Ansible to deploy [sdkperf_c](https://docs.solace.com/API/SDKPerf/SDKPerf.htm) to remote Linux test hosts and drive publisher/consumer load against the broker under test.
+A test harness for characterising and validating the message throughput of Solace brokers — both software brokers and hardware appliances. Uses Ansible to deploy [sdkperf_c](https://docs.solace.com/API/SDKPerf/SDKPerf.htm) to remote Linux test hosts and drive publisher/consumer load against the broker under test.
 
 ---
 
 ## What you will need
 
-- A Solace PubSub+ software broker or hardware appliance to test
+- A Solace software broker or hardware appliance to test
 - Publisher and consumer test hosts (Linux) — ideally 4 of each with 10 GbE connectivity
 - A controller host (Linux) with Ansible installed and SSH access to the test hosts
 - SSH keys from the controller installed on all test hosts
@@ -52,7 +52,7 @@ The `specific-test-sets/` folder contains pre-configured testsets for common bro
 Each tier has variants for message type and HA configuration:
 - `-direct` — direct messaging
 - `-gm-noha` — guaranteed (persistent) messaging, standalone broker
-- `-gm-ha` — guaranteed messaging, HA pair (primary + backup + witness)
+- `-gm-ha` — guaranteed messaging, HA pair (primary + backup + monitoring node (in case of software))
 - `-quick` — abbreviated run covering key scenarios only
 
 **Example:** test an Enterprise 10k broker in HA configuration:
@@ -65,7 +65,7 @@ specific-test-sets/ent-10k-gm-ha.sh <broker-ip>
 | Script | Description |
 |---|---|
 | `3560-ADB4-direct.sh` | Solace 3560 appliance — direct messaging |
-| `3560-ADB4-gm-ha.sh` | Solace 3560 appliance — guaranteed messaging (HA) |
+| `3560-ADB4-gm-ha.sh` | Solace 3560 appliance — guaranteed messaging (HA pair) |
 
 Target rates in the 3560 testsets are based on published Solace specifications (11M/24M msg/s direct at 100B f=1/f=10; 640k/2.8M msg/s persistent at 1KB f=1/f=10) and measurements from londonlab. f=50 values are estimates — update these after running a discovery testset.
 
