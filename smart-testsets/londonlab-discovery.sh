@@ -14,7 +14,7 @@
 # To run direct only: comment out the persistent arrays below.
 # To shorten runs: reduce search_iterations or runlength in run-binsearch-testset.sh.
 
-vmrs="${1:-emea8.londonlab}"
+broker="${1:-emea8.londonlab}"
 testsetprefix="londonlab-discovery"
 msg_type="mixed"
 
@@ -55,6 +55,6 @@ testarray6=""\
 "20480:50:1:persistent "\
 ";"
 
-${BASH_SOURCE%/*}/../run-binsearch-testset.sh ${vmrs} ${testsetprefix} ${msg_type} \
+${BASH_SOURCE%/*}/../run-binsearch-testset.sh ${broker} ${testsetprefix} ${msg_type} \
   ";"${testarray1[@]} ${testarray2[@]} ${testarray3[@]} \
   ${testarray4[@]} ${testarray5[@]} ${testarray6[@]}

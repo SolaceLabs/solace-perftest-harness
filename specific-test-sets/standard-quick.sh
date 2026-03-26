@@ -1,6 +1,6 @@
 #!/bin/bash
 #Test set (direct messaging) to run against a small standard software broker (2 cores)
-vmrs="${1}" #broker IP/DNS
+broker="${1}" #broker IP/DNS
 testsetprefix="standard"
 msg_type="mixed"
 msg_type1="direct"
@@ -28,4 +28,4 @@ testarray2=""\
 "1024:50:125000:1:${msg_type2} "\
 ";" #need to  end with to separate the various test arrays;
 
-${BASH_SOURCE%/*}/../run-testset.sh ${vmrs} ${testsetprefix} ${msg_type} ";"${testarray1[@]} ${testarray2[@]}
+${BASH_SOURCE%/*}/../run-testset.sh ${broker} ${testsetprefix} ${msg_type} ";"${testarray1[@]} ${testarray2[@]}

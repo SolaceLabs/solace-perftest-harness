@@ -1,6 +1,6 @@
 #!/bin/bash
 #Test set (guaranteed messaging) to run against a small enterprise software broker (2 cores)
-vmrs="${1}" #broker IP/DNS
+broker="${1}" #broker IP/DNS
 testsetprefix="2core-gke-ha"
 msg_type="persistent"
 
@@ -54,4 +54,4 @@ testarray7=""\
 "102400:50:2000:2:${msg_type} "\
 ";" #need to  end with to separate the various test arrays;
 
-${BASH_SOURCE%/*}/../run-testset.sh ${vmrs} ${testsetprefix} ${msg_type} ";"${testarray1[@]} ${testarray2[@]} ${testarray3[@]} ${testarray4[@]} ${testarray5[@]} ${testarray6[@]} ${testarray7[@]}
+${BASH_SOURCE%/*}/../run-testset.sh ${broker} ${testsetprefix} ${msg_type} ";"${testarray1[@]} ${testarray2[@]} ${testarray3[@]} ${testarray4[@]} ${testarray5[@]} ${testarray6[@]} ${testarray7[@]}

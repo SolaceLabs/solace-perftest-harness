@@ -1,6 +1,6 @@
 #!/bin/bash
 #Quick test set (mixed messaging) to run against a large software broker (8 cores)
-vmrs="$1" #broker IP/DNS
+broker="$1" #broker IP/DNS
 testsetprefix="8core-quick"
 msg_type="mixed"
 msg_type1="direct"
@@ -28,4 +28,4 @@ testarray2=""\
 "1024:50:540000:2:${msg_type2} "\
 ";" #need to  end with to separate the various test arrays;
 
-${BASH_SOURCE%/*}/../run-testset.sh ${vmrs} ${testsetprefix} ${msg_type} ";"${testarray1[@]} ${testarray2[@]}
+${BASH_SOURCE%/*}/../run-testset.sh ${broker} ${testsetprefix} ${msg_type} ";"${testarray1[@]} ${testarray2[@]}

@@ -1,8 +1,8 @@
 #!/bin/bash
 # Binary search approach to find the max stable throughput for Solace broker performance testing.
 #
-# For each test scenario (msg_size, fanout, hosts, msg_type), performs a binary search
-# over message rates to find the highest rate the broker can sustain end-to-end with
+# For each test scenario (msg_size, fanout, hosts, msg_type), performs an exponential probe
+# followed by a binary search to find the highest rate the broker can sustain end-to-end with
 # consumers active. No prior knowledge of expected rates is required, and no empirical
 # multipliers are used.
 #
@@ -21,16 +21,18 @@
 prompt_between_tests="false"
 
 echo "Running run-binsearch-testset.sh with args: $@"
-vmrs="$1"           # IP/hostname of the broker under test
+broker="$1"           # IP/hostname of the broker under test
 testsetprefix="$2"  # prefix for log and result files
 msg_type="$3"       # message type label used in result filename (informational)
 
 runlength=60               # seconds per test run
-search_iterations=10       # binary search iterations; precision = upper_bound / 2^iterations
+search_iterations=10       # binary search iterations after probe; precision = probe_range / 2^iterations
 allowed_error_margin=5     # consumer rate must be >= (100 - margin)% of target to count as a pass
+precision_threshold=500    # stop binary search early when range narrows to ±this many msgs/sec
+inter_iteration_cooldown=5 # seconds to wait between iterations (allows broker/queues to settle)
 
-# Per-type upper bounds (msgs/sec). Binary search starts at [0, upper_bound].
-# Adjust these for your environment — too high wastes iterations, too low caps discovery.
+# Per-type upper bounds (msgs/sec). Exponential probe starts at upper_bound/1024.
+# Adjust these for your environment — too high means more probe steps, too low caps discovery.
 search_upper_bound_direct=5000000
 search_upper_bound_nonpersistent=2000000
 search_upper_bound_persistent=1000000
@@ -52,7 +54,7 @@ checkdependencies() {
 # Usage: run_single_test <msg_size> <fanout> <hosts> <mt> <target_rate> <logfile>
 run_single_test() {
   local msg_size=$1 fanout=$2 hosts=$3 mt=$4 target_rate=$5 logfile=$6
-  ./run-test.sh -e '{"vmrs":'${vmrs}',"parallel_hosts":'${hosts}',"target_msg_rate":'${target_rate}',"msg_size":'${msg_size}',"sdk_fanout":'${fanout}',"runlength":'${runlength}',"mt":"'${mt}'"}' | tee "${logfile}"
+  ./run-test.sh -e '{"broker":"'${broker}'","parallel_hosts":'${hosts}',"target_msg_rate":'${target_rate}',"msg_size":'${msg_size}',"sdk_fanout":'${fanout}',"runlength":'${runlength}',"mt":"'${mt}'"}' | tee "${logfile}"
 }
 
 # Extract the total consumer rate from a run log.
@@ -61,35 +63,95 @@ get_consumer_rate() {
   grep "all  consumers:" "$1" | awk 'BEGIN { FS=" " } { print $5 }'
 }
 
-# Binary search for the maximum stable consumer rate for a given scenario.
-# Sets globals: max_stable_rate, max_stable_logfile
+# Exponential probe + binary search for the maximum stable consumer rate for a given scenario.
+# Sets globals: max_stable_rate, max_stable_logfile, last_logfile
 # Usage: find_max_rate <msg_size> <fanout> <hosts> <mt>
 find_max_rate() {
   local msg_size=$1 fanout=$2 hosts=$3 mt=$4
 
   # Select upper bound based on message type
-  local high
+  local upper
   case "${mt}" in
-    persistent)
-      high=${search_upper_bound_persistent} ;;
-    nonpersistent)
-      high=${search_upper_bound_nonpersistent} ;;
-    *)
-      high=${search_upper_bound_direct} ;;
+    persistent)    upper=${search_upper_bound_persistent} ;;
+    nonpersistent) upper=${search_upper_bound_nonpersistent} ;;
+    *)             upper=${search_upper_bound_direct} ;;
   esac
 
   local low=0
+  local high=${upper}
   max_stable_rate=0
   max_stable_logfile=""
+  last_logfile=""
 
   echo ""
   echo "============================================================"
   echo "Binary search: msg_size=${msg_size} fanout=${fanout} hosts=${hosts} mt=${mt}"
-  echo "Search range: [${low}, ${high}] over ${search_iterations} iterations"
-  echo "Precision at end: ±$(( high / (1 << search_iterations) )) msgs/sec"
+  echo "Upper bound: ${upper} msgs/sec"
   echo "============================================================"
 
+  # Phase 1: exponential probe — double from upper/1024 until first failure.
+  # This tightens the search range before binary search, avoiding wasted iterations
+  # when the true max is much lower than the upper bound (e.g. 20KB persistent).
+  local probe_rate=$(( upper / 1024 ))
+  [ ${probe_rate} -lt 100 ] && probe_rate=100
+  local probe_iter=0
+
+  echo ""
+  echo "--- Phase 1: exponential probe (starting at ${probe_rate} msgs/sec) ---"
+
+  while [ ${probe_rate} -le ${upper} ]; do
+    probe_iter=$(( probe_iter + 1 ))
+    local logfile="${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}_probe${probe_iter}.log"
+    echo ""
+    echo "Probe ${probe_iter}: target=${probe_rate} msgs/sec  [current range: ${low} - ${high}]"
+
+    run_single_test ${msg_size} ${fanout} ${hosts} ${mt} ${probe_rate} "${logfile}"
+    last_logfile="${logfile}"
+
+    local receiver_rate
+    receiver_rate=$(get_consumer_rate "${logfile}")
+
+    if [ -z "${receiver_rate}" ] || ! [[ "${receiver_rate}" =~ ^[0-9]+$ ]]; then
+      echo "Warning: could not parse consumer rate — treating as failure."
+      high=${probe_rate}
+      [ ${inter_iteration_cooldown} -gt 0 ] && sleep ${inter_iteration_cooldown}
+      break
+    fi
+
+    local threshold=$(( probe_rate * (100 - allowed_error_margin) / 100 ))
+    echo "Achieved: ${receiver_rate}  Threshold: ${threshold}  (target ${probe_rate} - ${allowed_error_margin}%)"
+
+    if [[ ${receiver_rate} -ge ${threshold} ]]; then
+      echo "=> PASS — doubling probe rate"
+      max_stable_rate=${probe_rate}
+      max_stable_logfile="${logfile}"
+      low=${probe_rate}
+      probe_rate=$(( probe_rate * 2 ))
+      [ ${inter_iteration_cooldown} -gt 0 ] && sleep ${inter_iteration_cooldown}
+    else
+      echo "=> FAIL — binary search will run in [${low}, ${probe_rate}]"
+      high=${probe_rate}
+      [ ${inter_iteration_cooldown} -gt 0 ] && sleep ${inter_iteration_cooldown}
+      break
+    fi
+  done
+
+  # If probe passed all the way to the upper bound, clamp high
+  if [ ${probe_rate} -gt ${upper} ]; then
+    high=${upper}
+  fi
+
+  echo ""
+  echo "--- Phase 2: binary search in [${low}, ${high}] over up to ${search_iterations} iterations ---"
+  echo "Precision at end: ±$(( (high - low) / (1 << search_iterations) )) msgs/sec"
+
   for iter in $(seq 1 ${search_iterations}); do
+    # Early exit if the range has already converged to within the precision threshold
+    if [ $(( high - low )) -le $(( precision_threshold * 2 )) ]; then
+      echo "Precision target ±${precision_threshold} msgs/sec reached (range $(( high - low )) msgs/sec), stopping early."
+      break
+    fi
+
     local mid=$(( (low + high) / 2 ))
     if [ ${mid} -le 0 ]; then
       echo "Midpoint reached zero, stopping search early."
@@ -101,6 +163,7 @@ find_max_rate() {
     echo "Iteration ${iter}/${search_iterations}: target=${mid} msgs/sec  [range: ${low} - ${high}]"
 
     run_single_test ${msg_size} ${fanout} ${hosts} ${mt} ${mid} "${logfile}"
+    last_logfile="${logfile}"
 
     local receiver_rate
     receiver_rate=$(get_consumer_rate "${logfile}")
@@ -108,10 +171,11 @@ find_max_rate() {
     if [ -z "${receiver_rate}" ] || ! [[ "${receiver_rate}" =~ ^[0-9]+$ ]]; then
       echo "Warning: could not parse consumer rate — treating as failure."
       high=${mid}
+      [ ${inter_iteration_cooldown} -gt 0 ] && sleep ${inter_iteration_cooldown}
       continue
     fi
 
-    local threshold=$(( mid - (mid / 100 * allowed_error_margin) ))
+    local threshold=$(( mid * (100 - allowed_error_margin) / 100 ))
     echo "Achieved: ${receiver_rate}  Threshold: ${threshold}  (target ${mid} - ${allowed_error_margin}%)"
 
     if [[ ${receiver_rate} -ge ${threshold} ]]; then
@@ -123,13 +187,15 @@ find_max_rate() {
       echo "=> FAIL — searching lower half [${low}, ${mid}]"
       high=${mid}
     fi
+
+    [ ${inter_iteration_cooldown} -gt 0 ] && sleep ${inter_iteration_cooldown}
   done
 
   echo ""
   if [ ${max_stable_rate} -gt 0 ]; then
     echo "Max stable rate: ${max_stable_rate} msgs/sec  (precision: ±$(( (high - low) / 2 )) msgs/sec)"
   else
-    echo "No passing rate found within [0, ${high}]. Check broker connectivity or raise search_upper_bound."
+    echo "No passing rate found within [0, ${upper}]. Check broker connectivity or raise search_upper_bound."
   fi
 }
 
@@ -147,21 +213,21 @@ testarray6=$(echo ${@} | cut -d ';' -f 7)
 testarray7=$(echo ${@} | cut -d ';' -f 8)
 
 # Resolve hostname to IP if a plain name was given
-if [ -z "${vmrs}" ] || [[ ${vmrs} != *"."* ]]; then
-  ip=$(dig ${vmrs} +short)
+if [ -z "${broker}" ] || [[ ${broker} != *"."* ]]; then
+  ip=$(dig ${broker} +short)
   if [[ ${ip} != *"."* ]]; then
     echo "No valid router IP given to run against, exiting..."
     exit 1
   else
-    vmrs=${ip}
-    echo "Router IP set to: $vmrs"
+    broker=${ip}
+    echo "Router IP set to: $broker"
   fi
 else
-  echo "Router IP set to: $vmrs"
+  echo "Router IP set to: $broker"
 fi
 
 echo ""
-echo "Running binary search testset for ${testsetprefix} ${msg_type} on ${vmrs}"
+echo "Running binary search testset for ${testsetprefix} ${msg_type} on ${broker}"
 
 xIFS=$IFS
 IFS=$';'
@@ -192,11 +258,9 @@ for testarray in ${testarray7} ${testarray6} ${testarray5} ${testarray4} ${testa
             echo "Max stable rate found: ${max_stable_rate} msgs/sec" | tee -a "${local_final_logfile}"
             echo "Test: OK" | tee -a "${local_final_logfile}"
           else
-            # No iteration passed — write a minimal failure log
-            # Use the last iteration log if available (contains Ansible echo_end block for results parser)
-            last_iter_log="${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}_iter${search_iterations}.log"
-            if [ -f "${last_iter_log}" ]; then
-              cp "${last_iter_log}" "${local_final_logfile}"
+            # No iteration passed — use the last log written (contains Ansible output for results parser)
+            if [ -n "${last_logfile}" ] && [ -f "${last_logfile}" ]; then
+              cp "${last_logfile}" "${local_final_logfile}"
             else
               touch "${local_final_logfile}"
             fi
@@ -206,6 +270,7 @@ for testarray in ${testarray7} ${testarray6} ${testarray5} ${testarray4} ${testa
           fi
 
           rm -f "${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}_iter"*.log
+          rm -f "${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}_probe"*.log
 
           sleep 2
           echo

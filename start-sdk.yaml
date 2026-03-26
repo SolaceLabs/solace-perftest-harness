@@ -86,7 +86,7 @@
       - { src: sdkpublisher.sh, dest: sdkpublisher.sh }
       - { src: sdkconsumers.sh, dest: sdkconsumers.sh }
   - name: 'run consumer'
-    shell:  "{{ script_path }}/sdkconsumers.sh {{ runlength + 10 }} {{ sdk_consumers }} {{ item.topic }} {{ sdk_fanout }} -cip={{ vmrs }} {{ sdk_credentials }} -cc={{ sdk_consumer_threads }} -mt={{ mt }} | tee sdk.log"
+    shell:  "{{ script_path }}/sdkconsumers.sh {{ runlength + 10 }} {{ sdk_consumers }} {{ item.topic }} {{ sdk_fanout }} -cip={{ broker }} {{ sdk_credentials }} -cc={{ sdk_consumer_threads }} -mt={{ mt }} | tee sdk.log"
     when: "item.groups in group_names and
     ( item.index|int <= parallel_hosts )"
     async: "{{ runlength + 20 }}"
@@ -98,7 +98,7 @@
     with_items:
       - { index: 1, topic: 'topic1', groups: 'subhost' }
   - name: 'run publishers'
-    shell:  "{{ script_path }}/sdkpublisher.sh {{ runlength }} {{ msg_rate }} {{ act_publishers }} 999999999 {{ item.topic }} -cip={{ vmrs }} {{ sdk_credentials}} -msa={{ msg_size }} -mt={{ mt }} | tee sdk.log"
+    shell:  "{{ script_path }}/sdkpublisher.sh {{ runlength }} {{ msg_rate }} {{ act_publishers }} 999999999 {{ item.topic }} -cip={{ broker }} {{ sdk_credentials}} -msa={{ msg_size }} -mt={{ mt }} | tee sdk.log"
     when: "item.groups in group_names and
     ( item.index|int <= parallel_hosts )"
     async: "{{ runlength + 30 }}"

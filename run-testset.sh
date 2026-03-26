@@ -20,7 +20,7 @@ prompt_between_tests="false" #set to false, if you want to run tests fully autom
 #prompt_between_tests="true" #set to false, if you want to run tests fully automatic
 
 echo "Running run-testset.sh with args: $@"
-vmrs="$1" #ip to connect to vmrs for testing
+broker="$1" #ip to connect to broker for testing
 testsetprefix="$2" #prefix for log files and results
 msg_type="$3" #message type for test:direct, nonpersistent or persistent
 
@@ -58,22 +58,22 @@ echo "testarray6=${testarray6}"
 testarray7=$(echo ${@} | cut -d ';' -f 8)
 echo "testarray7=${testarray7}"
 
-if [ -z "${vmrs}" ] || [[ ${vmrs} != *"."* ]]; then
+if [ -z "${broker}" ] || [[ ${broker} != *"."* ]]; then
   #not an ip, try to resolve
-  ip=$(dig ${vmrs} +short)
+  ip=$(dig ${broker} +short)
   if [[ ${ip} != *"."* ]]; then
   	echo "no valid router ip given to run against, exiting..."
   	exit 1
   else
-  	vmrs=${ip}
-  	echo "router ip set to: $vmrs"
+  	broker=${ip}
+  	echo "router ip set to: $broker"
   fi
 else
-  echo "router ip set to: $vmrs"
+  echo "router ip set to: $broker"
 fi
 
 
-echo "Running testset for ${testsetprefix} ${msg_type} on ${vmrs}"...
+echo "Running testset for ${testsetprefix} ${msg_type} on ${broker}"...
 xIFS=$IFS #remember internal field separator
 IFS=$';'  #set ifs to ; for this for loop
 for testarray in ${testarray7} ${testarray6} ${testarray5} ${testarray4} ${testarray3} ${testarray2} ${testarray1}; do
@@ -95,7 +95,7 @@ for testarray in ${testarray7} ${testarray6} ${testarray5} ${testarray4} ${testa
             echo ""
           fi
           #Call wrapper script for running a single test
-          ./run-test.sh -e '{"vmrs":'${vmrs}',"parallel_hosts":'${hosts}',"target_msg_rate":'${msgrate}',"msg_size":'${msg_size}',"sdk_fanout":'${fanout}',"runlength":'${runlength}',"mt":"'${mt}'"}' | tee ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log
+          ./run-test.sh -e '{"broker":'${broker}',"parallel_hosts":'${hosts}',"target_msg_rate":'${msgrate}',"msg_size":'${msg_size}',"sdk_fanout":'${fanout}',"runlength":'${runlength}',"mt":"'${mt}'"}' | tee ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log
           #Parse and log results and check for success/failure
           receiver_rate=`cat ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log | grep "all  consumers:" | awk 'BEGIN { FS= " " }; { print $5 }'`
           echo "allowed error margin = ${allowed_error_margin} %" | tee -a ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log
