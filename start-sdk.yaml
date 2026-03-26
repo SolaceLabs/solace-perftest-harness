@@ -1,10 +1,10 @@
 ---
 - hosts: subhost, pubhost
-  remote_user: "{{ user }}"
+  remote_user: "{{ sshuser }}"
   vars:
     #main setup variables - can be overriden by calling script
-    user: 'choltfurth' #default user for perf host log in
-    script_path: '/home/{{ user }}/pubSubTools'
+    sshuser: 'perfharness' #default user for perf host log in
+    script_path: '/home/{{ sshuser }}/pubSubTools'
 
     #variables controlling the test type - most of these are being overwritten by calling scripts
     runlength: 120 #default run length for each test
@@ -62,15 +62,15 @@
     tags: debug
   - name: 'create pubSubTools'
     file:
-      path: "/home/{{ user }}/pubSubTools"
+      path: "/home/{{ sshuser }}/pubSubTools"
       state: directory
       mode: 0755
   - name: 'copy sdkperf'
     copy:
       src: ./pubSubTools/{{ item.src }}
       dest: "{{ script_path }}/{{ item.dest }}"
-      owner: "{{ user }}"
-      group: "{{ user }}"
+      owner: "{{ sshuser }}"
+      group: "{{ sshuser }}"
       mode: "u+x"
     with_items:
       - { src: LICENSES, dest: LICENSES }
@@ -79,8 +79,8 @@
     copy:
       src: ./scripts/{{ item.src }}
       dest: "{{ script_path }}/{{ item.dest }}"
-      owner: "{{ user }}"
-      group: "{{ user }}"
+      owner: "{{ sshuser }}"
+      group: "{{ sshuser }}"
       mode: "u+x"
     with_items:
       - { src: sdkpublisher.sh, dest: sdkpublisher.sh }

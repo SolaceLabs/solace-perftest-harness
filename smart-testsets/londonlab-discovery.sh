@@ -18,6 +18,9 @@ broker="${1:-emea8.londonlab}"
 testsetprefix="londonlab-discovery"
 msg_type="mixed"
 
+# SSH user on the londonlab test hosts
+export sshuser=choltfurth
+
 # Upper bounds for Solace 3560 hardware appliance (msgs/sec).
 # Direct:      11M at f=1, 24M at f=10 (100B) — set ceiling above f=10 peak
 # Nonpersist.: similar to direct, no separate official figure

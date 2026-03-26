@@ -31,6 +31,7 @@ allowed_error_margin=5     # consumer rate must be >= (100 - margin)% of target 
 precision_pct=1            # stop binary search early when range narrows to ±this % of midpoint
 precision_threshold=500    # absolute minimum precision floor (msgs/sec) — applies at very low rates
 inter_iteration_cooldown=5 # seconds to wait between iterations (allows broker/queues to settle)
+: ${sshuser:=perfharness}  # SSH user on test hosts; override via export in calling testset script
 
 # Per-type upper bounds (msgs/sec). Exponential probe starts at upper_bound/1024.
 # Adjust these for your environment — too high means more probe steps, too low caps discovery.
@@ -56,7 +57,7 @@ checkdependencies() {
 # Usage: run_single_test <msg_size> <fanout> <hosts> <mt> <target_rate> <logfile>
 run_single_test() {
   local msg_size=$1 fanout=$2 hosts=$3 mt=$4 target_rate=$5 logfile=$6
-  ./run-test.sh -e '{"broker":"'${broker}'","parallel_hosts":'${hosts}',"target_msg_rate":'${target_rate}',"msg_size":'${msg_size}',"sdk_fanout":'${fanout}',"runlength":'${runlength}',"mt":"'${mt}'"}' | tee "${logfile}"
+  ./run-test.sh -e '{"broker":"'${broker}'","parallel_hosts":'${hosts}',"target_msg_rate":'${target_rate}',"msg_size":'${msg_size}',"sdk_fanout":'${fanout}',"runlength":'${runlength}',"mt":"'${mt}'","sshuser":"'${sshuser}'"}' | tee "${logfile}"
 }
 
 # Extract the total consumer rate from a run log.

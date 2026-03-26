@@ -26,6 +26,7 @@ msg_type="$3" #message type for test:direct, nonpersistent or persistent
 
 runlength=60 #how long to run reach test for in seconds
 allowed_error_margin=5 #allowed error margin in pct"
+: ${sshuser:=perfharness}  # SSH user on test hosts; override via export in calling testset script
 
 log_dir=${BASH_SOURCE%/*}/temp #directory for temp files
 result_dir=${BASH_SOURCE%/*}/results #directory to store results in
@@ -95,7 +96,7 @@ for testarray in ${testarray7} ${testarray6} ${testarray5} ${testarray4} ${testa
             echo ""
           fi
           #Call wrapper script for running a single test
-          ./run-test.sh -e '{"broker":'${broker}',"parallel_hosts":'${hosts}',"target_msg_rate":'${msgrate}',"msg_size":'${msg_size}',"sdk_fanout":'${fanout}',"runlength":'${runlength}',"mt":"'${mt}'"}' | tee ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log
+          ./run-test.sh -e '{"broker":'${broker}',"parallel_hosts":'${hosts}',"target_msg_rate":'${msgrate}',"msg_size":'${msg_size}',"sdk_fanout":'${fanout}',"runlength":'${runlength}',"mt":"'${mt}'","sshuser":"'${sshuser}'"}' | tee ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log
           #Parse and log results and check for success/failure
           receiver_rate=`cat ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log | grep "all  consumers:" | awk 'BEGIN { FS= " " }; { print $5 }'`
           echo "allowed error margin = ${allowed_error_margin} %" | tee -a ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log
