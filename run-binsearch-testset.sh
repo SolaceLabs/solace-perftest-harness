@@ -33,9 +33,10 @@ inter_iteration_cooldown=5 # seconds to wait between iterations (allows broker/q
 
 # Per-type upper bounds (msgs/sec). Exponential probe starts at upper_bound/1024.
 # Adjust these for your environment — too high means more probe steps, too low caps discovery.
-search_upper_bound_direct=5000000
-search_upper_bound_nonpersistent=2000000
-search_upper_bound_persistent=1000000
+# Can be overridden by the calling testset script via exported environment variables.
+: ${search_upper_bound_direct:=5000000}
+: ${search_upper_bound_nonpersistent:=2000000}
+: ${search_upper_bound_persistent:=1000000}
 
 log_dir=${BASH_SOURCE%/*}/temp
 result_dir=${BASH_SOURCE%/*}/results

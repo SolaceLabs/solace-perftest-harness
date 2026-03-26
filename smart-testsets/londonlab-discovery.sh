@@ -18,6 +18,14 @@ broker="${1:-emea8.londonlab}"
 testsetprefix="londonlab-discovery"
 msg_type="mixed"
 
+# Upper bounds for Solace 3560 hardware appliance (msgs/sec).
+# Direct:      11M at f=1, 24M at f=10 (100B) — set ceiling above f=10 peak
+# Nonpersist.: similar to direct, no separate official figure
+# Persistent:  640k at f=1, 2.8M at f=10 (1KB) — set ceiling above f=10 peak
+export search_upper_bound_direct=25000000
+export search_upper_bound_nonpersistent=20000000
+export search_upper_bound_persistent=5000000
+
 # Tests are in the format: msg_size:fanout:number_of_publisher_hosts:msg_type
 # Only 1 publisher host (emeaperf3) and 1 subscriber host (emeaperf4) available.
 
