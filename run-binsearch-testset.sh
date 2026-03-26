@@ -28,7 +28,8 @@ msg_type="$3"       # message type label used in result filename (informational)
 runlength=60               # seconds per test run
 search_iterations=10       # binary search iterations after probe; precision = probe_range / 2^iterations
 allowed_error_margin=5     # consumer rate must be >= (100 - margin)% of target to count as a pass
-precision_threshold=500    # stop binary search early when range narrows to ±this many msgs/sec
+precision_pct=1            # stop binary search early when range narrows to ±this % of midpoint
+precision_threshold=500    # absolute minimum precision floor (msgs/sec) — applies at very low rates
 inter_iteration_cooldown=5 # seconds to wait between iterations (allows broker/queues to settle)
 
 # Per-type upper bounds (msgs/sec). Exponential probe starts at upper_bound/1024.
@@ -144,16 +145,18 @@ find_max_rate() {
 
   echo ""
   echo "--- Phase 2: binary search in [${low}, ${high}] over up to ${search_iterations} iterations ---"
-  echo "Precision at end: ±$(( (high - low) / (1 << search_iterations) )) msgs/sec"
+  echo "Will stop early at ±${precision_pct}% of midpoint (floor: ±${precision_threshold} msgs/sec)"
 
   for iter in $(seq 1 ${search_iterations}); do
-    # Early exit if the range has already converged to within the precision threshold
-    if [ $(( high - low )) -le $(( precision_threshold * 2 )) ]; then
-      echo "Precision target ±${precision_threshold} msgs/sec reached (range $(( high - low )) msgs/sec), stopping early."
+    local mid=$(( (low + high) / 2 ))
+
+    # Early exit when range narrows to ±precision_pct% of midpoint (or absolute floor, whichever is larger)
+    local pct_stop=$(( mid * precision_pct / 100 ))
+    [ ${pct_stop} -lt ${precision_threshold} ] && pct_stop=${precision_threshold}
+    if [ $(( high - low )) -le $(( pct_stop * 2 )) ]; then
+      echo "Precision target ±${precision_pct}% (±${pct_stop} msgs/sec) reached (range $(( high - low )) msgs/sec), stopping early."
       break
     fi
-
-    local mid=$(( (low + high) / 2 ))
     if [ ${mid} -le 0 ]; then
       echo "Midpoint reached zero, stopping search early."
       break
