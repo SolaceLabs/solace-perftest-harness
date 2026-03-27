@@ -13,7 +13,7 @@
 #Adjust the following according to your needs and infrastructure
 #number of cores to distribute your processes across - used by taskset to pin publishers to cores. 
 #Should match the number of cores on the perf host running the publishers.
-no_cores=4
+no_cores=${NO_CORES:-4}
 core_offset=1
 
 #set cleanup to false, if you need to debug something and look at the output

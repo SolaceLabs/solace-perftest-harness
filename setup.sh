@@ -120,7 +120,9 @@ press Enter with no input to stop adding hosts for that group.
 
 EOF
 
-prompt sshuser "SSH user on test hosts" "perfharness"
+prompt sshuser    "SSH user on test hosts"            "perfharness"
+prompt pub_cores  "CPU cores on publisher hosts"     "4"
+prompt sub_cores  "CPU cores on subscriber hosts"    "${pub_cores}"
 echo ""
 
 pub_hosts=()
@@ -191,6 +193,8 @@ broker_vpn: ${broker_vpn}
 broker_username: ${broker_username}
 broker_password: ${broker_password}
 sshuser: ${sshuser}
+pub_cores: ${pub_cores}
+sub_cores: ${sub_cores}
 EOF
 
 echo "  Done."
@@ -223,9 +227,11 @@ for h in "${pub_hosts[@]}"; do echo "  ${h}"; done
 echo "Subscriber hosts:"
 for h in "${sub_hosts[@]}"; do echo "  ${h}"; done
 echo ""
-echo "Broker VPN:  ${broker_vpn}"
-echo "Username:    ${broker_username}"
-echo "SSH user:    ${sshuser}"
+echo "Broker VPN:       ${broker_vpn}"
+echo "Username:         ${broker_username}"
+echo "SSH user:         ${sshuser}"
+echo "Publisher cores:  ${pub_cores}"
+echo "Subscriber cores: ${sub_cores}"
 echo ""
 
 # --- Next steps ---
