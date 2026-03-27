@@ -5,7 +5,7 @@
     - ../config/credentials.yaml
   vars:
     #main setup variables - can be overriden by calling script
-    sshuser: 'perfharness' #default user for perf host log in
+    # sshuser is loaded from config/credentials.yaml (written by setup.sh); default: perfharness
     script_path: '/home/{{ sshuser }}/pubSubTools'
 
     #variables controlling the test type - most of these are being overwritten by calling scripts

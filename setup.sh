@@ -120,6 +120,9 @@ press Enter with no input to stop adding hosts for that group.
 
 EOF
 
+prompt sshuser "SSH user on test hosts" "perfharness"
+echo ""
+
 pub_hosts=()
 sub_hosts=()
 
@@ -187,6 +190,7 @@ cat > "${creds_file}" <<EOF
 broker_vpn: ${broker_vpn}
 broker_username: ${broker_username}
 broker_password: ${broker_password}
+sshuser: ${sshuser}
 EOF
 
 echo "  Done."
@@ -221,6 +225,7 @@ for h in "${sub_hosts[@]}"; do echo "  ${h}"; done
 echo ""
 echo "Broker VPN:  ${broker_vpn}"
 echo "Username:    ${broker_username}"
+echo "SSH user:    ${sshuser}"
 echo ""
 
 # --- Next steps ---

@@ -1,6 +1,6 @@
-########################################################
-# Host file for running Solace perf tests against Solace brokers #
-########################################################
+#########################################################
+# Ansible inventory for Solace performance test harness #
+#########################################################
 # Enter IP addresses of your perf hosts here...
 [pubhost]
 emeaperf3.londonlab
