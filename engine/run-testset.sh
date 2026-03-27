@@ -1,5 +1,5 @@
 #!/bin/bash
-# Wrapper script to run a whole set of perf tests against Solace VMRs.
+# Wrapper script to run a whole set of perf tests against Solace brokers.
 # Tests are being passed in as arrays. 
 # An array can have several tests separated by space.
 # Each test need to be in the format:

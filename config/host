@@ -1,5 +1,5 @@
 ########################################################
-# Host file for running Solace perf tests against VMRs #
+# Host file for running Solace perf tests against Solace brokers #
 ########################################################
 # Enter IP addresses of your perf hosts here...
 [pubhost]

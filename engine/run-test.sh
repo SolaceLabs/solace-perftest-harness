@@ -1,5 +1,5 @@
 #!/bin/bash
-# Wrapper script to run ansible playbook start-sdk.yaml for perf testing Solace VMRs (single test)
+# Wrapper script to run ansible playbook start-sdk.yaml for perf testing Solace brokers (single test)
 # and parsing achieved publisher and consumer rates
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
