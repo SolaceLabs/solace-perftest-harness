@@ -30,7 +30,7 @@ export ANSIBLE_HOST_KEY_CHECKING=False
 checkdependencies
 cleanup
 echo "Running ansible-playbook start-sdk.yaml with args: " $@
-ansible-playbook -i "${script_dir}/../host" "${script_dir}/start-sdk.yaml" $@ | tee "${script_dir}/run-tests.log"
+ansible-playbook -i "${script_dir}/../config/host" "${script_dir}/start-sdk.yaml" $@ | tee "${script_dir}/run-tests.log"
 echo
 printf "RESULT ****************************************\n"
 if grep -q 'Exception\|Error' "${script_dir}/run-tests.log"; then

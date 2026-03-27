@@ -30,7 +30,7 @@ benchmarking-tests/         # Fixed-target testsets for known broker tiers
 discovery-tests/            # Discovery testsets (binary search format)
 scripts/                    # sdkpublisher.sh and sdkconsumers.sh — run on test hosts
 pubSubTools/                # sdkperf_c binary and licences (not included in repo)
-host                        # Ansible inventory (publisher and consumer hosts)
+config/host                 # Ansible inventory (publisher and consumer hosts)
 results/                    # Test result output files
 temp/                       # Temporary per-iteration logs (cleaned up after each run)
 ```
