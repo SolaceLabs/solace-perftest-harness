@@ -19,7 +19,7 @@ testarray1=""\
 ";" #need to  end with to separate the various test arrays;
 testarray2=""\
 "1024:1:13000:1:${msg_type} "\
-"1021:2:26000:1:${msg_type} "\
+"1024:2:26000:1:${msg_type} "\
 "1024:5:58000:1:${msg_type} "\
 "1024:10:88000:1:${msg_type} "\
 "1024:50:122000:1:${msg_type} "\

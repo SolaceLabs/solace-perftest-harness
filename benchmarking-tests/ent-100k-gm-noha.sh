@@ -34,7 +34,7 @@ testarray3=""\
 testarray4=""\
 "4096:1:44000:4:${msg_type} "\
 "4096:2:89000:4:${msg_type} "\
-"4096:5:1770000:4:${msg_type} "\
+"4096:5:177000:4:${msg_type} "\
 "4096:10:180000:4:${msg_type} "\
 "4096:50:190000:2:${msg_type} "\
 ";" #need to  end with to separate the various test arrays;

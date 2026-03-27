@@ -19,7 +19,7 @@ testarray1=""\
 ";" #need to  end with to separate the various test arrays;
 testarray2=""\
 "1024:1:10000:1:${msg_type} "\
-"1021:2:20000:1:${msg_type} "\
+"1024:2:20000:1:${msg_type} "\
 "1024:5:50000:1:${msg_type} "\
 "1024:10:88000:1:${msg_type} "\
 "1024:50:122000:1:${msg_type} "\
@@ -34,7 +34,7 @@ testarray3=""\
 testarray4=""\
 "4096:1:9000:1:${msg_type} "\
 "4096:2:19000:1:${msg_type} "\
-"4096:5:370000:1:${msg_type} "\
+"4096:5:37000:1:${msg_type} "\
 "4096:10:49000:1:${msg_type} "\
 "4096:50:68000:1:${msg_type} "\
 ";" #need to  end with to separate the various test arrays;

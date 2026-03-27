@@ -12,7 +12,7 @@ msg_type2="persistent"
 # msg_size:fanout_number:overall_msg_rate:number_of_publisher_hosts:msg_type
 # Several (up to 7) arrays/testsets can be passed in, if separated by ;
 
-testarray2=""\
+testarray1=""\
 "1024:1:550000:4:${msg_type1} "\
 "1024:2:790000:4:${msg_type1} "\
 "1024:5:550000:4:${msg_type1} "\
