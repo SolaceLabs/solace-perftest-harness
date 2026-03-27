@@ -66,6 +66,6 @@ testarray6=""\
 "20480:50:1:persistent "\
 ";"
 
-${BASH_SOURCE%/*}/../run-binsearch-testset.sh ${broker} ${testsetprefix} ${msg_type} \
+${BASH_SOURCE%/*}/../engine/run-binsearch-testset.sh ${broker} ${testsetprefix} ${msg_type} \
   ";"${testarray1[@]} ${testarray2[@]} ${testarray3[@]} \
   ${testarray4[@]} ${testarray5[@]} ${testarray6[@]}

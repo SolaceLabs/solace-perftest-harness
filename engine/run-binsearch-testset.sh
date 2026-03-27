@@ -40,8 +40,8 @@ inter_iteration_cooldown=5 # seconds to wait between iterations (allows broker/q
 : ${search_upper_bound_nonpersistent:=2000000}
 : ${search_upper_bound_persistent:=1000000}
 
-log_dir=${BASH_SOURCE%/*}/temp
-result_dir=${BASH_SOURCE%/*}/results
+log_dir=${BASH_SOURCE%/*}/../temp
+result_dir=${BASH_SOURCE%/*}/../results
 
 checkdependencies() {
   echo "Checking dependencies..."
@@ -57,7 +57,7 @@ checkdependencies() {
 # Usage: run_single_test <msg_size> <fanout> <hosts> <mt> <target_rate> <logfile>
 run_single_test() {
   local msg_size=$1 fanout=$2 hosts=$3 mt=$4 target_rate=$5 logfile=$6
-  ./run-test.sh -e '{"broker":"'${broker}'","parallel_hosts":'${hosts}',"target_msg_rate":'${target_rate}',"msg_size":'${msg_size}',"sdk_fanout":'${fanout}',"runlength":'${runlength}',"mt":"'${mt}'","sshuser":"'${sshuser}'"}' | tee "${logfile}"
+  "${BASH_SOURCE%/*}/run-test.sh" -e '{"broker":"'${broker}'","parallel_hosts":'${hosts}',"target_msg_rate":'${target_rate}',"msg_size":'${msg_size}',"sdk_fanout":'${fanout}',"runlength":'${runlength}',"mt":"'${mt}'","sshuser":"'${sshuser}'"}' | tee "${logfile}"
 }
 
 # Extract the total consumer rate from a run log.

@@ -20,16 +20,17 @@ A test harness for characterising and validating the message throughput of Solac
 ## Repository structure
 
 ```
-run-testset.sh              # Runs a fixed-target testset (pass/fail against known rates)
-run-binsearch-testset.sh    # Discovers max throughput via exponential probe + binary search
-run-test.sh                 # Single-test wrapper around the Ansible playbook
-start-sdk.yaml              # Ansible playbook: deploys sdkperf_c, runs publishers and consumers
+engine/                          # Core test engine
+engine/run-testset.sh            # Runs a fixed-target testset (pass/fail against known rates)
+engine/run-binsearch-testset.sh  # Discovers max throughput via exponential probe + binary search
+engine/run-test.sh               # Single-test wrapper around the Ansible playbook
+engine/start-sdk.yaml            # Ansible playbook: deploys sdkperf_c, runs publishers and consumers
 
 benchmarking-tests/         # Fixed-target testsets for known broker tiers
-discovery-tests/             # Discovery testsets (binary search format)
+discovery-tests/            # Discovery testsets (binary search format)
 scripts/                    # sdkpublisher.sh and sdkconsumers.sh — run on test hosts
 pubSubTools/                # sdkperf_c binary and licences (not included in repo)
-hosts                       # Ansible inventory (publisher and consumer hosts)
+host                        # Ansible inventory (publisher and consumer hosts)
 results/                    # Test result output files
 temp/                       # Temporary per-iteration logs (cleaned up after each run)
 ```
@@ -169,7 +170,7 @@ Key parameters in `start-sdk.yaml`:
 
 ## Additional documentation
 
-- `Perf Test Harness-Overview.pptx` — architecture and methodology overview
+- `docs/Perf Test Harness-Overview.pptx` — architecture and methodology overview
 
 ## Authors
 
