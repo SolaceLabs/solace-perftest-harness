@@ -69,7 +69,7 @@
       mode: 0755
   - name: 'copy sdkperf'
     copy:
-      src: ./pubSubTools/{{ item.src }}
+      src: ../pubSubTools/{{ item.src }}
       dest: "{{ script_path }}/{{ item.dest }}"
       owner: "{{ sshuser }}"
       group: "{{ sshuser }}"
@@ -79,7 +79,7 @@
       - { src: sdkperf_c, dest: sdkperf_c }
   - name: 'copy scripts'
     copy:
-      src: ./scripts/{{ item.src }}
+      src: ../scripts/{{ item.src }}
       dest: "{{ script_path }}/{{ item.dest }}"
       owner: "{{ sshuser }}"
       group: "{{ sshuser }}"
