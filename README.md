@@ -7,15 +7,15 @@ A test harness for characterising and validating the message throughput of Solac
 ## What you will need
 
 - A Solace software broker or hardware appliance to test
-- Publisher and consumer test hosts (Linux) — ideally 4 of each with 10 GbE connectivity
+- Publisher and consumer test hosts (Linux) — min 2, ideally 4 or more with 10 GbE connectivity
 - A controller host (Linux) with Ansible installed and SSH access to the test hosts
 - SSH keys from the controller installed on all test hosts
-- A client username on the broker VPN with publish, subscribe, and guaranteed endpoint create permissions (credentials configured in `engine/start-sdk.yaml`)
+- A client username on the broker VPN with publish, subscribe, and guaranteed endpoint create permissions (credentials stored in `config/credentials.yaml`)
 - `sdkperf_c` binary placed in `pubSubTools/` on the controller (copied to test hosts by Ansible)
 
 > For minimal testing a single publisher host and a single consumer host is sufficient, but will limit the maximum achievable rates (especially for direct messaging at small message sizes).
 
-Run `./setup.sh` for a guided walkthrough of the above requirements and to configure your test hosts.
+Run `./setup.sh` for a guided walkthrough of the above requirements and to configure your test hosts and credentials.
 
 ---
 
@@ -33,11 +33,12 @@ engine/run-test.sh               # Single-test wrapper around the Ansible playbo
 engine/start-sdk.yaml            # Ansible playbook: deploys sdkperf_c, runs publishers and consumers
 
 benchmarking-tests/              # Fixed-target testsets for known broker tiers
-benchmarking-tests/archive/      # Older testsets no longer in active use
 discovery-tests/                 # Discovery testsets (binary search format)
 scripts/                         # sdkpublisher.sh and sdkconsumers.sh — run on test hosts
 pubSubTools/                     # sdkperf_c binary and licences (not included in repo)
 config/host                      # Ansible inventory (publisher and consumer hosts)
+config/credentials.yaml          # Broker credentials for sdkperf (gitignored — not committed)
+config/credentials.yaml.example  # Credentials template
 docs/                            # Architecture overview and additional documentation
 results/                         # Test result output files
 temp/                            # Temporary per-iteration logs (cleaned up after each run)
@@ -53,7 +54,7 @@ Run the setup wizard to configure your test hosts:
 ./setup.sh
 ```
 
-This will explain the infrastructure requirements, guide you through SSH key setup, and write your publisher and subscriber host names to `config/host`.
+This will explain the infrastructure requirements, guide you through SSH key setup, and write your publisher/subscriber host names to `config/host` and your broker credentials to `config/credentials.yaml`.
 
 ---
 
@@ -120,16 +121,11 @@ msg_size:fanout:publisher_hosts:msg_type
 ./start-generic-discovery-test.sh
 ```
 
-**londonlab discovery** — pre-configured for emea8.londonlab (18 scenarios, ~6 hours):
-```bash
-discovery-tests/londonlab-discovery.sh emea8.londonlab
-```
-
 ### Upper bounds
 
 The exponential probe starts at `upper_bound / 1024` and doubles upward. The defaults are conservative (software broker limits). Testsets for more capable brokers should override these via `export` before calling `engine/run-binsearch-testset.sh`:
 
-| Variable | Default | londonlab (3560 ADB4) |
+| Variable | Default | 3560 w/ ADB4 |
 |---|---|---|
 | `search_upper_bound_direct` | 5,000,000 | 25,000,000 |
 | `search_upper_bound_nonpersistent` | 2,000,000 | 20,000,000 |
@@ -171,7 +167,7 @@ The target rate field is omitted — the script determines it automatically.
 |---|---|---|
 | ≤ 1KB | Broker CPU / disk IOPS | Throughput largely independent of message size |
 | 1KB–20KB | Disk write bandwidth (persistent) or broker CPU (direct) | Persistent rates fall as message size increases |
-| ≥ 20KB | Network bandwidth (10 GbE ≈ 1.25 GB/s per host) | Rate ≈ 1.25 GB/s ÷ msg_size per host, fanout has minimal effect on publisher rate |
+| ≥ 20KB | Network bandwidth (n * 10 GbE ≈ n * 1.25 GB/s per host / network interface) | Rate ≈ n * 1.25 GB/s ÷ msg_size per host, fanout has minimal effect on publisher rate |
 
 For high-fanout scenarios (f ≥ 10), the consumer-side network becomes the binding constraint: each consumer host must handle `publish_rate × fanout` messages. With 1 consumer host on 10 GbE this limits useful fanout testing. Use multiple consumer hosts for accurate high-fanout results.
 
