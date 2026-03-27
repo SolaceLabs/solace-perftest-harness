@@ -10,36 +10,68 @@ A test harness for characterising and validating the message throughput of Solac
 - Publisher and consumer test hosts (Linux) — ideally 4 of each with 10 GbE connectivity
 - A controller host (Linux) with Ansible installed and SSH access to the test hosts
 - SSH keys from the controller installed on all test hosts
-- A client username on the broker VPN with publish, subscribe, and guaranteed endpoint create permissions (credentials configured in `start-sdk.yaml`)
+- A client username on the broker VPN with publish, subscribe, and guaranteed endpoint create permissions (credentials configured in `engine/start-sdk.yaml`)
 - `sdkperf_c` binary placed in `pubSubTools/` on the controller (copied to test hosts by Ansible)
 
 > For minimal testing a single publisher host and a single consumer host is sufficient, but will limit the maximum achievable rates (especially for direct messaging at small message sizes).
+
+Run `./setup.sh` for a guided walkthrough of the above requirements and to configure your test hosts.
 
 ---
 
 ## Repository structure
 
 ```
+setup.sh                         # Interactive setup wizard — configures hosts and explains requirements
+start-benchmarking-test.sh       # Interactive menu to select and run a benchmarking test
+start-generic-discovery-test.sh  # Wrapper to run a generic discovery test (prompts for all parameters)
+
 engine/                          # Core test engine
 engine/run-testset.sh            # Runs a fixed-target testset (pass/fail against known rates)
 engine/run-binsearch-testset.sh  # Discovers max throughput via exponential probe + binary search
 engine/run-test.sh               # Single-test wrapper around the Ansible playbook
 engine/start-sdk.yaml            # Ansible playbook: deploys sdkperf_c, runs publishers and consumers
 
-benchmarking-tests/         # Fixed-target testsets for known broker tiers
-discovery-tests/            # Discovery testsets (binary search format)
-scripts/                    # sdkpublisher.sh and sdkconsumers.sh — run on test hosts
-pubSubTools/                # sdkperf_c binary and licences (not included in repo)
-config/host                 # Ansible inventory (publisher and consumer hosts)
-results/                    # Test result output files
-temp/                       # Temporary per-iteration logs (cleaned up after each run)
+benchmarking-tests/              # Fixed-target testsets for known broker tiers
+benchmarking-tests/archive/      # Older testsets no longer in active use
+discovery-tests/                 # Discovery testsets (binary search format)
+scripts/                         # sdkpublisher.sh and sdkconsumers.sh — run on test hosts
+pubSubTools/                     # sdkperf_c binary and licences (not included in repo)
+config/host                      # Ansible inventory (publisher and consumer hosts)
+docs/                            # Architecture overview and additional documentation
+results/                         # Test result output files
+temp/                            # Temporary per-iteration logs (cleaned up after each run)
 ```
+
+---
+
+## Getting started
+
+Run the setup wizard to configure your test hosts:
+
+```bash
+./setup.sh
+```
+
+This will explain the infrastructure requirements, guide you through SSH key setup, and write your publisher and subscriber host names to `config/host`.
 
 ---
 
 ## Running a fixed-target testset (known broker)
 
 The `benchmarking-tests/` folder contains pre-configured testsets for common broker tiers and configurations. Each script defines target rates the broker is expected to achieve and reports pass/fail for each scenario.
+
+The easiest way to run one is via the interactive menu:
+
+```bash
+./start-benchmarking-test.sh
+```
+
+Or invoke a testset script directly:
+
+```bash
+benchmarking-tests/ent-10k-gm-ha.sh <broker-ip>
+```
 
 ### Software broker tiers (Solace licensing)
 
@@ -56,11 +88,6 @@ Each tier has variants for message type and HA configuration:
 - `-gm-ha` — guaranteed messaging, HA pair (primary + backup + monitoring node (in case of software))
 - `-quick` — abbreviated run covering key scenarios only
 
-**Example:** test an Enterprise 10k broker in HA configuration:
-```bash
-benchmarking-tests/ent-10k-gm-ha.sh <broker-ip>
-```
-
 ### Hardware appliance
 
 | Script | Description |
@@ -68,13 +95,13 @@ benchmarking-tests/ent-10k-gm-ha.sh <broker-ip>
 | `3560-ADB4-direct.sh` | Solace 3560 appliance — direct messaging |
 | `3560-ADB4-gm-ha.sh` | Solace 3560 appliance — guaranteed messaging (HA pair) |
 
-Target rates in the 3560 testsets are based on published Solace [specifications](https://solace.com/products/performance/) (11M/24M msg/s direct at 100B f=1/f=10; 640k/2.8M msg/s persistent at 1KB f=1/f=10) and measurements from londonlab. 
+Target rates in the 3560 testsets are based on published Solace [specifications](https://solace.com/products/performance/) (11M/24M msg/s direct at 100B f=1/f=10; 640k/2.8M msg/s persistent at 1KB f=1/f=10) and measurements from londonlab.
 
 ---
 
 ## Discovering the maximum throughput of an unknown broker
 
-Use `run-binsearch-testset.sh` when you don't know what rates to expect — for example, new hardware, a new configuration, or initial characterisation of a broker.
+Use the discovery tests when you don't know what rates to expect — for example, new hardware, a new configuration, or initial characterisation of a broker.
 
 Rather than specifying target rates, the script automatically finds the highest message rate the broker can sustain end-to-end for each scenario using two phases:
 
@@ -88,14 +115,19 @@ Test entries omit the target rate field:
 msg_size:fanout:publisher_hosts:msg_type
 ```
 
-**Example:** run the londonlab discovery set (18 scenarios, ~3 hours):
+**Generic discovery** — prompts for broker, SSH user, host count, and message types:
+```bash
+./start-generic-discovery-test.sh
+```
+
+**londonlab discovery** — pre-configured for emea8.londonlab (18 scenarios, ~6 hours):
 ```bash
 discovery-tests/londonlab-discovery.sh emea8.londonlab
 ```
 
 ### Upper bounds
 
-The exponential probe starts at `upper_bound / 1024` and doubles upward. The defaults are conservative (software broker limits). Testsets for more capable brokers should override these via `export` before calling `run-binsearch-testset.sh`:
+The exponential probe starts at `upper_bound / 1024` and doubles upward. The defaults are conservative (software broker limits). Testsets for more capable brokers should override these via `export` before calling `engine/run-binsearch-testset.sh`:
 
 | Variable | Default | londonlab (3560 ADB4) |
 |---|---|---|
@@ -109,8 +141,8 @@ See `discovery-tests/londonlab-discovery.sh` for an example of how to override t
 
 ## How the tests work
 
-1. The testset script defines scenarios as arrays and passes them to `run-testset.sh` or `run-binsearch-testset.sh`.
-2. For each scenario the runner calls `run-test.sh`, which invokes the Ansible playbook `start-sdk.yaml`.
+1. The testset script defines scenarios as arrays and passes them to `engine/run-testset.sh` or `engine/run-binsearch-testset.sh`.
+2. For each scenario the runner calls `engine/run-test.sh`, which invokes the Ansible playbook `engine/start-sdk.yaml`.
 3. Ansible copies `sdkperf_c` and the publisher/consumer scripts to the test hosts, then launches:
    - **Consumers** asynchronously (started first, so they are ready before publishers)
    - **Publishers** at the target rate for the configured `runlength` (default: 60 seconds)
@@ -147,7 +179,7 @@ For high-fanout scenarios (f ≥ 10), the consumer-side network becomes the bind
 
 ## Configuration
 
-Key parameters in `run-binsearch-testset.sh`:
+Key parameters in `engine/run-binsearch-testset.sh`:
 
 | Parameter | Default | Description |
 |---|---|---|
@@ -158,11 +190,11 @@ Key parameters in `run-binsearch-testset.sh`:
 | `precision_threshold` | 500 | Absolute minimum precision floor (msgs/sec) |
 | `inter_iteration_cooldown` | 5 | Seconds between iterations (allows broker queues to drain) |
 
-Key parameters in `start-sdk.yaml`:
+Key parameters in `engine/start-sdk.yaml`:
 
 | Parameter | Default | Description |
 |---|---|---|
-| `user` | `perfharness` | SSH user on test hosts |
+| `sshuser` | `perfharness` | SSH user on test hosts |
 | `sdk_publishers` | 4 | sdkperf_c publisher processes per host (match to core count) |
 | `runlength` | 120 | Default run length (overridden by calling script) |
 
