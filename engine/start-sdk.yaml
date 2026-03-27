@@ -1,6 +1,8 @@
 ---
 - hosts: subhost, pubhost
   remote_user: "{{ sshuser }}"
+  vars_files:
+    - ../config/credentials.yaml
   vars:
     #main setup variables - can be overriden by calling script
     sshuser: 'perfharness' #default user for perf host log in
@@ -29,7 +31,7 @@
     #set actual number of publishers to the lower of the two for really small msg rates:
     act_publishers: "{{ [[ msg_rate | int, sdk_publishers] | min, 1] | max }}"
     sdk_consumers: "{{ act_publishers }}" #default number of clients on each consumer hosts - needs to match publishers!
-    sdk_credentials: '-cu=perftestharness@perftest-harness -cp=default' #default sdkperf login creds
+    sdk_credentials: "-cu={{ broker_username }}@{{ broker_vpn }} -cp={{ broker_password }}"
     async_retries: "{{ runlength / 10 + 5 | round | int }}" #how long ansible is waiting for the sdks to finish (in 10s intervals).
     
     # some variables for pretty printing variables/test parameters

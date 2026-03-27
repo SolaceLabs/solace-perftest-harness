@@ -1,3 +1,4 @@
 /*.log
 /start-sdk.retry
 .claude/
+config/credentials.yaml

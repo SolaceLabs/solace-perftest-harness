@@ -5,6 +5,7 @@
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 host_file="${script_dir}/config/host"
+creds_file="${script_dir}/config/credentials.yaml"
 
 # --- Helper ---
 prompt() {
@@ -153,8 +154,45 @@ for i in 1 2 3 4; do
   sub_hosts+=("${h}")
 done
 
-# --- Write config/host ---
+# --- Broker credentials ---
+cat <<'EOF'
+============================================================
+  BROKER CREDENTIALS
+============================================================
+
+Enter the credentials sdkperf will use to connect to the
+broker. These are saved to config/credentials.yaml, which
+is gitignored and will not be committed to the repository.
+
+The client username must exist on the broker VPN and have:
+  - Publish permission
+  - Subscribe permission
+  - Allow Guaranteed Endpoint Create (for persistent tests)
+
+EOF
+
+prompt broker_vpn      "Broker VPN name"       "perftest-harness"
+prompt broker_username "Client username"        "perftestharness"
+prompt broker_password "Client password"        "default"
+
+# --- Write config/credentials.yaml ---
 echo ""
+echo "Writing ${creds_file}..."
+
+cat > "${creds_file}" <<EOF
+---
+# Solace broker credentials for sdkperf
+# This file is gitignored — do not commit it.
+
+broker_vpn: ${broker_vpn}
+broker_username: ${broker_username}
+broker_password: ${broker_password}
+EOF
+
+echo "  Done."
+echo ""
+
+# --- Write config/host ---
 echo "Writing ${host_file}..."
 
 {
@@ -173,13 +211,16 @@ echo "Writing ${host_file}..."
 
 echo ""
 echo "============================================================"
-echo "  Configuration written to config/host"
+echo "  Setup complete"
 echo "============================================================"
 echo ""
 echo "Publisher hosts:"
 for h in "${pub_hosts[@]}"; do echo "  ${h}"; done
 echo "Subscriber hosts:"
 for h in "${sub_hosts[@]}"; do echo "  ${h}"; done
+echo ""
+echo "Broker VPN:  ${broker_vpn}"
+echo "Username:    ${broker_username}"
 echo ""
 
 # --- Next steps ---
@@ -201,8 +242,8 @@ cat <<'EOF'
        - Publish permission
        - Subscribe permission
        - Allow Guaranteed Endpoint Create (for persistent tests)
-     Update the credentials in engine/start-sdk.yaml if needed
-     (default: perftestharness@perftest-harness / default).
+     Credentials are stored in config/credentials.yaml and can
+     be updated there at any time.
 
   4. Run a discovery test to find your broker's maximum throughput:
        ./start-generic-discovery-test.sh
