@@ -133,15 +133,19 @@ waitall $pids
 echo "Done, checking results and gathering stats...!"
 sleep 2
 echo " "
-if grep -q 'Exception\|Error' ${name}_stats_*.txt; then
-  echo "Errors occured during run:" | tee result_pub.txt
-  cat ${name}_stats_*.txt | grep "Exception\|Error" | tee -a result_pub.txt
-else
+if grep -q "Computed publish" ${name}_stats_*.txt; then
   echo "Computing results"
   cat ${name}_stats_*.txt | grep "Computed publish" > ${name}_stats-r1.txt
   awk 'BEGIN { FS= " " } ; { print $6 }' ${name}_stats-r1.txt > ${name}_stats-r2.txt
   sum=`cat ${name}_stats-r2.txt | awk '{ sum += $1; } END { print sum; }'`
   echo "Sum across publishers: ${sum} (msg/sec)" | tee result_pub.txt
+  if grep -q 'Exception\|Error' ${name}_stats_*.txt; then
+    echo "Warnings (non-fatal errors in sdkperf output, rate was still computed):"
+    cat ${name}_stats_*.txt | grep 'Exception\|Error'
+  fi
+else
+  echo "Errors occured during run:" | tee result_pub.txt
+  cat ${name}_stats_*.txt | grep "Exception\|Error" | tee -a result_pub.txt
 fi
 if [[ "${cleanup_at_end}" = "true" ]]; then
   cleanup
