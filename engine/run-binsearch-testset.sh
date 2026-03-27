@@ -31,7 +31,8 @@ allowed_error_margin=5     # consumer rate must be >= (100 - margin)% of target 
 precision_pct=1            # stop binary search early when range narrows to ±this % of midpoint
 precision_threshold=500    # absolute minimum precision floor (msgs/sec) — applies at very low rates
 inter_iteration_cooldown=5 # seconds to wait between iterations (allows broker/queues to settle)
-: ${sshuser:=perfharness}  # SSH user on test hosts; override via export in calling testset script
+: ${sshuser:=$(awk '/^sshuser:/{print $2}' "${BASH_SOURCE%/*}/../config/credentials.yaml" 2>/dev/null)}
+: ${sshuser:=perfharness}  # fallback if not set by caller or credentials.yaml
 
 # Per-type upper bounds (msgs/sec). Exponential probe starts at upper_bound/1024.
 # Adjust these for your environment — too high means more probe steps, too low caps discovery.

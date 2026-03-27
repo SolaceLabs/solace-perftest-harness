@@ -26,7 +26,8 @@ msg_type="$3" #message type for test:direct, nonpersistent or persistent
 
 runlength=60 #how long to run reach test for in seconds
 allowed_error_margin=5 #allowed error margin in pct"
-: ${sshuser:=perfharness}  # SSH user on test hosts; override via export in calling testset script
+: ${sshuser:=$(awk '/^sshuser:/{print $2}' "${BASH_SOURCE%/*}/../config/credentials.yaml" 2>/dev/null)}
+: ${sshuser:=perfharness}  # fallback if not set by caller or credentials.yaml
 
 log_dir=${BASH_SOURCE%/*}/../temp #directory for temp files
 result_dir=${BASH_SOURCE%/*}/../results #directory to store results in
