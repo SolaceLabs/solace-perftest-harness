@@ -25,8 +25,8 @@ run-binsearch-testset.sh    # Discovers max throughput via exponential probe + b
 run-test.sh                 # Single-test wrapper around the Ansible playbook
 start-sdk.yaml              # Ansible playbook: deploys sdkperf_c, runs publishers and consumers
 
-specific-test-sets/         # Fixed-target testsets for known broker tiers
-smart-testsets/             # Discovery testsets (binary search format)
+benchmarking-tests/         # Fixed-target testsets for known broker tiers
+discovery-tests/             # Discovery testsets (binary search format)
 scripts/                    # sdkpublisher.sh and sdkconsumers.sh — run on test hosts
 pubSubTools/                # sdkperf_c binary and licences (not included in repo)
 hosts                       # Ansible inventory (publisher and consumer hosts)
@@ -38,7 +38,7 @@ temp/                       # Temporary per-iteration logs (cleaned up after eac
 
 ## Running a fixed-target testset (known broker)
 
-The `specific-test-sets/` folder contains pre-configured testsets for common broker tiers and configurations. Each script defines target rates the broker is expected to achieve and reports pass/fail for each scenario.
+The `benchmarking-tests/` folder contains pre-configured testsets for common broker tiers and configurations. Each script defines target rates the broker is expected to achieve and reports pass/fail for each scenario.
 
 ### Software broker tiers (Solace licensing)
 
@@ -57,7 +57,7 @@ Each tier has variants for message type and HA configuration:
 
 **Example:** test an Enterprise 10k broker in HA configuration:
 ```bash
-specific-test-sets/ent-10k-gm-ha.sh <broker-ip>
+benchmarking-tests/ent-10k-gm-ha.sh <broker-ip>
 ```
 
 ### Hardware appliance
@@ -67,7 +67,7 @@ specific-test-sets/ent-10k-gm-ha.sh <broker-ip>
 | `3560-ADB4-direct.sh` | Solace 3560 appliance — direct messaging |
 | `3560-ADB4-gm-ha.sh` | Solace 3560 appliance — guaranteed messaging (HA pair) |
 
-Target rates in the 3560 testsets are based on published Solace specifications (11M/24M msg/s direct at 100B f=1/f=10; 640k/2.8M msg/s persistent at 1KB f=1/f=10) and measurements from londonlab. f=50 values are estimates — update these after running a discovery testset.
+Target rates in the 3560 testsets are based on published Solace [specifications](https://solace.com/products/performance/) (11M/24M msg/s direct at 100B f=1/f=10; 640k/2.8M msg/s persistent at 1KB f=1/f=10) and measurements from londonlab. 
 
 ---
 
@@ -89,7 +89,7 @@ msg_size:fanout:publisher_hosts:msg_type
 
 **Example:** run the londonlab discovery set (18 scenarios, ~3 hours):
 ```bash
-smart-testsets/londonlab-discovery.sh emea8.londonlab
+discovery-tests/londonlab-discovery.sh emea8.londonlab
 ```
 
 ### Upper bounds
@@ -102,7 +102,7 @@ The exponential probe starts at `upper_bound / 1024` and doubles upward. The def
 | `search_upper_bound_nonpersistent` | 2,000,000 | 20,000,000 |
 | `search_upper_bound_persistent` | 1,000,000 | 5,000,000 |
 
-See `smart-testsets/londonlab-discovery.sh` for an example of how to override these.
+See `discovery-tests/londonlab-discovery.sh` for an example of how to override these.
 
 ---
 
@@ -161,7 +161,7 @@ Key parameters in `start-sdk.yaml`:
 
 | Parameter | Default | Description |
 |---|---|---|
-| `user` | `choltfurth` | SSH user on test hosts |
+| `user` | `perfharness` | SSH user on test hosts |
 | `sdk_publishers` | 4 | sdkperf_c publisher processes per host (match to core count) |
 | `runlength` | 120 | Default run length (overridden by calling script) |
 

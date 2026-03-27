@@ -14,7 +14,7 @@
 # "100:50:4000000:2:direct "\
 # "100:100:4000000:2:direct "\
 # ";" #need to  end with to separate the various test arrays;
-# See scripts in sub-folder specific-test-sets for examples.
+# See scripts in sub-folder benchmarking-tests for examples.
 
 prompt_between_tests="false" #set to false, if you want to run tests fully automatic
 #prompt_between_tests="true" #set to false, if you want to run tests fully automatic

@@ -3,7 +3,7 @@
 # Finds the maximum stable throughput for a range of message sizes and fanouts
 # without requiring prior knowledge of the broker's capabilities.
 #
-# Usage: ./smart-testsets/londonlab-discovery.sh [router_ip_or_hostname]
+# Usage: ./discovery-tests/londonlab-discovery.sh [router_ip_or_hostname]
 # Default router: emea8.londonlab
 #
 # Estimated runtime:

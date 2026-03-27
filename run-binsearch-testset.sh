@@ -16,7 +16,7 @@
 #   "100:5:4:direct "\
 #   "100:50:2:direct "\
 #   ";"
-# See scripts in sub-folder smart-testsets for examples.
+# See scripts in sub-folder discovery-tests for examples.
 
 prompt_between_tests="false"
 
