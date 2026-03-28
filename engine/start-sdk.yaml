@@ -48,6 +48,19 @@
   ######## MAIN ########
   ######################
   tasks:
+  - name: 'check credentials'
+    assert:
+      that:
+        - broker_username is defined
+        - broker_vpn is defined
+        - broker_password is defined
+      fail_msg: >
+        Broker credentials are missing from config/credentials.yaml.
+        Run ./setup.sh to add them, or copy config/credentials.yaml.example
+        and fill in broker_vpn, broker_username and broker_password.
+    run_once: true
+    tags: always
+
   - name: 'echo_start'
     debug:
       msg:
