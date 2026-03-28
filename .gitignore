@@ -2,3 +2,4 @@
 /start-sdk.retry
 .claude/
 config/credentials.yaml
+/custom-sets/*.sh
