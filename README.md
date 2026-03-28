@@ -25,6 +25,7 @@ Run `./setup.sh` for a guided walkthrough of the above requirements and to confi
 setup.sh                         # Interactive setup wizard — configures hosts and explains requirements
 start-benchmarking-test.sh       # Interactive menu to select and run a benchmarking test
 start-generic-discovery-test.sh  # Wrapper to run a generic discovery test (prompts for all parameters)
+start-custom-discovery-test.sh   # Builds a custom discovery testset and saves it to custom-sets/
 
 engine/                          # Core test engine
 engine/run-testset.sh            # Runs a fixed-target testset (pass/fail against known rates)
@@ -34,6 +35,7 @@ engine/start-sdk.yaml            # Ansible playbook: deploys sdkperf_c, runs pub
 
 benchmarking-tests/              # Fixed-target testsets for known broker tiers
 discovery-tests/                 # Discovery testsets (binary search format)
+custom-sets/                     # User-generated custom discovery testsets (gitignored)
 scripts/                         # sdkpublisher.sh and sdkconsumers.sh — run on test hosts
 pubSubTools/                     # sdkperf_c binary and licences (not included in repo)
 config/host                      # Ansible inventory (publisher and consumer hosts)
@@ -116,9 +118,19 @@ Test entries omit the target rate field:
 msg_size:fanout:publisher_hosts:msg_type
 ```
 
-**Generic discovery** — prompts for broker, SSH user, host count, and message types:
+**Generic discovery** — standard scenario matrix (100B, 1KB, 20KB × fanout 1/5/50), prompts for broker, SSH user, host count, and message types:
 ```bash
 ./start-generic-discovery-test.sh
+```
+
+**Custom discovery** — interactive wizard to choose message types, sizes, fanout values and upper bounds, generates a reusable testset under `custom-sets/`:
+```bash
+./start-custom-discovery-test.sh
+```
+
+The generated script is saved to `custom-sets/<name>.sh` and can be re-run directly at any time:
+```bash
+./custom-sets/<name>.sh [broker-ip]
 ```
 
 ### Upper bounds
