@@ -39,11 +39,31 @@ checkdependencies() {
       echo ${e} " not found in PATH. Please install or update PATH"
       exit 1
     fi
-  done 
+  done
+}
+
+checkcredentials() {
+  local creds="${BASH_SOURCE%/*}/../config/credentials.yaml"
+  if [ ! -f "${creds}" ]; then
+    echo "Error: config/credentials.yaml not found."
+    echo "Run ./setup.sh to create it."
+    exit 1
+  fi
+  local missing=()
+  for field in broker_vpn broker_username broker_password; do
+    grep -q "^${field}:" "${creds}" || missing+=("${field}")
+  done
+  if [ ${#missing[@]} -gt 0 ]; then
+    echo "Error: the following fields are missing from config/credentials.yaml:"
+    printf '  %s\n' "${missing[@]}"
+    echo "Run ./setup.sh to add them, or copy config/credentials.yaml.example."
+    exit 1
+  fi
 }
 
 #main routine
 checkdependencies
+checkcredentials
 # Parse passed in test arrays
 testarray1=$(echo ${@} | cut -d ';' -f 2)
 echo "testarray1=${testarray1}"

@@ -54,6 +54,25 @@ checkdependencies() {
   done
 }
 
+checkcredentials() {
+  local creds="${BASH_SOURCE%/*}/../config/credentials.yaml"
+  if [ ! -f "${creds}" ]; then
+    echo "Error: config/credentials.yaml not found."
+    echo "Run ./setup.sh to create it."
+    exit 1
+  fi
+  local missing=()
+  for field in broker_vpn broker_username broker_password; do
+    grep -q "^${field}:" "${creds}" || missing+=("${field}")
+  done
+  if [ ${#missing[@]} -gt 0 ]; then
+    echo "Error: the following fields are missing from config/credentials.yaml:"
+    printf '  %s\n' "${missing[@]}"
+    echo "Run ./setup.sh to add them, or copy config/credentials.yaml.example."
+    exit 1
+  fi
+}
+
 # Run a single test and tee output to logfile.
 # Usage: run_single_test <msg_size> <fanout> <hosts> <mt> <target_rate> <logfile>
 run_single_test() {
@@ -212,6 +231,7 @@ find_max_rate() {
 # ---- main ----
 
 checkdependencies
+checkcredentials
 
 # Parse passed-in test arrays (semicolon-delimited, same convention as run-smart-testset.sh)
 testarray1=$(echo ${@} | cut -d ';' -f 2)
