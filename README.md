@@ -24,7 +24,7 @@ Run `./setup.sh` for a guided walkthrough of the above requirements and to confi
 ```
 setup.sh                         # Interactive setup wizard — configures hosts and explains requirements
 start-benchmarking-test.sh       # Interactive menu to select and run a benchmarking test
-start-generic-discovery-test.sh  # Wrapper to run a generic discovery test (prompts for all parameters)
+start-standard-discovery-test.sh  # Wrapper to run a generic discovery test (prompts for all parameters)
 start-custom-discovery-test.sh   # Builds a custom discovery testset and saves it to custom-sets/
 
 engine/                          # Core test engine
@@ -118,9 +118,9 @@ Test entries omit the target rate field:
 msg_size:fanout:publisher_hosts:msg_type
 ```
 
-**Generic discovery** — standard scenario matrix (100B, 1KB, 20KB × fanout 1/5/50), prompts for broker, SSH user, host count, and message types:
+**Standard discovery** — standard scenario matrix (100B, 1KB, 20KB × fanout 1/5/50), prompts for broker, SSH user, host count, and message types:
 ```bash
-./start-generic-discovery-test.sh
+./start-standard-discovery-test.sh
 ```
 
 **Custom discovery** — interactive wizard to choose message types, sizes, fanout values and upper bounds, generates a reusable testset under `custom-sets/`:

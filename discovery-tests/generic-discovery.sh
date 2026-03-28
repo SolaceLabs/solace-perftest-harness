@@ -4,7 +4,7 @@
 # exponential probe + binary search to find the maximum stable throughput.
 #
 # Usage: ./discovery-tests/generic-discovery.sh
-#   or via the wrapper: ./start-generic-discovery-test.sh
+#   or via the wrapper: ./start-standard-discovery-test.sh
 
 # --- Prompt helper: prompt <varname> <label> [default] ---
 prompt() {

@@ -257,7 +257,7 @@ cat <<'EOF'
      be updated there at any time.
 
   4. Run a discovery test to find your broker's maximum throughput:
-       ./start-generic-discovery-test.sh
+       ./start-standard-discovery-test.sh
 
      Or run a fixed-target benchmarking test:
        ./start-benchmarking-test.sh
