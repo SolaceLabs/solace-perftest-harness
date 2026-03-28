@@ -187,6 +187,23 @@ For high-fanout scenarios (f ≥ 10), the consumer-side network becomes the bind
 
 ## Configuration
 
+### config/credentials.yaml
+
+Written by `./setup.sh` and gitignored. Required fields:
+
+| Field | Description |
+|---|---|
+| `broker_vpn` | Broker VPN name |
+| `broker_username` | Client username sdkperf connects as |
+| `broker_password` | Client password |
+| `sshuser` | SSH user on test hosts |
+| `pub_cores` | CPU cores on publisher hosts (sets parallel publisher processes) |
+| `sub_cores` | CPU cores on subscriber hosts |
+
+The runner scripts (`run-binsearch-testset.sh`, `run-testset.sh`) validate that the three broker credential fields are present before starting any tests and abort with a clear message if any are missing. Copy `config/credentials.yaml.example` as a starting point if you are not using `setup.sh`.
+
+### run-binsearch-testset.sh parameters
+
 Key parameters in `engine/run-binsearch-testset.sh`:
 
 | Parameter | Default | Description |
@@ -197,6 +214,8 @@ Key parameters in `engine/run-binsearch-testset.sh`:
 | `precision_pct` | 1 | Stop binary search when range ≤ ±1% of midpoint |
 | `precision_threshold` | 500 | Absolute minimum precision floor (msgs/sec) |
 | `inter_iteration_cooldown` | 5 | Seconds between iterations (allows broker queues to drain) |
+
+### start-sdk.yaml parameters
 
 Key parameters in `engine/start-sdk.yaml`:
 
