@@ -143,7 +143,7 @@
 
   - name: 'display pub results'
     debug:
-      msg: "{{ item.stdout | default('(no output)') }}"
+      msg: "{{ item.stdout_lines | default([item.stdout | default('(no output)')]) | reject('match', 'sdkperf_c ') | list }}"
     loop: "{{ pub.results }}"
     when: not item is skipped
 
@@ -159,7 +159,7 @@
     with_items: "{{ sub.results }}"
   - name: 'display sub results'
     debug:
-      msg: "{{ item.stdout | default('(no output)') }}"
+      msg: "{{ item.stdout_lines | default([item.stdout | default('(no output)')]) | reject('match', 'fanout:') | list }}"
     loop: "{{ sub_result.results }}"
     when: not item is skipped
 
