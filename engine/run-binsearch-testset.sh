@@ -44,6 +44,13 @@ inter_iteration_cooldown=5 # seconds to wait between iterations (allows broker/q
 log_dir=${BASH_SOURCE%/*}/../temp
 result_dir=${BASH_SOURCE%/*}/../results
 
+# Summary tracking arrays (populated during the test loop)
+_sum_msg_sizes=()
+_sum_fanouts=()
+_sum_mts=()
+_sum_max_rates=()
+_sum_results=()
+
 checkdependencies() {
   echo "Checking dependencies..."
   for e in rm cat sed grep ls dig sleep ansible-playbook; do
@@ -309,6 +316,16 @@ for testarray in ${testarray7} ${testarray6} ${testarray5} ${testarray4} ${testa
             echo "Test: Fail (no passing rate found)" | tee -a "${local_final_logfile}"
           fi
 
+          _sum_msg_sizes+=("${msg_size}")
+          _sum_fanouts+=("${fanout}")
+          _sum_mts+=("${mt}")
+          _sum_max_rates+=("${max_stable_rate}")
+          if [ ${max_stable_rate} -gt 0 ]; then
+            _sum_results+=("OK")
+          else
+            _sum_results+=("Fail")
+          fi
+
           rm -f "${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}_iter"*.log
           rm -f "${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}_probe"*.log
 
@@ -337,6 +354,37 @@ if ls "${log_dir}/${testsetprefix}"_*.log 1>/dev/null 2>&1; then
     printf "  Subscriber host cores: %s\n\n" "${_sub_cores}"
     cat $(ls -rt "${log_dir}/${testsetprefix}"_*.log) | egrep -A 16 "echo_end|RESULT" | grep -A 25 "echo_end"
   } | tee "${result_dir}/${testsetprefix}_${msg_type}_result.txt"
+fi
+
+# Print per-scenario summary table and append to result file
+if [ ${#_sum_msg_sizes[@]} -gt 0 ]; then
+  {
+    echo ""
+    echo "============================================================"
+    echo " Results summary"
+    echo "============================================================"
+    printf "  %-8s  %6s  %-13s  %15s  %s\n" \
+      "Msg size" "Fanout" "Type" "Max stable rate" "Result"
+    printf "  %-8s  %6s  %-13s  %15s  %s\n" \
+      "--------" "------" "-------------" "---------------" "------"
+    _pass=0; _fail=0
+    for (( _i=0; _i<${#_sum_msg_sizes[@]}; _i++ )); do
+      printf "  %7sB  %6d  %-13s  %15d  %s\n" \
+        "${_sum_msg_sizes[$_i]}" \
+        "${_sum_fanouts[$_i]}" \
+        "${_sum_mts[$_i]}" \
+        "${_sum_max_rates[$_i]}" \
+        "${_sum_results[$_i]}"
+      if [ "${_sum_results[$_i]}" = "OK" ]; then
+        (( _pass++ ))
+      else
+        (( _fail++ ))
+      fi
+    done
+    echo "============================================================"
+    printf "  %d/%d scenarios passed\n" "${_pass}" "$(( _pass + _fail ))"
+    echo "============================================================"
+  } | tee -a "${result_dir}/${testsetprefix}_${msg_type}_result.txt"
 fi
 
 sleep 10

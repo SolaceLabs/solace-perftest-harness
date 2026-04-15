@@ -32,6 +32,14 @@ allowed_error_margin=5 #allowed error margin in pct"
 log_dir=${BASH_SOURCE%/*}/../temp #directory for temp files
 result_dir=${BASH_SOURCE%/*}/../results #directory to store results in
 
+# Summary tracking arrays (populated during the test loop)
+_sum_msg_sizes=()
+_sum_fanouts=()
+_sum_mts=()
+_sum_target_rates=()
+_sum_achieved_rates=()
+_sum_results=()
+
 checkdependencies() {
   echo "Checking dependencies..."
   for e in rm cat sed grep ls dig let sleep ansible-playbook; do
@@ -137,10 +145,18 @@ for testarray in ${testarray7} ${testarray6} ${testarray5} ${testarray4} ${testa
           if [[ $withinerrormargin -lt $receiver_rate ]]; then
             echo "Achieved rate $receiver_rate >= $withinerrormargin" | tee -a ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log
             echo "Test: OK" | tee -a ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log
+            _sum_result="OK"
           else
             echo "Achieved rate $receiver_rate < $withinerrormargin" | tee -a ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log
             echo "Test: Fail" | tee -a ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log
+            _sum_result="Fail"
           fi
+          _sum_msg_sizes+=("${msg_size}")
+          _sum_fanouts+=("${fanout}")
+          _sum_mts+=("${mt}")
+          _sum_target_rates+=("${msgrate}")
+          _sum_achieved_rates+=("${receiver_rate:-0}")
+          _sum_results+=("${_sum_result}")
           sleep 2 #delay to allow temp logs to finish writing
           echo
         else
@@ -164,5 +180,37 @@ echo "Finished testset, compiling results..."
   printf "  Subscriber host cores: %s\n\n" "${_sub_cores}"
   cat $(ls -rt ${log_dir}/${testsetprefix}_*.log) | egrep -A 16 "echo_end|RESULT" | grep -A 25 "echo_end"
 } | tee ${result_dir}/${testsetprefix}_${msg_type}_result.txt
+
+# Print per-scenario summary table and append to result file
+if [ ${#_sum_msg_sizes[@]} -gt 0 ]; then
+  {
+    echo ""
+    echo "============================================================"
+    echo " Results summary"
+    echo "============================================================"
+    printf "  %-8s  %6s  %-13s  %12s  %13s  %s\n" \
+      "Msg size" "Fanout" "Type" "Target rate" "Achieved rate" "Result"
+    printf "  %-8s  %6s  %-13s  %12s  %13s  %s\n" \
+      "--------" "------" "-------------" "------------" "-------------" "------"
+    _pass=0; _fail=0
+    for (( _i=0; _i<${#_sum_msg_sizes[@]}; _i++ )); do
+      printf "  %7sB  %6d  %-13s  %12d  %13d  %s\n" \
+        "${_sum_msg_sizes[$_i]}" \
+        "${_sum_fanouts[$_i]}" \
+        "${_sum_mts[$_i]}" \
+        "${_sum_target_rates[$_i]}" \
+        "${_sum_achieved_rates[$_i]}" \
+        "${_sum_results[$_i]}"
+      if [ "${_sum_results[$_i]}" = "OK" ]; then
+        (( _pass++ ))
+      else
+        (( _fail++ ))
+      fi
+    done
+    echo "============================================================"
+    printf "  %d/%d tests passed\n" "${_pass}" "$(( _pass + _fail ))"
+    echo "============================================================"
+  } | tee -a ${result_dir}/${testsetprefix}_${msg_type}_result.txt
+fi
 sleep 10 #delay cleanup in case someone is watching/tailing the test
 rm -f ${log_dir}/${testsetprefix}_*.log #clean up log files
