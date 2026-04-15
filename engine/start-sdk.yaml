@@ -31,7 +31,7 @@
     #set actual number of publishers to the lower of the two for really small msg rates:
     act_publishers: "{{ [[ msg_rate | int, sdk_publishers | int] | min, 1] | max }}"
     sdk_consumers: "{{ act_publishers }}" #default number of clients on each consumer hosts - needs to match publishers!
-    sdk_credentials: "-cu={{ broker_username }}@{{ broker_vpn }} -cp={{ broker_password }}"
+    sdk_credentials: "-cu={{ broker_username | trim }}@{{ broker_vpn | trim }} -cp={{ broker_password | trim }}"
     async_retries: "{{ runlength / 10 + 5 | round | int }}" #how long ansible is waiting for the sdks to finish (in 10s intervals).
     
     # some variables for pretty printing variables/test parameters

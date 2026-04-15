@@ -26,7 +26,7 @@ msg_type="$3" #message type for test:direct, nonpersistent or persistent
 
 runlength=60 #how long to run reach test for in seconds
 allowed_error_margin=5 #allowed error margin in pct"
-: ${sshuser:=$(awk '/^sshuser:/{print $2}' "${BASH_SOURCE%/*}/../config/credentials.yaml" 2>/dev/null)}
+: ${sshuser:=$(awk '/^sshuser:/{gsub(/[[:space:]]/, "", $2); print $2}' "${BASH_SOURCE%/*}/../config/credentials.yaml" 2>/dev/null)}
 : ${sshuser:=perfharness}  # fallback if not set by caller or credentials.yaml
 
 log_dir=${BASH_SOURCE%/*}/../temp #directory for temp files
@@ -68,8 +68,8 @@ checkcredentials
 # Gather host and core info for the result file header
 _host_file="${BASH_SOURCE%/*}/../config/host"
 _creds="${BASH_SOURCE%/*}/../config/credentials.yaml"
-_pub_cores=$(awk '/^pub_cores:/{print $2}' "${_creds}" 2>/dev/null); : ${_pub_cores:=unknown}
-_sub_cores=$(awk '/^sub_cores:/{print $2}' "${_creds}" 2>/dev/null); : ${_sub_cores:=unknown}
+_pub_cores=$(awk '/^pub_cores:/{gsub(/[[:space:]]/, "", $2); print $2}' "${_creds}" 2>/dev/null); : ${_pub_cores:=unknown}
+_sub_cores=$(awk '/^sub_cores:/{gsub(/[[:space:]]/, "", $2); print $2}' "${_creds}" 2>/dev/null); : ${_sub_cores:=unknown}
 mapfile -t _pub_hosts < <(awk '/^\[pubhost\]/{f=1;next} /^\[/{f=0} f && /[^[:space:]]/ && !/^#/{print $1}' "${_host_file}" 2>/dev/null)
 mapfile -t _sub_hosts < <(awk '/^\[subhost\]/{f=1;next} /^\[/{f=0} f && /[^[:space:]]/ && !/^#/{print $1}' "${_host_file}" 2>/dev/null)
 _pub_host_str=$(IFS=', '; echo "${_pub_hosts[*]:-none}")

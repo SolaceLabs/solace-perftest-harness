@@ -31,7 +31,7 @@ allowed_error_margin=5     # consumer rate must be >= (100 - margin)% of target 
 precision_pct=1            # stop binary search early when range narrows to ±this % of midpoint
 precision_threshold=500    # absolute minimum precision floor (msgs/sec) — applies at very low rates
 inter_iteration_cooldown=5 # seconds to wait between iterations (allows broker/queues to settle)
-: ${sshuser:=$(awk '/^sshuser:/{print $2}' "${BASH_SOURCE%/*}/../config/credentials.yaml" 2>/dev/null)}
+: ${sshuser:=$(awk '/^sshuser:/{gsub(/[[:space:]]/, "", $2); print $2}' "${BASH_SOURCE%/*}/../config/credentials.yaml" 2>/dev/null)}
 : ${sshuser:=perfharness}  # fallback if not set by caller or credentials.yaml
 
 # Per-type upper bounds (msgs/sec). Exponential probe starts at upper_bound/1024.
@@ -236,8 +236,8 @@ checkcredentials
 # Gather host and core info for the result file header
 _host_file="${BASH_SOURCE%/*}/../config/host"
 _creds="${BASH_SOURCE%/*}/../config/credentials.yaml"
-_pub_cores=$(awk '/^pub_cores:/{print $2}' "${_creds}" 2>/dev/null); : ${_pub_cores:=unknown}
-_sub_cores=$(awk '/^sub_cores:/{print $2}' "${_creds}" 2>/dev/null); : ${_sub_cores:=unknown}
+_pub_cores=$(awk '/^pub_cores:/{gsub(/[[:space:]]/, "", $2); print $2}' "${_creds}" 2>/dev/null); : ${_pub_cores:=unknown}
+_sub_cores=$(awk '/^sub_cores:/{gsub(/[[:space:]]/, "", $2); print $2}' "${_creds}" 2>/dev/null); : ${_sub_cores:=unknown}
 mapfile -t _pub_hosts < <(awk '/^\[pubhost\]/{f=1;next} /^\[/{f=0} f && /[^[:space:]]/ && !/^#/{print $1}' "${_host_file}" 2>/dev/null)
 mapfile -t _sub_hosts < <(awk '/^\[subhost\]/{f=1;next} /^\[/{f=0} f && /[^[:space:]]/ && !/^#/{print $1}' "${_host_file}" 2>/dev/null)
 _pub_host_str=$(IFS=', '; echo "${_pub_hosts[*]:-none}")
