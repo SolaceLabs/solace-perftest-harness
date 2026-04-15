@@ -1,7 +1,7 @@
 #!/bin/bash
 #Test set (guaranteed messaging) to run against a medium enterprise software broker (4 cores)
 broker="${1}" #broker IP/DNS
-testsetprefix="4core-ha"
+testsetprefix="10k-ha"
 msg_type="persistent"
 
 # Tests are being passed in as arrays. 

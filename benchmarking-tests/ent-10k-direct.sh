@@ -1,7 +1,7 @@
 #!/bin/bash
 #Test set (direct messaging) to run against a medium enterprise software broker (4 cores)
 broker="${1}" #broker IP/DNS
-testsetprefix="4core"
+testsetprefix="10k"
 msg_type="direct"
 
 # Tests are being passed in as arrays. 

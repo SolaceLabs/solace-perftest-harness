@@ -1,7 +1,7 @@
 #!/bin/bash
 #Quick test set (mixed messaging) to run against a large software broker (8 cores)
 broker="$1" #broker IP/DNS
-testsetprefix="8core-quick"
+testsetprefix="100k-quick"
 msg_type="mixed"
 msg_type1="direct"
 msg_type2="persistent"
