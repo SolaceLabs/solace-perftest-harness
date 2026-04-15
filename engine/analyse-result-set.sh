@@ -2,7 +2,9 @@
 # analyse-result-set.sh
 # Parses Solace perftest-harness result files and provides diagnostic guidance.
 #
-# Usage: ./engine/analyse-result-set.sh [file|dir ...]
+# Usage: ./engine/analyse-result-set.sh [file|dir|name ...]
+#        Accepts: full file paths, directories, or test-set shorthand names
+#        (e.g. "1k_mixed" resolves to results/1k_mixed_result.txt).
 #        With no arguments, scans results/ directory for *_result.txt files.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -17,7 +19,13 @@ if [ $# -gt 0 ]; then
     elif [ -f "${arg}" ]; then
       files+=("${arg}")
     else
-      echo "WARNING: not found: ${arg}"
+      # Try resolving as a test-set shorthand: look for <arg>_result.txt under results/
+      mapfile -t found < <(find "${SCRIPT_DIR}/../results" -name "${arg}_result.txt" | sort)
+      if [ ${#found[@]} -gt 0 ]; then
+        files+=("${found[@]}")
+      else
+        echo "WARNING: not found: ${arg}"
+      fi
     fi
   done
 else
