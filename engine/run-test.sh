@@ -40,12 +40,12 @@ if grep -q 'Exception\|Error' "${script_dir}/run-tests.log"; then
 else
   #If no exceptions occured, parse and print out achieved message rates
   #first publishers
-  cat "${script_dir}/run-tests.log" | sed 's/\\n/\n/g' | grep 'Sum across publishers:' | grep -v ansible | \
+  cat "${script_dir}/run-tests.log" | sed 's/\x1B\[[0-9;]*m//g' | sed 's/\\n/\n/g' | grep 'Sum across publishers:' | grep -v ansible | \
   awk 'BEGIN { FS= " " } ; { print $1" "$2" "$3" "$4" "$5 }' > "${script_dir}/sum-pub.txt"
   sum_pub=`awk 'BEGIN { FS= " " }; { print $4 }' "${script_dir}/sum-pub.txt" | awk '{ sum += $1; } END { print sum; }'`
   printf "Sum across all publishers: %9.0f (msgs/sec)\n" ${sum_pub}
   #then consumers
-  cat "${script_dir}/run-tests.log" | sed 's/\\n/\n/g' | grep 'Sum across consumers:' | grep -v ansible | \
+  cat "${script_dir}/run-tests.log" | sed 's/\x1B\[[0-9;]*m//g' | sed 's/\\n/\n/g' | grep 'Sum across consumers:' | grep -v ansible | \
   awk 'BEGIN { FS= " " } ; { print $1" "$2" "$3" "$4" "$5 }' > "${script_dir}/sum-sub.txt"
   sum_sub=`awk 'BEGIN { FS= " " }; { print $4 }' "${script_dir}/sum-sub.txt" | awk '{ sum += $1; } END { print sum; }'`
   printf "Sum across all  consumers: %9.0f (msgs/sec)\n" ${sum_sub}
