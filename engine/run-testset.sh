@@ -212,5 +212,12 @@ if [ ${#_sum_msg_sizes[@]} -gt 0 ]; then
     echo "============================================================"
   } | tee -a ${result_dir}/${testsetprefix}_${msg_type}_result.txt
 fi
+
+# Run automated analysis on the completed result file
+if [ -f "${result_dir}/${testsetprefix}_${msg_type}_result.txt" ]; then
+  echo ""
+  "${BASH_SOURCE%/*}/analyse-result-set.sh" "${result_dir}/${testsetprefix}_${msg_type}_result.txt"
+fi
+
 sleep 10 #delay cleanup in case someone is watching/tailing the test
 rm -f ${log_dir}/${testsetprefix}_*.log #clean up log files
