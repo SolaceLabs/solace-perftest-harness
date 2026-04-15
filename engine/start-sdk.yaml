@@ -43,6 +43,8 @@
     str_fanout: "{{ ([filler, sdk_fanout] | join)[-8:] }}"
     str_parallel_hosts: "{{ ([filler, parallel_hosts] | join)[-8:] }}"
     str_publishers: "{{ ([filler, act_publishers] | join)[-8:] }}"
+    str_pub_cores: "{{ ([filler, pub_cores | default(4)] | join)[-8:] }}"
+    str_sub_cores: "{{ ([filler, sub_cores | default(4)] | join)[-8:] }}"
     
   ######################
   ######## MAIN ########
@@ -72,6 +74,8 @@
         - "# Message type                {{ str_mt }} #"
         - "# Parallel hosts (pub/sub)         {{ str_parallel_hosts }} #"
         - "# Parallel processes per host      {{ str_publishers }} #"
+        - "# Publisher host cores             {{ str_pub_cores }} #"
+        - "# Subscriber host cores            {{ str_sub_cores }} #"
         - "#############################################"
     run_once: true
     tags: debug
@@ -170,5 +174,7 @@
         - "# Message type                {{ str_mt }} #"
         - "# Parallel hosts (pub/sub)         {{ str_parallel_hosts }} #"
         - "# Parallel processes per host      {{ str_publishers }} #"
+        - "# Publisher host cores             {{ str_pub_cores }} #"
+        - "# Subscriber host cores            {{ str_sub_cores }} #"
         - "#############################################"
     run_once: true

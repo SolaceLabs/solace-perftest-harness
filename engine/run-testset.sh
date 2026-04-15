@@ -64,6 +64,17 @@ checkcredentials() {
 #main routine
 checkdependencies
 checkcredentials
+
+# Gather host and core info for the result file header
+_host_file="${BASH_SOURCE%/*}/../config/host"
+_creds="${BASH_SOURCE%/*}/../config/credentials.yaml"
+_pub_cores=$(awk '/^pub_cores:/{print $2}' "${_creds}" 2>/dev/null); : ${_pub_cores:=unknown}
+_sub_cores=$(awk '/^sub_cores:/{print $2}' "${_creds}" 2>/dev/null); : ${_sub_cores:=unknown}
+mapfile -t _pub_hosts < <(awk '/^\[pubhost\]/{f=1;next} /^\[/{f=0} f && /[^[:space:]]/ && !/^#/{print $1}' "${_host_file}" 2>/dev/null)
+mapfile -t _sub_hosts < <(awk '/^\[subhost\]/{f=1;next} /^\[/{f=0} f && /[^[:space:]]/ && !/^#/{print $1}' "${_host_file}" 2>/dev/null)
+_pub_host_str=$(IFS=', '; echo "${_pub_hosts[*]:-none}")
+_sub_host_str=$(IFS=', '; echo "${_sub_hosts[*]:-none}")
+
 # Parse passed in test arrays
 testarray1=$(echo ${@} | cut -d ';' -f 2)
 echo "testarray1=${testarray1}"
@@ -145,6 +156,13 @@ for testarray in ${testarray7} ${testarray6} ${testarray5} ${testarray4} ${testa
 done
 #Write only the test summary along with the result to the result file (without all the ansible log output)
 echo "Finished testset, compiling results..."
-cat $(ls -rt ${log_dir}/${testsetprefix}_*.log) | egrep -A 14 "echo_end|RESULT"|grep -A 23 "echo_end" | tee ${result_dir}/${testsetprefix}_${msg_type}_result.txt
+{
+  printf "Test environment\n"
+  printf "  Publisher hosts  (%d): %s\n" "${#_pub_hosts[@]}" "${_pub_host_str}"
+  printf "  Subscriber hosts (%d): %s\n" "${#_sub_hosts[@]}" "${_sub_host_str}"
+  printf "  Publisher host cores:  %s\n" "${_pub_cores}"
+  printf "  Subscriber host cores: %s\n\n" "${_sub_cores}"
+  cat $(ls -rt ${log_dir}/${testsetprefix}_*.log) | egrep -A 16 "echo_end|RESULT" | grep -A 25 "echo_end"
+} | tee ${result_dir}/${testsetprefix}_${msg_type}_result.txt
 sleep 10 #delay cleanup in case someone is watching/tailing the test
 rm -f ${log_dir}/${testsetprefix}_*.log #clean up log files
