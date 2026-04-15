@@ -35,7 +35,7 @@ echo ""
 prompt test_name "Test name (filename and result prefix)" ""
 read -r -p "Broker hostname or IP (blank = prompt when run): " broker
 
-default_sshuser=$(awk '/^sshuser:/{print $2}' "${SCRIPT_DIR}/config/credentials.yaml" 2>/dev/null)
+default_sshuser=$(awk '/^sshuser:/{gsub(/[[:space:]]/, "", $2); print $2}' "${SCRIPT_DIR}/config/credentials.yaml" 2>/dev/null)
 : "${default_sshuser:=perfharness}"
 prompt sshuser        "SSH user on test hosts"                 "${default_sshuser}"
 prompt parallel_hosts "Number of parallel pub/sub host pairs"  "1"
