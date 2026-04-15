@@ -32,6 +32,7 @@ engine/run-testset.sh            # Runs a fixed-target testset (pass/fail agains
 engine/run-binsearch-testset.sh  # Discovers max throughput via exponential probe + binary search
 engine/run-test.sh               # Single-test wrapper around the Ansible playbook
 engine/start-sdk.yaml            # Ansible playbook: deploys sdkperf_c, runs publishers and consumers
+engine/analyse-result-set.sh    # Parses result files and prints diagnostic guidance
 
 benchmarking-tests/              # Fixed-target testsets for known broker tiers
 discovery-tests/                 # Discovery testsets (binary search format)
@@ -155,7 +156,7 @@ See `discovery-tests/londonlab-discovery.sh` for an example of how to override t
    - **Consumers** asynchronously (started first, so they are ready before publishers)
    - **Publishers** at the target rate for the configured `runlength` (default: 60 seconds)
 4. After the run, Ansible collects stdout from both sides. The total consumer rate is summed across all hosts and checked against the target (allowing a 5% error margin).
-5. Results are written to `results/` at the end of each testset.
+5. Results are written to `results/` at the end of each testset, followed by an automated diagnostic analysis (see [Analysing results](#analysing-results) below).
 
 ### Fixed-target testset format
 ```
@@ -170,6 +171,41 @@ msg_size : fanout : parallel_hosts : msg_type
 ```
 
 The target rate field is omitted — the script determines it automatically.
+
+---
+
+## Analysing results
+
+`engine/analyse-result-set.sh` is run automatically after each testset completes. It parses the result file and prints a diagnostic summary identifying common bottlenecks and configuration issues.
+
+You can also run it manually at any time:
+
+```bash
+# By test-set shorthand name (resolves to results/<name>_result.txt)
+engine/analyse-result-set.sh 1k_mixed
+
+# By full file path
+engine/analyse-result-set.sh results/1k_mixed_result.txt
+
+# On a directory
+engine/analyse-result-set.sh results/my-run/
+
+# Scan the whole results/ directory (no arguments)
+engine/analyse-result-set.sh
+```
+
+The script checks for:
+
+| Finding | What it means |
+|---|---|
+| `"Error in clock"` errors | Publisher host CPU saturated — sdkperf cannot sustain the requested rate |
+| Publish rate flat across all scenarios | Publisher host or NIC is the bottleneck regardless of target |
+| Low publish rate consistent across message sizes | WAN or throttled network link between publisher and broker |
+| NIC approaching 1 GbE / 10 GbE | Publisher or consumer NIC bandwidth limit |
+| Low persistent publish rate (target >> achieved) | Storage IOPS limit on the broker |
+| Consumer rate < publish_rate × fanout | Messages dropped or not delivered to all subscribers |
+| All persistent fail, direct OK | VPN message spool quota, guaranteed messaging not enabled, or missing endpoint-create permission |
+| Publisher near target but all tests fail | Broker CPU, memory, or NIC is the bottleneck |
 
 ---
 
