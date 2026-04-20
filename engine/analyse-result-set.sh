@@ -192,6 +192,42 @@ for file in "${files[@]}"; do
     fi
   fi
 
+  # ── Partial publisher host count ────────────────────────────────────────────
+  # If pub_rate × fanout is a consistent fraction of target across failing tests,
+  # fewer publisher hosts contributed than the inventory specifies.
+  # frac = pr * fo * 100 / tr  → ~100% when all hosts run, ~50% if half missing, etc.
+  if [ "${fail}" -ge 2 ] 2>/dev/null; then
+    ph50=0; ph33=0; ph25=0; ph_tests=0; ph_seen=0
+    for (( i=0; i<n; i++ )); do
+      [ "${a_res[$i]}" = "Fail" ] || continue
+      _pr="${a_pr[$i]}"; _fo="${a_fo[$i]}"; _tr="${a_tr[$i]}"; _ph="${a_ph[$i]:-1}"
+      [ "${_pr}" -le 0 ]  2>/dev/null && continue
+      [ "${_fo}" -le 0 ]  2>/dev/null && continue
+      [ "${_tr}" -le 0 ]  2>/dev/null && continue
+      [ "${_ph}" -le 1 ]  2>/dev/null && continue   # skip single-host tests
+      (( ph_tests++ ))
+      [ "${_ph}" -gt "${ph_seen}" ] && ph_seen="${_ph}"
+      frac=$(( _pr * _fo * 100 / _tr ))
+      if   [ "${frac}" -ge 45 ] && [ "${frac}" -le 55 ]; then (( ph50++ ))
+      elif [ "${frac}" -ge 30 ] && [ "${frac}" -le 38 ]; then (( ph33++ ))
+      elif [ "${frac}" -ge 22 ] && [ "${frac}" -le 28 ]; then (( ph25++ ))
+      fi
+    done
+    if [ "${ph_tests}" -ge 2 ] 2>/dev/null; then
+      req=$(( ph_tests * 6 / 10 ))   # 60% of qualifying tests must agree
+      if [ "${ph50}" -ge "${req}" ] && [ "${ph_seen}" -ge 2 ] 2>/dev/null; then
+        actual=$(( ph_seen / 2 ))
+        note "Partial publisher contribution (~50% of expected): publisher rate × fanout ≈ 50% of target across failing tests, consistent with only ${actual} of ${ph_seen} expected publisher hosts running. Note: Ansible echo_end uses run_once so the host IP in the result file is not a count of active publishers — the shortfall can only be inferred from rates. Check all [pubhost] entries in config/host are reachable (ansible -i config/host -m ping pubhost) and re-run. Throughput results from affected tests understate the broker's true capacity."
+      elif [ "${ph33}" -ge "${req}" ] && [ "${ph_seen}" -ge 3 ] 2>/dev/null; then
+        actual=$(( ph_seen / 3 ))
+        note "Partial publisher contribution (~33% of expected): publisher rate × fanout ≈ 33% of target across failing tests, consistent with only ${actual} of ${ph_seen} expected publisher hosts running. Verify all [pubhost] hosts in config/host are reachable and re-run."
+      elif [ "${ph25}" -ge "${req}" ] && [ "${ph_seen}" -ge 4 ] 2>/dev/null; then
+        actual=$(( ph_seen / 4 ))
+        note "Partial publisher contribution (~25% of expected): publisher rate × fanout ≈ 25% of target across failing tests, consistent with only ${actual} of ${ph_seen} expected publisher hosts running. Verify all [pubhost] hosts in config/host are reachable and re-run."
+      fi
+    fi
+  fi
+
   # ── Per-scenario checks ────────────────────────────────────────────────────────
   # Track whether a publisher-side bottleneck was already identified (suppresses
   # fanout delivery false positives caused by throttled publishers)
@@ -211,12 +247,17 @@ for file in "${files[@]}"; do
     con_bw_kbs=$(( cr * sz / 1024 ))
     pub_bw_per_host_kbs=$(( pub_bw_kbs / (ph > 0 ? ph : 1) ))
 
-    # Publisher NIC: always flag near 10 GbE (hard ceiling regardless of pass/fail)
-    # Only flag near 1 GbE if test failed (otherwise it's not the bottleneck)
-    if [ "${pub_bw_per_host_kbs}" -gt 1037598 ] 2>/dev/null; then
-      note "${sz}B ${mt} f=${fo}: Publisher NIC near 10 GbE limit (~$(( pub_bw_per_host_kbs / 1024 )) MB/s per host). To go higher, add more publisher hosts (increase parallel_hosts)."
-    elif [ "${pub_bw_per_host_kbs}" -gt 103760 ] && [ "${res}" = "Fail" ] 2>/dev/null; then
-      note "${sz}B ${mt} f=${fo}: Publisher throughput ~$(( pub_bw_per_host_kbs / 1024 )) MB/s per host — near 1 GbE NIC capacity. If the publisher host has a 1 GbE NIC, this is the bottleneck. Upgrade to 10 GbE or add more publisher hosts."
+    # Publisher NIC: suppress when a publisher-side host issue is already flagged —
+    # pub_bw_per_host_kbs is computed using spec'd ph, not actual running hosts,
+    # so it would be misleading when fewer hosts ran than expected.
+    # Always flag near 10 GbE (hard ceiling regardless of pass/fail); only flag
+    # near 1 GbE if test failed (otherwise it's not the bottleneck).
+    if ! ${pub_bottleneck_flagged} 2>/dev/null; then
+      if [ "${pub_bw_per_host_kbs}" -gt 1037598 ] 2>/dev/null; then
+        note "${sz}B ${mt} f=${fo}: Publisher NIC near 10 GbE limit (~$(( pub_bw_per_host_kbs / 1024 )) MB/s per host). To go higher, add more publisher hosts (increase parallel_hosts)."
+      elif [ "${pub_bw_per_host_kbs}" -gt 103760 ] && [ "${res}" = "Fail" ] 2>/dev/null; then
+        note "${sz}B ${mt} f=${fo}: Publisher throughput ~$(( pub_bw_per_host_kbs / 1024 )) MB/s per host — near 1 GbE NIC capacity. If the publisher host has a 1 GbE NIC, this is the bottleneck. Upgrade to 10 GbE or add more publisher hosts."
+      fi
     fi
 
     # Consumer NIC: always flag near 10 GbE; only flag near 1 GbE on failure
@@ -227,8 +268,11 @@ for file in "${files[@]}"; do
     fi
 
     # Persistent storage IOPS: only flag on failure, and only when the pub rate
-    # is clearly below the target (not just a conservative low-target test)
-    if [ "${mt}" = "persistent" ] && [ "${res}" = "Fail" ] && \
+    # is clearly below the target (not just a conservative low-target test).
+    # Suppress when a publisher-side host issue is already flagged — a low pub
+    # rate caused by missing hosts would otherwise generate a false IOPS warning.
+    if ! ${pub_bottleneck_flagged} && \
+       [ "${mt}" = "persistent" ] && [ "${res}" = "Fail" ] && \
        [ "${pr}" -lt 5000 ] && [ "${tr}" -gt 10000 ] 2>/dev/null; then
       note "${sz}B persistent f=${fo}: Publisher achieved only ${pr} msg/sec (target ${tr}). At 1 write per message, this is ~${pr} IOPS — possibly storage IOPS limited on the broker (e.g. AWS EBS gp3 default is 3000 IOPS). Check broker storage performance; for cloud deployments increase EBS IOPS or use instance-store volumes."
     fi
@@ -259,11 +303,16 @@ for file in "${files[@]}"; do
   fi
 
   # ── Publisher rate near target but all fail → broker is bottleneck ─────────────
-  if [ "${fail}" -gt 0 ] && [ "${fail}" -eq "${n}" ] && [ "${max_pr}" -gt 50000 ] 2>/dev/null; then
+  # Guard: skip if a publisher-side issue is already identified (partial hosts,
+  # flat rate, WAN) to avoid falsely blaming the broker.
+  if ! ${pub_bottleneck_flagged} && \
+     [ "${fail}" -gt 0 ] && [ "${fail}" -eq "${n}" ] && [ "${max_pr}" -gt 50000 ] 2>/dev/null; then
     pub_at_target=0
     for (( i=0; i<n; i++ )); do
-      pr="${a_pr[$i]}"; tr="${a_tr[$i]}"; fo="${a_fo[$i]:-1}"; ph="${a_ph[$i]:-1}"
-      expected_pub=$(( tr / (fo > 0 ? fo : 1) / (ph > 0 ? ph : 1) ))
+      pr="${a_pr[$i]}"; tr="${a_tr[$i]}"; fo="${a_fo[$i]:-1}"
+      # Compare total pub rate against total expected ingress (tr / fanout),
+      # not against per-host expected — ph is irrelevant for total vs total.
+      expected_pub=$(( tr / (fo > 0 ? fo : 1) ))
       if [ "${expected_pub}" -gt 0 ] 2>/dev/null; then
         pct=$(( pr * 100 / expected_pub ))
         if [ "${pct}" -ge 85 ]; then (( pub_at_target++ )); fi
