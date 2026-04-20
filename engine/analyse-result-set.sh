@@ -52,7 +52,7 @@ for file in "${files[@]}"; do
   echo "============================================================"
 
   # Print Test environment header if present (new-format files)
-  env_block=$(head -8 "${file}" | grep -A6 'Test environment' | sed 's/^/  /')
+  env_block=$(head -9 "${file}" | grep -A7 'Test environment' | sed 's/^/  /')
   [ -n "${env_block}" ] && { echo "${env_block}"; echo ""; }
 
   # ── Parse all scenarios from the file ─────────────────────────────────────────

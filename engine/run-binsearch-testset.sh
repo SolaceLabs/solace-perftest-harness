@@ -347,11 +347,13 @@ done
 echo "Finished testset, compiling results..."
 if ls "${log_dir}/${testsetprefix}"_*.log 1>/dev/null 2>&1; then
   {
+    . "${BASH_SOURCE%/*}/../VERSION"
     printf "Test environment\n"
     printf "  Publisher hosts  (%d): %s\n" "${#_pub_hosts[@]}" "${_pub_host_str}"
     printf "  Subscriber hosts (%d): %s\n" "${#_sub_hosts[@]}" "${_sub_host_str}"
     printf "  Publisher host cores:  %s\n" "${_pub_cores}"
-    printf "  Subscriber host cores: %s\n\n" "${_sub_cores}"
+    printf "  Subscriber host cores: %s\n" "${_sub_cores}"
+    printf "  Harness version:       %s (%s)\n\n" "${HARNESS_VERSION}" "${HARNESS_DATE}"
     cat $(ls -rt "${log_dir}/${testsetprefix}"_*.log) | egrep -A 16 "echo_end|RESULT" | grep -A 25 "echo_end"
   } | tee "${result_dir}/${testsetprefix}_${msg_type}_result.txt"
 fi
