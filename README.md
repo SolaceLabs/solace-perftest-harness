@@ -26,6 +26,8 @@ setup.sh                         # Interactive setup wizard — configures hosts
 start-benchmarking-test.sh       # Interactive menu to select and run a benchmarking test
 start-standard-discovery-test.sh  # Wrapper to run a generic discovery test (prompts for all parameters)
 start-custom-discovery-test.sh   # Builds a custom discovery testset and saves it to custom-sets/
+VERSION                          # Harness version and release date (sourced by runner scripts)
+bump-version.sh                  # Updates VERSION to a new semver and today's date
 
 engine/                          # Core test engine
 engine/run-testset.sh            # Runs a fixed-target testset (pass/fail against known rates)
@@ -201,6 +203,7 @@ The script checks for:
 | `"Error in clock"` errors | Publisher host CPU saturated — sdkperf cannot sustain the requested rate |
 | Publish rate flat across all scenarios | Publisher host or NIC is the bottleneck regardless of target |
 | Low publish rate consistent across message sizes | WAN or throttled network link between publisher and broker |
+| Publisher rate consistently ~50%/33%/25% of expected | Fewer publisher hosts contributed than specified — one or more `[pubhost]` entries were unreachable during the Ansible run |
 | NIC approaching 1 GbE / 10 GbE | Publisher or consumer NIC bandwidth limit |
 | Low persistent publish rate (target >> achieved) | Storage IOPS limit on the broker |
 | Consumer rate < publish_rate × fanout | Messages dropped or not delivered to all subscribers |
@@ -260,6 +263,20 @@ Key parameters in `engine/start-sdk.yaml`:
 | `sshuser` | `perfharness` | SSH user on test hosts |
 | `sdk_publishers` | 4 | sdkperf_c publisher processes per host (match to core count) |
 | `runlength` | 120 | Default run length (overridden by calling script) |
+
+---
+
+## Versioning
+
+The harness version and release date are stored in `VERSION` at the repo root and sourced by the runner scripts. The version is written into the "Test environment" header of every result file, making it easy to reproduce or compare runs.
+
+To bump the version before committing a significant change:
+
+```bash
+./bump-version.sh v2.2.0
+```
+
+This updates `VERSION` to the new semver and sets the date to today. The `VERSION` file should be committed together with the change it describes.
 
 ---
 
