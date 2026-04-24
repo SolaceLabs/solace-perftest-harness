@@ -29,6 +29,7 @@ start-custom-discovery-test.sh   # Builds a custom discovery testset and saves i
 VERSION                          # Harness version and release date (sourced by runner scripts)
 bump-version.sh                  # Updates VERSION to a new semver and today's date
 CLAUDE.md                        # Guidance for Claude Code (architecture, commands, formats)
+CLAUDE.private.md                # Private Claude context — engagement results and notes (gitignored, not committed)
 
 engine/                          # Core test engine
 engine/run-testset.sh            # Runs a fixed-target testset (pass/fail against known rates)
