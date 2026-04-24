@@ -28,6 +28,7 @@ start-standard-discovery-test.sh  # Wrapper to run a generic discovery test (pro
 start-custom-discovery-test.sh   # Builds a custom discovery testset and saves it to custom-sets/
 VERSION                          # Harness version and release date (sourced by runner scripts)
 bump-version.sh                  # Updates VERSION to a new semver and today's date
+CLAUDE.md                        # Guidance for Claude Code (architecture, commands, formats)
 
 engine/                          # Core test engine
 engine/run-testset.sh            # Runs a fixed-target testset (pass/fail against known rates)
@@ -44,7 +45,7 @@ pubSubTools/                     # sdkperf_c binary and licences (not included i
 config/host                      # Ansible inventory (publisher and consumer hosts)
 config/credentials.yaml          # Broker credentials for sdkperf (gitignored — not committed)
 config/credentials.yaml.example  # Credentials template
-docs/                            # Architecture overview and additional documentation
+docs/                            # Architecture overview, additional documentation, and LLM tool definitions
 results/                         # Test result output files
 temp/                            # Temporary per-iteration logs (cleaned up after each run)
 ```
@@ -283,6 +284,8 @@ This updates `VERSION` to the new semver and sets the date to today. The `VERSIO
 ## Additional documentation
 
 - `docs/Perf Test Harness-Overview.pptx` — architecture and methodology overview
+- `docs/tools.json` — Anthropic-format tool definitions for the harness operations; pass the `tools` array to the Claude API to give an LLM the ability to run tests and analyse results programmatically
+- `CLAUDE.md` — guidance for Claude Code: architecture overview, common commands, and test format reference
 
 ## Authors
 
