@@ -1,0 +1,225 @@
+{
+  "_meta": {
+    "format": "anthropic-tools-v1",
+    "description": "Tool definitions for the Solace Performance Test Harness. Pass the 'tools' array to the Claude API tools parameter, or use individually with any OpenAI-compatible tool-calling interface.",
+    "prerequisites": "Ansible installed; sdkperf_c binary in pubSubTools/; config/credentials.yaml present (copy from config/credentials.yaml.example). All commands must run from the repository root on a Linux filesystem (not a Windows path — use a /tmp clone if needed).",
+    "working_directory": "Repository root (scripts use BASH_SOURCE-relative paths and must be invoked with ./ from within the repo)"
+  },
+  "tools": [
+    {
+      "name": "list_benchmarking_tests",
+      "description": "List all available pre-configured fixed-target benchmarking testsets. Returns testset names that can be passed to run_benchmarking_test. Each testset targets a specific Solace broker tier and messaging configuration.\n\nCommand: ls benchmarking-tests/*.sh | sed 's|benchmarking-tests/||; s|\\.sh||' | sort",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "name": "run_benchmarking_test",
+      "description": "Run a pre-configured fixed-target benchmarking testset against a Solace broker. Each scenario is tested once at the expected peak rate and reported as PASS (consumer rate ≥ 95% of target) or FAIL. Results are written to results/{prefix}_{msg_type}_result.txt and analysed automatically on completion.\n\nTier naming: standard = Standard edition; ent-1k/10k/100k = Enterprise tiers (max ~1k/10k/100k connections); 3560-ADB4 = Solace 3560 hardware appliance with ADB4 blade.\nVariants: direct = direct messaging; gm-ha/gm-noha = guaranteed messaging with/without HA; quick = abbreviated run covering key scenarios only.\n\nCommand: ./start-benchmarking-test.sh {test_name} {broker}",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "test_name": {
+            "type": "string",
+            "description": "Name of the benchmarking testset to run.",
+            "enum": [
+              "ent-1k-direct",
+              "ent-1k-gm-ha",
+              "ent-1k-gm-noha",
+              "ent-1k-quick",
+              "ent-10k-direct",
+              "ent-10k-gm-ha",
+              "ent-10k-gm-noha",
+              "ent-10k-quick",
+              "ent-100k-direct",
+              "ent-100k-gm-ha",
+              "ent-100k-gm-noha",
+              "ent-100k-quick",
+              "standard-direct",
+              "standard-gm-ha",
+              "standard-gm-noha",
+              "standard-quick",
+              "3560-ADB4-direct",
+              "3560-ADB4-gm-ha"
+            ]
+          },
+          "broker": {
+            "type": "string",
+            "description": "Broker IP address or hostname."
+          }
+        },
+        "required": ["test_name", "broker"]
+      }
+    },
+    {
+      "name": "run_discovery_test",
+      "description": "Discover the maximum sustained throughput of a Solace broker for each scenario using an exponential probe followed by binary search. No target rates are required — the harness finds the highest rate the broker can sustain end-to-end. Results are written to results/{prefix}_{msg_type}_result.txt and analysed automatically.\n\nAlgorithm: exponential probe starts at upper_bound/1024 and doubles until first failure; binary search converges to ±1% precision (or ±500 msgs/sec floor) within search_iterations (default 10) iterations.\n\nUpper bounds: the probe starting point scales from upper_bound/1024, so set upper_bound higher for more capable brokers (e.g. 25000000 for the 3560 ADB4 hardware appliance).\n\nCommand: Sets sshuser and upper-bound env vars, then calls engine/run-binsearch-testset.sh with scenario arrays built from the provided sizes, fanouts, parallel_hosts, and msg_types.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "broker": {
+            "type": "string",
+            "description": "Broker IP address or hostname."
+          },
+          "prefix": {
+            "type": "string",
+            "description": "Result file prefix. Result written to results/{prefix}_{msg_type}_result.txt.",
+            "default": "discovery"
+          },
+          "sshuser": {
+            "type": "string",
+            "description": "SSH user on test hosts. Defaults to the value in config/credentials.yaml."
+          },
+          "parallel_hosts": {
+            "type": "integer",
+            "description": "Number of parallel publisher/subscriber host pairs to use. More hosts allow higher aggregate rates.",
+            "minimum": 1,
+            "default": 1
+          },
+          "msg_types": {
+            "type": "array",
+            "description": "Message types to test.",
+            "items": {
+              "type": "string",
+              "enum": ["direct", "persistent", "nonpersistent"]
+            },
+            "default": ["direct", "persistent"]
+          },
+          "msg_sizes": {
+            "type": "array",
+            "description": "Message sizes in bytes to include in the scenario matrix.",
+            "items": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "default": [100, 1024, 20480]
+          },
+          "fanouts": {
+            "type": "array",
+            "description": "Fanout values to include in the scenario matrix. Fanout is the number of consumer subscriptions per published message.",
+            "items": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "default": [1, 5, 50]
+          },
+          "upper_bound_direct": {
+            "type": "integer",
+            "description": "Probe upper bound for direct messaging (msgs/sec). Conservative default suits software brokers. Increase for hardware appliances (e.g. 25000000 for 3560 ADB4).",
+            "minimum": 1,
+            "default": 5000000
+          },
+          "upper_bound_nonpersistent": {
+            "type": "integer",
+            "description": "Probe upper bound for non-persistent messaging (msgs/sec).",
+            "minimum": 1,
+            "default": 2000000
+          },
+          "upper_bound_persistent": {
+            "type": "integer",
+            "description": "Probe upper bound for persistent (guaranteed) messaging (msgs/sec).",
+            "minimum": 1,
+            "default": 1000000
+          }
+        },
+        "required": ["broker"]
+      }
+    },
+    {
+      "name": "run_custom_testset",
+      "description": "Run a previously generated custom discovery testset from custom-sets/. Custom testsets are created by start-custom-discovery-test.sh and saved as custom-sets/{name}.sh. Use list_results to see results from prior runs.\n\nCommand: custom-sets/{name}.sh [{broker}]",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Custom testset name — the filename without path or .sh extension (e.g. 'my-broker-test' for custom-sets/my-broker-test.sh)."
+          },
+          "broker": {
+            "type": "string",
+            "description": "Broker IP address or hostname. If omitted, uses the broker embedded in the testset at creation time (if any)."
+          }
+        },
+        "required": ["name"]
+      }
+    },
+    {
+      "name": "run_single_test",
+      "description": "Run a single performance test scenario directly via the Ansible playbook and return the aggregate publisher and consumer rates. Useful for spot-checking a specific scenario without running a full testset. Does not write a result file.\n\ntarget_msg_rate is the expected total consumer-side rate and must include the fanout multiplier (e.g. 100k msgs/sec published with fanout=5 means target_msg_rate=500000). The playbook divides by parallel_hosts×fanout to derive the per-publisher rate.\n\nCommand: engine/run-test.sh -e '{\"broker\":\"...\",\"parallel_hosts\":...,\"target_msg_rate\":...,\"msg_size\":...,\"sdk_fanout\":...,\"runlength\":...,\"mt\":\"...\",\"sshuser\":\"...\"}'",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "broker": {
+            "type": "string",
+            "description": "Broker IP address or hostname."
+          },
+          "msg_size": {
+            "type": "integer",
+            "description": "Message size in bytes.",
+            "minimum": 1
+          },
+          "fanout": {
+            "type": "integer",
+            "description": "Number of consumer subscriptions per published message.",
+            "minimum": 1
+          },
+          "target_msg_rate": {
+            "type": "integer",
+            "description": "Target total consumer message rate (msgs/sec), including the fanout multiplier. Example: 1000 msgs/sec published with fanout=5 → target_msg_rate=5000.",
+            "minimum": 1
+          },
+          "msg_type": {
+            "type": "string",
+            "description": "Messaging mode.",
+            "enum": ["direct", "nonpersistent", "persistent"]
+          },
+          "parallel_hosts": {
+            "type": "integer",
+            "description": "Number of parallel publisher/subscriber host pairs.",
+            "minimum": 1,
+            "default": 1
+          },
+          "runlength": {
+            "type": "integer",
+            "description": "Test duration in seconds.",
+            "minimum": 10,
+            "default": 60
+          },
+          "sshuser": {
+            "type": "string",
+            "description": "SSH user on test hosts. Defaults to value in config/credentials.yaml."
+          }
+        },
+        "required": ["broker", "msg_size", "fanout", "target_msg_rate", "msg_type"]
+      }
+    },
+    {
+      "name": "analyse_results",
+      "description": "Parse result files and print a diagnostic summary table plus findings for each identified bottleneck or configuration issue.\n\nChecks performed:\n- 'Error in clock' entries → publisher CPU saturated, cannot sustain the requested rate\n- Publish rate flat across all scenarios → publisher host or NIC is the absolute ceiling\n- Low publish rate consistent across message sizes → WAN or throttled network link\n- Consumer rate ~50%/33%/25% of expected → 1/2, 1/3, or 1/4 of publisher hosts reached (SSH issue)\n- Publisher or consumer bandwidth near 1 GbE (>100 MB/s) or 10 GbE (>1 GB/s)\n- Low persistent publish rate with target >> achieved → broker storage IOPS limit\n- Consumer rate < publish_rate × fanout → message drops or subscription failures\n- All persistent fail while direct passes → VPN spool quota, endpoint-create permission missing, or guaranteed messaging not licensed\n\nCommand: engine/analyse-result-set.sh [paths...]",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "paths": {
+            "type": "array",
+            "description": "Result file paths, directories, or shorthand names to analyse. Shorthand names resolve to results/{name}_result.txt (e.g. '1k_mixed' → results/1k_mixed_result.txt). Omit to scan the entire results/ directory.",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "list_results",
+      "description": "List available result files in the results/ directory. Result filenames follow the pattern {testsetprefix}_{msg_type}_result.txt. Pass any of these names (or paths) to analyse_results for diagnostic analysis.\n\nCommand: find results/ -name '*_result.txt' | sort",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  ]
+}
