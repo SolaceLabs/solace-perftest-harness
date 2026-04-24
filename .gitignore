@@ -3,3 +3,4 @@
 .claude/
 config/credentials.yaml
 /custom-sets/*.sh
+CLAUDE.private.md
