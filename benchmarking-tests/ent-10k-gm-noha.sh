@@ -1,5 +1,6 @@
 #!/bin/bash
-#Test set (guaranteed messaging) to run against a medium enterprise software broker (4 cores) (no redundancy)
+# Benchmarking test (guaranteed messaging, non-HA) — self-managed software broker, 10k tier (8 vCPU)
+# Reference: SolOS 10.8.x+, modern cloud VM or comparable on-prem hardware, no TLS, non-HA
 broker="${1}" #broker IP/DNS
 testsetprefix="10k-noha"
 msg_type="persistent"
@@ -27,7 +28,7 @@ testarray2=""\
 testarray3=""\
 "2048:1:30000:2:${msg_type} "\
 "2048:2:70000:2:${msg_type} "\
-"2048:5:130000:3:${msg_type} "\
+"2048:5:130000:2:${msg_type} "\
 "2048:10:140000:2:${msg_type} "\
 "2048:50:320000:2:${msg_type} "\
 ";" #need to  end with to separate the various test arrays;

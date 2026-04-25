@@ -3,6 +3,7 @@
 .claude/
 config/credentials.yaml
 /custom-sets/*.sh
-/benchmarking-tests/cloud-aws-*.sh
+/benchmarking-tests/cloud-*.sh
+/benchmarking-tests/hiperf-*.sh
 CLAUDE.private.md
 /results/

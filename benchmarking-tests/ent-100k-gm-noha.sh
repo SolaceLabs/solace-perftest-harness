@@ -1,5 +1,6 @@
 #!/bin/bash
-#Test set (guaranteed messaging) to run against a large enterprise software broker (8 cores) (no redundancy)
+# Benchmarking test (guaranteed messaging, non-HA) — self-managed software broker, 100k tier (16 vCPU)
+# Reference: SolOS 10.8.x+, modern cloud VM or comparable on-prem hardware, no TLS, non-HA
 broker="${1}" #broker IP/DNS
 testsetprefix="100k-noha"
 msg_type="persistent"
@@ -11,35 +12,35 @@ msg_type="persistent"
 # Several (up to 7) arrays/testsets can be passed in, if separated by ;
 
 testarray1=""\
-"512:1:80000:4:${msg_type} "\
+"512:1:110000:4:${msg_type} "\
 "512:2:140000:4:${msg_type} "\
 "512:5:270000:4:${msg_type} "\
 "512:10:400000:4:${msg_type} "\
 "512:50:620000:2:${msg_type} "\
 ";" #need to  end with to separate the various test arrays;
 testarray2=""\
-"1024:1:74000:4:${msg_type} "\
+"1024:1:100000:4:${msg_type} "\
 "1024:2:150000:4:${msg_type} "\
 "1024:5:270000:4:${msg_type} "\
 "1024:10:390000:4:${msg_type} "\
 "1024:50:625000:2:${msg_type} "\
 ";" #need to  end with to separate the various test arrays;
 testarray3=""\
-"2048:1:59000:4:${msg_type} "\
+"2048:1:80000:4:${msg_type} "\
 "2048:2:120000:4:${msg_type} "\
 "2048:5:226000:4:${msg_type} "\
 "2048:10:324000:4:${msg_type} "\
 "2048:50:525000:2:${msg_type} "\
 ";" #need to  end with to separate the various test arrays;
 testarray4=""\
-"4096:1:44000:4:${msg_type} "\
+"4096:1:65000:4:${msg_type} "\
 "4096:2:89000:4:${msg_type} "\
 "4096:5:177000:4:${msg_type} "\
 "4096:10:180000:4:${msg_type} "\
 "4096:50:190000:2:${msg_type} "\
 ";" #need to  end with to separate the various test arrays;
 testarray5=""\
-"20480:1:6000:4:${msg_type} "\
+"20480:1:10000:4:${msg_type} "\
 "20480:2:13000:4:${msg_type} "\
 "20480:5:35000:4:${msg_type} "\
 "20480:10:37000:4:${msg_type} "\

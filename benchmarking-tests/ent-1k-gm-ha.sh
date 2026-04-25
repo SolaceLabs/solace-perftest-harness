@@ -1,5 +1,7 @@
 #!/bin/bash
-#Test set (guaranteed messaging) to run against a small enterprise software broker (2 cores)
+# Benchmarking test (guaranteed messaging, HA) — self-managed software broker, 1k tier (4 vCPU)
+# Reference: SolOS 10.8.x+, modern cloud VM or comparable on-prem hardware, no TLS, HA
+# f1 targets calibrated to match/exceed Cloud AWS 1k (TLS+HA) — our no-TLS setup should beat these
 broker="${1}" #broker IP/DNS
 testsetprefix="1k-ha"
 msg_type="persistent"
@@ -11,28 +13,28 @@ msg_type="persistent"
 # Several (up to 7) arrays/testsets can be passed in, if separated by ;
 
 testarray1=""\
-"512:1:15000:1:${msg_type} "\
+"512:1:20000:1:${msg_type} "\
 "512:2:30000:1:${msg_type} "\
 "512:5:63000:1:${msg_type} "\
 "512:10:95000:1:${msg_type} "\
 "512:50:135000:1:${msg_type} "\
 ";" #need to  end with to separate the various test arrays;
 testarray2=""\
-"1024:1:13000:1:${msg_type} "\
+"1024:1:18000:1:${msg_type} "\
 "1024:2:26000:1:${msg_type} "\
 "1024:5:58000:1:${msg_type} "\
 "1024:10:88000:1:${msg_type} "\
 "1024:50:122000:1:${msg_type} "\
 ";" #need to  end with to separate the various test arrays;
 testarray3=""\
-"2048:1:12000:1:${msg_type} "\
+"2048:1:15000:1:${msg_type} "\
 "2048:2:23000:1:${msg_type} "\
 "2048:5:51000:1:${msg_type} "\
 "2048:10:76000:1:${msg_type} "\
 "2048:50:105000:1:${msg_type} "\
 ";" #need to  end with to separate the various test arrays;
 testarray4=""\
-"4096:1:9000:1:${msg_type} "\
+"4096:1:12000:1:${msg_type} "\
 "4096:2:19000:1:${msg_type} "\
 "4096:5:37000:1:${msg_type} "\
 "4096:10:49000:1:${msg_type} "\
