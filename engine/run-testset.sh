@@ -31,6 +31,7 @@ allowed_error_margin=5 #allowed error margin in pct"
 
 log_dir=${BASH_SOURCE%/*}/../temp #directory for temp files
 result_dir=${BASH_SOURCE%/*}/../results #directory to store results in
+mkdir -p "${log_dir}" "${result_dir}"
 
 # Summary tracking arrays (populated during the test loop)
 _sum_msg_sizes=()
@@ -39,6 +40,7 @@ _sum_mts=()
 _sum_target_rates=()
 _sum_achieved_rates=()
 _sum_results=()
+_abort=false
 
 checkdependencies() {
   echo "Checking dependencies..."
@@ -118,10 +120,12 @@ echo "Running testset for ${testsetprefix} ${msg_type} on ${broker}"...
 xIFS=$IFS #remember internal field separator
 IFS=$';'  #set ifs to ; for this for loop
 for testarray in ${testarray7} ${testarray6} ${testarray5} ${testarray4} ${testarray3} ${testarray2} ${testarray1}; do
+  [ "${_abort}" = "true" ] && break
   if [ -n "${testarray}" ]; then
     echo "testarray=${testarray}"
     IFS=$xIFS #reset ifs for next for loop
     for parameters in ${testarray}; do
+      [ "${_abort}" = "true" ] && break
       if [ -n "${parameters}" ]; then
         # Parse parameters for a single test
         echo "parameters=${parameters}"
@@ -139,6 +143,10 @@ for testarray in ${testarray7} ${testarray6} ${testarray5} ${testarray4} ${testa
           "${BASH_SOURCE%/*}/run-test.sh" -e '{"broker":'${broker}',"parallel_hosts":'${hosts}',"target_msg_rate":'${msgrate}',"msg_size":'${msg_size}',"sdk_fanout":'${fanout}',"runlength":'${runlength}',"mt":"'${mt}'","sshuser":"'${sshuser}'"}' | tee ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log
           #Parse and log results and check for success/failure
           receiver_rate=`cat ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log | grep "all  consumers:" | awk 'BEGIN { FS= " " }; { print $5 }'`
+          if ! [[ "${receiver_rate}" =~ ^[0-9]+$ ]]; then
+            echo "ERROR: No consumer rate received — broker may be unreachable or credentials incorrect. Aborting remaining scenarios." | tee -a ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log
+            _abort=true
+          fi
           echo "allowed error margin = ${allowed_error_margin} %" | tee -a ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log
           let withinerrormargin="$msgrate - ( $msgrate / 100 * $allowed_error_margin )"
           echo "target rate - error margin = ${withinerrormargin}" | tee -a ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log

@@ -98,6 +98,10 @@ number_of_clients=$3
 mn=$4
 topic=$5
 add_args=${@:6}
+# Disable TLS certificate validation for test environments using tcps://
+if echo "${add_args}" | grep -q "tcps://"; then
+  epl="${epl},SOLCLIENT_SESSION_PROP_SSL_VALIDATE_CERTIFICATE,0"
+fi
 export rate=$((${max_msg_rate}/${number_of_clients}))
 export mn=$((${mn}/${number_of_clients}))
 

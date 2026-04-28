@@ -85,6 +85,10 @@ number_of_clients=$2
 topic=$3
 fanout=$4
 add_args=${@:5}
+# Disable TLS certificate validation for test environments using tcps://
+if echo "${add_args}" | grep -q "tcps://"; then
+  epl="${epl},SOLCLIENT_SESSION_PROP_SSL_VALIDATE_CERTIFICATE,0"
+fi
 unset pids
 cleanup
 

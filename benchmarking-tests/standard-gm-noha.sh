@@ -3,6 +3,7 @@
 broker="${1}" #broker IP/DNS
 testsetprefix="standard-noha"
 msg_type="persistent"
+test_type="${msg_type}"
 
 # Tests are being passed in as arrays. 
 # An array can have several tests separated by space.
@@ -60,4 +61,4 @@ testarray7=""\
 "102400:50:2000:1:${msg_type} "\
 ";" #need to  end with to separate the various test arrays;
 
-${BASH_SOURCE%/*}/../engine/run-testset.sh ${broker} ${testsetprefix} ${msg_type} ";"${testarray1[@]} ${testarray2[@]} ${testarray3[@]} ${testarray4[@]} ${testarray5[@]} ${testarray6[@]} ${testarray7[@]}
+${BASH_SOURCE%/*}/../engine/run-testset.sh ${broker} ${testsetprefix} ${test_type} ";"${testarray1[@]} ${testarray2[@]} ${testarray3[@]} ${testarray4[@]} ${testarray5[@]} ${testarray6[@]} ${testarray7[@]}

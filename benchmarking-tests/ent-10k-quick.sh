@@ -2,9 +2,9 @@
 #Test set (direct messaging) to run against a small enterprise software broker (2 cores)
 broker="${1}" #broker IP/DNS
 testsetprefix="10k"
-msg_type="mixed"
 msg_type1="direct"
 msg_type2="persistent"
+test_type="mixed"
 
 # Tests are being passed in as arrays. 
 # An array can have several tests separated by space.
@@ -28,4 +28,4 @@ testarray2=""\
 "1024:50:320000:2:${msg_type2} "\
 ";" #need to  end with to separate the various test arrays;
 
-${BASH_SOURCE%/*}/../engine/run-testset.sh ${broker} ${testsetprefix} ${msg_type} ";"${testarray1[@]} ${testarray2[@]}
+${BASH_SOURCE%/*}/../engine/run-testset.sh ${broker} ${testsetprefix} ${test_type} ";"${testarray1[@]} ${testarray2[@]}

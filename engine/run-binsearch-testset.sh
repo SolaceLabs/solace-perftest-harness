@@ -43,6 +43,7 @@ inter_iteration_cooldown=5 # seconds to wait between iterations (allows broker/q
 
 log_dir=${BASH_SOURCE%/*}/../temp
 result_dir=${BASH_SOURCE%/*}/../results
+mkdir -p "${log_dir}" "${result_dir}"
 
 # Summary tracking arrays (populated during the test loop)
 _sum_msg_sizes=()
@@ -50,6 +51,7 @@ _sum_fanouts=()
 _sum_mts=()
 _sum_max_rates=()
 _sum_results=()
+_abort=false
 
 checkdependencies() {
   echo "Checking dependencies..."
@@ -279,9 +281,11 @@ echo "Running binary search testset for ${testsetprefix} ${msg_type} on ${broker
 xIFS=$IFS
 IFS=$';'
 for testarray in ${testarray7} ${testarray6} ${testarray5} ${testarray4} ${testarray3} ${testarray2} ${testarray1}; do
+  [ "${_abort}" = "true" ] && break
   if [ -n "${testarray}" ]; then
     IFS=$xIFS
     for parameters in ${testarray}; do
+      [ "${_abort}" = "true" ] && break
       if [ -n "${parameters}" ]; then
         msg_size=$(echo ${parameters} | cut -d : -f 1)
         fanout=$(echo ${parameters}   | cut -d : -f 2)
@@ -295,6 +299,13 @@ for testarray in ${testarray7} ${testarray6} ${testarray5} ${testarray4} ${testa
           fi
 
           find_max_rate ${msg_size} ${fanout} ${hosts} ${mt}
+
+          # Abort if no consumer rate was received at all (broker unreachable / credentials wrong)
+          if [ -z "${last_logfile}" ] || ! grep -q "all  consumers:" "${last_logfile}" 2>/dev/null; then
+            echo "ERROR: No consumer rate received — broker may be unreachable or credentials incorrect. Aborting remaining scenarios."
+            _abort=true
+            break
+          fi
 
           # Write the canonical result log for this scenario
           local_final_logfile="${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log"
