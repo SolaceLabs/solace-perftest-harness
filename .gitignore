@@ -3,7 +3,6 @@
 .claude/
 config/credentials.yaml
 /custom-sets/*.sh
-/benchmarking-tests/3560-*.sh
 CLAUDE.private.md
 /docs/ent-vs-cloud-target-comparison.md
 /results/
