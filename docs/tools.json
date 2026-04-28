@@ -17,7 +17,7 @@
     },
     {
       "name": "run_benchmarking_test",
-      "description": "Run a pre-configured fixed-target benchmarking testset against a Solace broker. Each scenario is tested once at the expected peak rate and reported as PASS (consumer rate ≥ 95% of target) or FAIL. Results are written to results/{prefix}_{msg_type}_result.txt and analysed automatically on completion.\n\nTier naming: standard = Standard edition; ent-1k/10k/100k = Enterprise tiers (max ~1k/10k/100k connections); 3560-ADB4 = Solace 3560 hardware appliance with ADB4 blade.\nVariants: direct = direct messaging; gm-ha/gm-noha = guaranteed messaging with/without HA; quick = abbreviated run covering key scenarios only.\n\nCommand: ./start-benchmarking-test.sh {test_name} {broker}",
+      "description": "Run a pre-configured fixed-target benchmarking testset against a Solace broker. Each scenario is tested once at the expected peak rate and reported as PASS (consumer rate ≥ 95% of target) or FAIL. Results are written to results/{prefix}_{msg_type}_result.txt and analysed automatically on completion.\n\nTest families:\n- ent-1k/10k/100k: Enterprise software broker tiers (max ~1k/10k/100k connections); calibrated for modern cloud VMs (4/8/16 vCPU, no TLS)\n- hiperf-1k/10k/100k: Same tiers but targets for dedicated on-prem servers (AMD EPYC/Intel Xeon, NVMe SSD, 25GbE+, no TLS); higher than ent targets\n- standard: Solace Standard edition software broker\n- cloud-2025-TLS-1k/10k/100k: Solace Cloud targets (min of AWS and GCP measured rates; TLS+HA)\n- 3560-ADB4-GM650k: Solace 3560 hardware appliance with ADB4 blade, GM650 license key\n\nVariants: direct = direct messaging; gm-ha/gm-noha = guaranteed (persistent) messaging with/without HA; quick = abbreviated run covering key scenarios only.\n\nCommand: ./start-benchmarking-test.sh {test_name} {broker}",
       "input_schema": {
         "type": "object",
         "properties": {
@@ -37,12 +37,28 @@
               "ent-100k-gm-ha",
               "ent-100k-gm-noha",
               "ent-100k-quick",
+              "hiperf-1k-direct",
+              "hiperf-1k-gm-ha",
+              "hiperf-1k-gm-noha",
+              "hiperf-10k-direct",
+              "hiperf-10k-gm-ha",
+              "hiperf-10k-gm-noha",
+              "hiperf-100k-direct",
+              "hiperf-100k-gm-ha",
+              "hiperf-100k-gm-noha",
               "standard-direct",
               "standard-gm-ha",
               "standard-gm-noha",
               "standard-quick",
-              "3560-ADB4-direct",
-              "3560-ADB4-gm-ha"
+              "cloud-2025-TLS-1k-direct",
+              "cloud-2025-TLS-1k-gm",
+              "cloud-2025-TLS-10k-direct",
+              "cloud-2025-TLS-10k-gm",
+              "cloud-2025-TLS-100k-direct",
+              "cloud-2025-TLS-100k-gm",
+              "3560-ADB4-GM650k-direct",
+              "3560-ADB4-GM650k-gm-ha",
+              "3560-ADB4-GM650k-quick"
             ]
           },
           "broker": {
