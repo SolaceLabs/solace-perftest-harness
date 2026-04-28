@@ -4,3 +4,4 @@
 *.yml   text eol=lf
 *.md    text eol=lf
 host    text eol=lf
+VERSION text eol=lf
