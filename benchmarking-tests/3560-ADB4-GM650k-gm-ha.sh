@@ -16,7 +16,7 @@
 # Test format: msg_size:fanout:overall_msg_rate:parallel_hosts:msg_type
 
 broker="${1}"
-testsetprefix="3560-ADB4-ha"
+testsetprefix="3560-ADB4-GM650k-ha"
 msg_type="persistent"
 test_type="${msg_type}"
 

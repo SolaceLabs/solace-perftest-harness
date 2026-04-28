@@ -1,7 +1,7 @@
 #!/bin/bash
 #Quick test set to run against a 3560 with an ADB4.
 broker="${1}" #broker IP/DNS
-testsetprefix="3560-ADB4-quick"
+testsetprefix="3560-ADB4-GM650k-quick"
 msg_type1="direct"
 msg_type2="persistent"
 test_type="mixed"
