@@ -179,6 +179,7 @@ EOF
 prompt broker_vpn      "Broker VPN name"       "perftest-harness"
 prompt broker_username "Client username"        "perftestharness"
 prompt broker_password "Client password"        "default"
+prompt broker_tls      "Use TLS port 55443 (true/false)" "false"
 
 # --- Write config/credentials.yaml ---
 echo ""
@@ -195,6 +196,7 @@ broker_password: ${broker_password}
 sshuser: ${sshuser}
 pub_cores: ${pub_cores}
 sub_cores: ${sub_cores}
+broker_tls: ${broker_tls}
 EOF
 
 echo "  Done."
@@ -229,6 +231,7 @@ for h in "${sub_hosts[@]}"; do echo "  ${h}"; done
 echo ""
 echo "Broker VPN:       ${broker_vpn}"
 echo "Username:         ${broker_username}"
+echo "TLS (port 55443): ${broker_tls}"
 echo "SSH user:         ${sshuser}"
 echo "Publisher cores:  ${pub_cores}"
 echo "Subscriber cores: ${sub_cores}"

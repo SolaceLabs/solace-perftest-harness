@@ -32,6 +32,7 @@
     act_publishers: "{{ [[ msg_rate | int, sdk_publishers | int] | min, 1] | max }}"
     sdk_consumers: "{{ act_publishers }}" #default number of clients on each consumer hosts - needs to match publishers!
     sdk_credentials: "-cu={{ broker_username | trim }}@{{ broker_vpn | trim }} -cp={{ broker_password | trim }}"
+    broker_cip: "{{ 'tcps://' + broker + ':55443' if (broker_tls | default(false) | bool) else 'tcp://' + broker }}"
     async_retries: "{{ runlength / 10 + 5 | round | int }}" #how long ansible is waiting for the sdks to finish (in 10s intervals).
     
     # some variables for pretty printing variables/test parameters
@@ -105,7 +106,7 @@
       - { src: sdkpublisher.sh, dest: sdkpublisher.sh }
       - { src: sdkconsumers.sh, dest: sdkconsumers.sh }
   - name: 'run consumer'
-    shell:  "NO_CORES={{ sub_cores | default(4) }} {{ script_path }}/sdkconsumers.sh {{ runlength + 10 }} {{ sdk_consumers }} {{ item.topic }} {{ sdk_fanout }} -cip={{ broker }} {{ sdk_credentials }} -cc={{ sdk_consumer_threads }} -mt={{ mt }} | tee sdk.log"
+    shell:  "NO_CORES={{ sub_cores | default(4) }} {{ script_path }}/sdkconsumers.sh {{ runlength + 10 }} {{ sdk_consumers }} {{ item.topic }} {{ sdk_fanout }} -cip={{ broker_cip }} {{ sdk_credentials }} -cc={{ sdk_consumer_threads }} -mt={{ mt }} | tee sdk.log"
     when: "item.groups in group_names and
     ( item.index|int <= parallel_hosts )"
     async: "{{ runlength + 20 }}"
@@ -117,7 +118,7 @@
     with_items:
       - { index: 1, topic: 'topic1', groups: 'subhost' }
   - name: 'run publishers'
-    shell:  "NO_CORES={{ pub_cores | default(4) }} {{ script_path }}/sdkpublisher.sh {{ runlength }} {{ msg_rate }} {{ act_publishers }} 999999999 {{ item.topic }} -cip={{ broker }} {{ sdk_credentials}} -msa={{ msg_size }} -mt={{ mt }} | tee sdk.log"
+    shell:  "NO_CORES={{ pub_cores | default(4) }} {{ script_path }}/sdkpublisher.sh {{ runlength }} {{ msg_rate }} {{ act_publishers }} 999999999 {{ item.topic }} -cip={{ broker_cip }} {{ sdk_credentials}} -msa={{ msg_size }} -mt={{ mt }} | tee sdk.log"
     when: "item.groups in group_names and
     ( item.index|int <= parallel_hosts )"
     async: "{{ runlength + 30 }}"

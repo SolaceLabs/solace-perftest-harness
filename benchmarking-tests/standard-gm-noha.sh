@@ -1,5 +1,5 @@
 #!/bin/bash
-#Test set (guaranteed messaging) to run against a small standard software broker (2 cores) (no redundancy)
+#Test set (guaranteed messaging) to run against a standard software broker (1k) (no redundancy)
 broker="${1}" #broker IP/DNS
 testsetprefix="standard-noha"
 msg_type="persistent"

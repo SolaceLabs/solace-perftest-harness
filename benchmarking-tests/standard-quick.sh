@@ -1,5 +1,5 @@
 #!/bin/bash
-#Test set (direct messaging) to run against a small standard software broker (2 cores)
+#Test set (direct messaging) to run against a standard software broker (1k)
 broker="${1}" #broker IP/DNS
 testsetprefix="standard"
 msg_type="mixed"

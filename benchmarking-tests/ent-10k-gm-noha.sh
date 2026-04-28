@@ -1,6 +1,5 @@
 #!/bin/bash
-# Benchmarking test (guaranteed messaging, non-HA) — self-managed software broker, 10k tier (8 vCPU)
-# Reference: SolOS 10.8.x+, modern cloud VM or comparable on-prem hardware, no TLS, non-HA
+# Benchmarking test (guaranteed messaging, non-HA) — self-managed software broker, 10k tier
 broker="${1}" #broker IP/DNS
 testsetprefix="10k-noha"
 msg_type="persistent"

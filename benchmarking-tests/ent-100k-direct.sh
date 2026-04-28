@@ -1,7 +1,6 @@
 #!/bin/bash
-# Benchmarking test (direct messaging) — self-managed software broker, 100k tier (16 vCPU)
+# Benchmarking test (direct messaging) — self-managed software broker, 100k tier
 # Reference: SolOS 10.8.x+, modern cloud VM or comparable on-prem hardware, no TLS, non-HA
-# Targets calibrated against SW broker 10.8.1 spreadsheet (×0.45 cloud vCPU factor)
 broker="${1}" #broker IP/DNS
 testsetprefix="100k"
 msg_type="direct"

@@ -1,7 +1,6 @@
 #!/bin/bash
-# Benchmarking test (guaranteed messaging, HA) — self-managed software broker, 1k tier (4 vCPU)
+# Benchmarking test (guaranteed messaging, HA) — self-managed software broker, 1k tier
 # Reference: SolOS 10.8.x+, modern cloud VM or comparable on-prem hardware, no TLS, HA
-# f1 targets calibrated to match/exceed Cloud AWS 1k (TLS+HA) — our no-TLS setup should beat these
 broker="${1}" #broker IP/DNS
 testsetprefix="1k-ha"
 msg_type="persistent"

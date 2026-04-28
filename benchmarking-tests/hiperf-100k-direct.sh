@@ -1,6 +1,6 @@
 #!/bin/bash
-# Benchmarking test (direct messaging) — high-performance on-prem, 100k tier (8 physical cores)
-# Reference: SolOS 10.8.1 SW broker spreadsheet (AMD Ryzen 9 3900X, NVMe, 10GbE) × 1.25 (no-TLS uplift)
+# Benchmarking test (direct messaging) — high-performance on-prem, 100k tier
+# Reference: SolOS 10.8.1 SW broker
 # Target hardware: modern AMD EPYC or Intel Xeon server, NVMe SSD, 25GbE NIC, no TLS
 # Note: 51200B/102400B derived from 20480B bandwidth; plateau scenarios assume 25GbE+ NIC
 # 4 pub hosts for f1-f10; 2 pub hosts for f50

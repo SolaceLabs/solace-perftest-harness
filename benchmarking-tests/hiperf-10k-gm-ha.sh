@@ -1,6 +1,6 @@
 #!/bin/bash
-# Benchmarking test (guaranteed messaging, HA) — high-performance on-prem, 10k tier (4 physical cores)
-# Reference: SolOS 10.8.1 SW broker spreadsheet (AMD Ryzen 9 3900X, NVMe, 10GbE) × 1.25 (no-TLS uplift)
+# Benchmarking test (guaranteed messaging, HA) — high-performance on-prem, 10k tier
+# Reference: SolOS 10.8.1 SW broker
 # Target hardware: modern AMD EPYC or Intel Xeon server, NVMe SSD, 25GbE NIC, no TLS, HA
 # 4 pub hosts for f1-f10; 2 pub hosts for f50
 broker="${1}" #broker IP/DNS

@@ -1,6 +1,6 @@
 #!/bin/bash
-# Benchmarking test (guaranteed messaging, non-HA) — high-performance on-prem, 100k tier (8 physical cores)
-# Reference: SolOS 10.8.1 SW broker spreadsheet × 1.25 (no-TLS) × 1.4 f1/f2 uplift for no mate-link writes
+# Benchmarking test (guaranteed messaging, non-HA) — high-performance on-prem, 100k tier
+# Reference: SolOS 10.8.1 SW broker
 # Target hardware: modern AMD EPYC or Intel Xeon server, NVMe SSD, 25GbE NIC, no TLS, non-HA
 # 4 pub hosts for f1-f10; 2 pub hosts for f50
 broker="${1}" #broker IP/DNS
