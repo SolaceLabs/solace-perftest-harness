@@ -81,29 +81,56 @@ Or invoke a testset script directly:
 benchmarking-tests/ent-10k-gm-ha.sh <broker-ip>
 ```
 
-### Software broker tiers (Solace licensing)
+### Self-managed software broker — enterprise tiers
 
-| Script prefix | Licensing tier |
-|---|---|
-| `standard-*` | Standard |
-| `ent-1k-*` | Enterprise 1k |
-| `ent-10k-*` | Enterprise 10k |
-| `ent-100k-*` | Enterprise 100k |
+Calibrated against a modern cloud VM (AMD EPYC, no TLS). Targets are tier-appropriate rates for SolOS 10.8.x+.
+
+| Script prefix | Licensing tier | Typical infra |
+|---|---|---|
+| `standard-*` | Standard | 2 vCPU, 1 pub host |
+| `ent-1k-*` | Enterprise 1k | 4 vCPU, 1 pub host |
+| `ent-10k-*` | Enterprise 10k | 8 vCPU, 4 pub hosts |
+| `ent-100k-*` | Enterprise 100k | 16 vCPU, 4 pub hosts |
 
 Each tier has variants for message type and HA configuration:
 - `-direct` — direct messaging
 - `-gm-noha` — guaranteed (persistent) messaging, standalone broker
-- `-gm-ha` — guaranteed messaging, HA pair (primary + backup + monitoring node (in case of software))
+- `-gm-ha` — guaranteed messaging, HA pair (primary + backup + monitoring node)
 - `-quick` — abbreviated run covering key scenarios only
+
+### Self-managed software broker — high-performance on-prem
+
+Targets for a dedicated on-prem server (AMD EPYC or Intel Xeon, NVMe SSD, 25 GbE+ NIC, no TLS). Rates are approximately 25% higher than the `ent-*` cloud equivalents.
+
+| Script prefix | Licensing tier |
+|---|---|
+| `hiperf-1k-*` | Enterprise 1k |
+| `hiperf-10k-*` | Enterprise 10k |
+| `hiperf-100k-*` | Enterprise 100k |
+
+Variants: `-direct`, `-gm-noha`, `-gm-ha` (no `-quick` variant).
+
+### Solace Cloud baseline (TLS)
+
+Minimum rates that should pass on both AWS and GCP Solace Cloud deployments, measured with TLSv1.2 AES256-GCM-SHA384, HA + encrypted mate-link.
+
+| Script prefix | Tier |
+|---|---|
+| `cloud-2025-TLS-1k-*` | 1k |
+| `cloud-2025-TLS-10k-*` | 10k |
+| `cloud-2025-TLS-100k-*` | 100k |
+
+Variants: `-direct`, `-gm` (single GM variant covers both HA configurations; targets are the minimum of AWS and GCP measurements).
 
 ### Hardware appliance
 
 | Script | Description |
 |---|---|
-| `3560-ADB4-direct.sh` | Solace 3560 appliance — direct messaging |
-| `3560-ADB4-gm-ha.sh` | Solace 3560 appliance — guaranteed messaging (HA pair) |
+| `3560-ADB4-GM650k-direct.sh` | Solace 3560 appliance — direct messaging |
+| `3560-ADB4-GM650k-gm-ha.sh` | Solace 3560 appliance — guaranteed messaging (HA pair) |
+| `3560-ADB4-GM650k-quick.sh` | Solace 3560 appliance — abbreviated run |
 
-Target rates in the 3560 testsets are based on published Solace [specifications](https://solace.com/products/performance/) (11M/24M msg/s direct at 100B f=1/f=10; 640k/2.8M msg/s persistent at 1KB f=1/f=10) and measurements from londonlab.
+Target rates are based on Solace-published measurements for the 3560 with NAB4+ADB4 cards and a GM650 licence key (e.g. ~6.8M msg/s direct at 1KB f=1, ~619k msg/s persistent HA at 1KB f=1). The GM key only affects persistent capacity — direct rates are the same for GM450 and GM650.
 
 ---
 
@@ -284,7 +311,7 @@ This updates `VERSION` to the new semver and sets the date to today. The `VERSIO
 
 ## Additional documentation
 
-- `docs/Perf Test Harness-Overview.pptx` — architecture and methodology overview
+- `docs/Perf Test Harness-Overview-2026.pptx` — architecture and methodology overview (Solace 2025 template)
 - `docs/tools.json` — Anthropic-format tool definitions for the harness operations; pass the `tools` array to the Claude API to give an LLM the ability to run tests and analyse results programmatically
 - `CLAUDE.md` — guidance for Claude Code: architecture overview, common commands, and test format reference
 
