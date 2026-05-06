@@ -76,9 +76,11 @@ echo ""
 echo "--- Search upper bounds (consumer msgs/sec) ---"
 echo "Sets the ceiling for the exponential probe. Use a generous estimate"
 echo "above the expected peak — too low caps results, too high adds probe steps."
-prompt ub_direct      "Direct upper bound (msgs/sec)"         "5000000"
-prompt ub_nonpersist  "Non-persistent upper bound (msgs/sec)" "2000000"
-prompt ub_persist     "Guaranteed upper bound (msgs/sec)"     "1000000"
+echo "  Software broker (cloud VM):     direct=5000000  nonpersist=2000000  persist=1000000"
+echo "  Hardware appliance (e.g. 3560): direct=35000000 nonpersist=35000000 persist=7000000"
+prompt ub_direct      "Direct upper bound (msgs/sec)"         "35000000"
+prompt ub_nonpersist  "Non-persistent upper bound (msgs/sec)" "35000000"
+prompt ub_persist     "Guaranteed upper bound (msgs/sec)"     "7000000"
 
 # --- Validate group count (runner supports up to 7 semicolon-delimited groups) ---
 n_arrays=0

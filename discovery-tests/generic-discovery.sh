@@ -48,9 +48,9 @@ echo "============================================================"
 echo ""
 
 export sshuser
-export search_upper_bound_direct=25000000
-export search_upper_bound_nonpersistent=20000000
-export search_upper_bound_persistent=5000000
+export search_upper_bound_direct=35000000
+export search_upper_bound_nonpersistent=35000000
+export search_upper_bound_persistent=7000000
 
 h=${parallel_hosts}
 
