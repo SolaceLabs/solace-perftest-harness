@@ -4,18 +4,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 If `CLAUDE.private.md` exists in the repo root, read it at the start of the session — it contains private engagement context, active test results, and AWS sizing notes that are not committed to the repository.
 
-## Environment
-
-All test runs must be executed from a Linux filesystem clone, not the Windows working directory (`/mnt/c/...`), because `BASH_SOURCE%/*` path resolution breaks under Windows paths. Use a `/tmp` clone:
-
-```bash
-git clone /mnt/c/Users/Christian/git/solace-perftest-harness /tmp/solace-perftest-harness
-cp /mnt/c/Users/Christian/git/solace-perftest-harness/config/credentials.yaml /tmp/solace-perftest-harness/config/
-cd /tmp/solace-perftest-harness
-```
-
-Always invoke scripts with `./` from within the repo directory (not `bash scriptname.sh` from outside).
-
 ## Prerequisites
 
 - Ansible installed on the controller host
