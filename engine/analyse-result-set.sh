@@ -246,6 +246,7 @@ for file in "${files[@]}"; do
     pub_bw_kbs=$(( pr * sz / 1024 ))
     con_bw_kbs=$(( cr * sz / 1024 ))
     pub_bw_per_host_kbs=$(( pub_bw_kbs / (ph > 0 ? ph : 1) ))
+    con_bw_per_host_kbs=$(( con_bw_kbs / (ph > 0 ? ph : 1) ))
 
     # Publisher NIC: suppress when a publisher-side host issue is already flagged —
     # pub_bw_per_host_kbs is computed using spec'd ph, not actual running hosts,
@@ -261,10 +262,10 @@ for file in "${files[@]}"; do
     fi
 
     # Consumer NIC: always flag near 10 GbE; only flag near 1 GbE on failure
-    if [ "${con_bw_kbs}" -gt 1037598 ] 2>/dev/null; then
-      note "${sz}B ${mt} f=${fo}: Consumer NIC near 10 GbE limit (~$(( con_bw_kbs / 1024 )) MB/s). To go higher, add more subscriber hosts."
-    elif [ "${con_bw_kbs}" -gt 103760 ] && [ "${res}" = "Fail" ] 2>/dev/null; then
-      note "${sz}B ${mt} f=${fo}: Consumer throughput ~$(( con_bw_kbs / 1024 )) MB/s — near 1 GbE NIC capacity. If the subscriber host has a 1 GbE NIC, this is the bottleneck. Add more subscriber hosts or upgrade to 10 GbE."
+    if [ "${con_bw_per_host_kbs}" -gt 1037598 ] 2>/dev/null; then
+      note "${sz}B ${mt} f=${fo}: Consumer NIC near 10 GbE limit (~$(( con_bw_per_host_kbs / 1024 )) MB/s per host). To go higher, add more subscriber hosts."
+    elif [ "${con_bw_per_host_kbs}" -gt 103760 ] && [ "${res}" = "Fail" ] 2>/dev/null; then
+      note "${sz}B ${mt} f=${fo}: Consumer throughput ~$(( con_bw_per_host_kbs / 1024 )) MB/s per host — near 1 GbE NIC capacity. If the subscriber host has a 1 GbE NIC, this is the bottleneck. Add more subscriber hosts or upgrade to 10 GbE."
     fi
 
     # Persistent storage IOPS: only flag on failure, and only when the pub rate
