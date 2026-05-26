@@ -265,6 +265,7 @@ Written by `./setup.sh` and gitignored. Required fields:
 | `broker_username` | Client username sdkperf connects as |
 | `broker_password` | Client password |
 | `sshuser` | SSH user on test hosts |
+| `ssh_port` | SSH port on test hosts (default: `22`) |
 | `pub_cores` | CPU cores on publisher hosts (sets parallel publisher processes) |
 | `sub_cores` | CPU cores on subscriber hosts |
 
@@ -290,6 +291,7 @@ Key parameters in `engine/start-sdk.yaml`:
 | Parameter | Default | Description |
 |---|---|---|
 | `sshuser` | `perfharness` | SSH user on test hosts |
+| `ansible_port` | `ssh_port` from credentials (default `22`) | SSH port used to connect to all test hosts |
 | `sdk_publishers` | 4 | sdkperf_c publisher processes per host (match to core count) |
 | `runlength` | 120 | Default run length (overridden by calling script) |
 
