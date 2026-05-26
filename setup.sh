@@ -91,9 +91,15 @@ Steps to set up SSH keys:
        ssh-copy-id <ssh-user>@<subhost1>
        (repeat for every host you configure below)
 
+     If your hosts use a non-standard SSH port, add -p <port>:
+       ssh-copy-id -p <port> <ssh-user>@<pubhost1>
+
   3. Verify password-free login works:
 
        ssh <ssh-user>@<pubhost1> echo "OK"
+
+     With a non-standard port:
+       ssh -p <port> <ssh-user>@<pubhost1> echo "OK"
 
   The SSH user must exist on all hosts and be the same user
   across all publisher and subscriber hosts. The default user
@@ -121,6 +127,7 @@ press Enter with no input to stop adding hosts for that group.
 EOF
 
 prompt sshuser    "SSH user on test hosts"            "perfharness"
+prompt ssh_port   "SSH port on test hosts"            "22"
 prompt pub_cores  "CPU cores on publisher hosts"     "4"
 prompt sub_cores  "CPU cores on subscriber hosts"    "${pub_cores}"
 echo ""
@@ -194,6 +201,7 @@ broker_vpn: ${broker_vpn}
 broker_username: ${broker_username}
 broker_password: ${broker_password}
 sshuser: ${sshuser}
+ssh_port: ${ssh_port}
 pub_cores: ${pub_cores}
 sub_cores: ${sub_cores}
 broker_tls: ${broker_tls}
@@ -233,6 +241,7 @@ echo "Broker VPN:       ${broker_vpn}"
 echo "Username:         ${broker_username}"
 echo "TLS (port 55443): ${broker_tls}"
 echo "SSH user:         ${sshuser}"
+echo "SSH port:         ${ssh_port}"
 echo "Publisher cores:  ${pub_cores}"
 echo "Subscriber cores: ${sub_cores}"
 echo ""
