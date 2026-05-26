@@ -72,7 +72,7 @@ Scenarios are space-separated within a bash array variable. Multiple arrays are 
 
 **`config/host`** — Ansible inventory with `[pubhost]` and `[subhost]` groups. Written by `setup.sh`.
 
-**`config/credentials.yaml`** — Required fields: `broker_vpn`, `broker_username`, `broker_password`, `sshuser`, `pub_cores`, `sub_cores`. Both runner scripts validate the three broker credential fields before starting and abort early if missing.
+**`config/credentials.yaml`** — Required fields: `broker_vpn`, `broker_username`, `broker_password`, `sshuser`, `pub_cores`, `sub_cores`. Optional: `ssh_port` (default `22`) — sets the SSH port Ansible uses to connect to all test hosts. Both runner scripts validate the three broker credential fields before starting and abort early if missing.
 
 **`VERSION`** — Contains `HARNESS_VERSION` and `HARNESS_DATE`. Sourced by runner scripts and written to the "Test environment" header of every result file. Run `./bump-version.sh vX.Y.Z` before committing.
 
