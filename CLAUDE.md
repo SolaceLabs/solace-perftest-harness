@@ -6,16 +6,20 @@ If `CLAUDE.private.md` exists in the repo root, read it at the start of the sess
 
 ## Prerequisites
 
-- Ansible installed on the controller host
+- Ansible installed on the controller host (`sudo apt install ansible` / `sudo yum install ansible`)
+- `dnsutils` installed for hostname validation (`sudo apt install dnsutils` / `sudo yum install bind-utils`)
 - SSH access to publisher/consumer test hosts (Linux)
 - `sdkperf_c` binary placed in `pubSubTools/` (not included in repo)
 - `config/credentials.yaml` present (gitignored — copy from `config/credentials.yaml.example`)
+
+`setup.sh` checks for both: missing `ansible` aborts setup; missing `dnsutils` prints a warning but continues.
 
 ## Common Commands
 
 ```bash
 # Initial setup
 ./setup.sh                             # Configure hosts and credentials interactively
+                                       # Checks for ansible (hard fail) and dnsutils (warning) before starting
 
 # Running tests
 ./start-benchmarking-test.sh           # Menu: select and run a pre-defined benchmarking testset
