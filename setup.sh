@@ -238,17 +238,26 @@ echo ""
 # --- Write config/host ---
 echo "Writing ${host_file}..."
 
+inventory_entry() {
+  local h="$1"
+  if [[ "${h}" == "localhost" || "${h}" == "127.0.0.1" || "${h}" == "::1" ]]; then
+    echo "${h} ansible_connection=local"
+  else
+    echo "${h}"
+  fi
+}
+
 {
   echo "########################################################"
   echo "# Ansible inventory for Solace performance test harness #"
   echo "########################################################"
   echo "[pubhost]"
   for h in "${pub_hosts[@]}"; do
-    echo "${h}"
+    inventory_entry "${h}"
   done
   echo "[subhost]"
   for h in "${sub_hosts[@]}"; do
-    echo "${h}"
+    inventory_entry "${h}"
   done
 } > "${host_file}"
 
