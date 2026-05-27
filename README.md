@@ -1,67 +1,125 @@
 # Solace Performance Test Harness
 
-A test harness for characterising and validating the message throughput of Solace brokers — both software brokers and hardware appliances. Uses Ansible to deploy [sdkperf_c](https://docs.solace.com/API/SDKPerf/SDKPerf.htm) to remote Linux test hosts and drive publisher/consumer load against the broker under test.
+An automated test harness for measuring and validating the message throughput of Solace brokers — software brokers and hardware appliances alike. Uses Ansible to orchestrate [sdkperf_c](https://docs.solace.com/API/SDKPerf/SDKPerf.htm) across multiple remote Linux test hosts.
+
+### What is it good for?
+
+- **Validate a broker tier before go-live** — run a pre-built benchmarking testset and get a pass/fail result against Solace-published throughput targets for your tier and message type
+- **Characterise new or unknown hardware** — automatically discover the maximum stable message rate a broker can sustain across a range of message sizes, fanout values, and message types, without needing to guess target rates upfront
+- **Reproduce Solace reference performance numbers** — independent, repeatable measurement using the same tooling and methodology as Solace's own published figures
+
+---
+
+## Quickstart
+
+### 1. Set up
+
+Run the guided setup wizard to configure your test hosts and broker credentials:
+
+```bash
+./setup.sh
+```
+
+This writes `config/host` (Ansible inventory) and `config/credentials.yaml`, explains SSH key requirements, and checks that dependencies (`ansible`, `dnsutils`) are installed.
+
+Then place the `sdkperf_c` binary in `pubSubTools/` — download it from the [Solace developer portal](https://solace.com/downloads/).
+
+---
+
+### 2. Choose your mode
+
+#### Validate — run a fixed-target benchmarking test
+
+Use this when you know what tier your broker is and want to confirm it meets spec. Pre-built testsets cover software broker tiers (1k/10k/100k), high-performance on-prem servers, Solace Cloud (TLS), and the 3560 hardware appliance.
+
+```bash
+./start-benchmarking-test.sh          # interactive menu
+# or invoke directly:
+benchmarking-tests/ent-10k-gm-ha.sh <broker-ip>
+```
+
+Each scenario reports **PASS** or **FAIL** against the published target rate (within a 5% margin).
+
+---
+
+#### Characterise — discover the maximum throughput of an unknown broker
+
+Use this when you don't have target rates — new hardware, a new configuration, or initial characterisation of any broker. The harness probes automatically using exponential search followed by binary search, converging to within ±1% of the true ceiling.
+
+```bash
+./start-standard-discovery-test.sh    # standard scenario matrix (100B/1KB/20KB × f1/f5/f50)
+```
+
+---
+
+#### Custom — build a bespoke discovery testset
+
+Use this to design your own scenario matrix: choose message types, sizes, fanout values, host counts, and upper bounds. The wizard generates a reusable script you can re-run at any time.
+
+```bash
+./start-custom-discovery-test.sh
+# saved to custom-sets/<name>.sh — re-run directly:
+./custom-sets/<name>.sh [broker-ip]
+```
+
+---
+
+## How it works
+
+```mermaid
+flowchart LR
+    ctrl["🖥️  Ansible Controller Host\n─────────────────────\nRuns harness scripts\nOrchestrates the test run\nCollects & evaluates results"]
+
+    subgraph pub["Publisher Hosts (up to 4)"]
+        p1["Pubhost 1"]
+        p2["Pubhost 2"]
+        p3["Pubhost 3 / 4"]
+    end
+
+    subgraph sub["Subscriber Hosts (up to 4)"]
+        s1["Subhost 1"]
+        s2["Subhost 2"]
+        s3["Subhost 3 / 4"]
+    end
+
+    broker[("Solace\nBroker")]
+
+    ctrl -- SSH --> pub
+    ctrl -- SSH --> sub
+    pub -- "SMF (publish)" --> broker
+    broker -- "SMF (deliver)" --> sub
+```
+
+The harness is structured in four layers:
+
+```
+User entry points  →  Engine runners  →  Ansible playbook  →  Remote host scripts
+```
+
+1. **User entry points** (`start-*.sh`, `benchmarking-tests/*.sh`, `discovery-tests/*.sh`, `custom-sets/*.sh`) define test scenarios as arrays and delegate to an engine runner.
+
+2. **Engine runners** loop over scenarios and call the Ansible playbook for each one:
+   - `engine/run-testset.sh` — fixed-target mode; each scenario has a known target rate; pass/fail within 5% margin
+   - `engine/run-binsearch-testset.sh` — discovery mode; exponential probe then binary search; stops at ±1% precision
+
+3. **Ansible playbook** (`engine/start-sdk.yaml`) copies `sdkperf_c` and the publisher/consumer scripts to test hosts over SSH, starts consumers first (async), then publishers at the target rate, polls both to completion, and collects stdout.
+
+4. **Remote scripts** (`scripts/sdkpublisher.sh`, `scripts/sdkconsumers.sh`) run on test hosts. Each spawns N sdkperf_c processes pinned to CPU cores via `taskset`, collects rate statistics, and prints a summary line the runner parses.
+
+For a visual walkthrough see `docs/Perf Test Harness-Overview-2026.pptx`.
 
 ---
 
 ## What you will need
 
 - A Solace software broker or hardware appliance to test
-- Publisher and consumer test hosts (Linux) — min 2, ideally 4 or more with 10 GbE connectivity
-- A controller host (Linux) with Ansible installed and SSH access to the test hosts
+- Publisher and consumer test hosts (Linux) — minimum 2, ideally 4 or more with 10 GbE connectivity
+- A controller host (Linux) with Ansible installed and SSH access to all test hosts
 - SSH keys from the controller installed on all test hosts
-- A client username on the broker VPN with publish, subscribe, and guaranteed endpoint create permissions (credentials stored in `config/credentials.yaml`)
-- `sdkperf_c` binary placed in `pubSubTools/` on the controller (copied to test hosts by Ansible)
+- A client username on the broker VPN with publish, subscribe, and guaranteed endpoint create permissions
+- `sdkperf_c` binary placed in `pubSubTools/` on the controller (copied to test hosts by Ansible at run time)
 
-> For minimal testing a single publisher host and a single consumer host is sufficient, but will limit the maximum achievable rates (especially for direct messaging at small message sizes).
-
-Run `./setup.sh` for a guided walkthrough of the above requirements and to configure your test hosts and credentials.
-
----
-
-## Repository structure
-
-```
-setup.sh                         # Interactive setup wizard — configures hosts and explains requirements
-start-benchmarking-test.sh       # Interactive menu to select and run a benchmarking test
-start-standard-discovery-test.sh  # Wrapper to run a generic discovery test (prompts for all parameters)
-start-custom-discovery-test.sh   # Builds a custom discovery testset and saves it to custom-sets/
-VERSION                          # Harness version and release date (sourced by runner scripts)
-bump-version.sh                  # Updates VERSION to a new semver and today's date
-CLAUDE.md                        # Guidance for Claude Code (architecture, commands, formats)
-CLAUDE.private.md                # Private Claude context — engagement results and notes (gitignored, not committed)
-
-engine/                          # Core test engine
-engine/run-testset.sh            # Runs a fixed-target testset (pass/fail against known rates)
-engine/run-binsearch-testset.sh  # Discovers max throughput via exponential probe + binary search
-engine/run-test.sh               # Single-test wrapper around the Ansible playbook
-engine/start-sdk.yaml            # Ansible playbook: deploys sdkperf_c, runs publishers and consumers
-engine/analyse-result-set.sh     # Parses result files and prints diagnostic guidance
-
-benchmarking-tests/              # Fixed-target testsets for known broker tiers
-discovery-tests/                 # Discovery testsets (binary search format)
-custom-sets/                     # User-generated custom discovery testsets (gitignored)
-scripts/                         # sdkpublisher.sh and sdkconsumers.sh — run on test hosts
-pubSubTools/                     # sdkperf_c binary and licences (not included in repo)
-config/host                      # Ansible inventory (publisher and consumer hosts)
-config/credentials.yaml          # Broker credentials for sdkperf (gitignored — not committed)
-config/credentials.yaml.example  # Credentials template
-docs/                            # Architecture overview, additional documentation, and LLM tool definitions
-results/                         # Test result output files
-temp/                            # Temporary per-iteration logs (cleaned up after each run)
-```
-
----
-
-## Getting started
-
-Run the setup wizard to configure your test hosts:
-
-```bash
-./setup.sh
-```
-
-This will explain the infrastructure requirements, guide you through SSH key setup, and write your publisher/subscriber host names to `config/host` and your broker credentials to `config/credentials.yaml`.
+> For minimal testing a single publisher host and a single consumer host is sufficient, but will limit achievable rates — especially for direct messaging at small message sizes where multiple publisher hosts are needed to saturate the broker.
 
 ---
 
@@ -179,32 +237,6 @@ See `discovery-tests/londonlab-discovery.sh` for an example of how to override t
 
 ---
 
-## How the tests work
-
-1. The testset script defines scenarios as arrays and passes them to `engine/run-testset.sh` or `engine/run-binsearch-testset.sh`.
-2. For each scenario the runner calls `engine/run-test.sh`, which invokes the Ansible playbook `engine/start-sdk.yaml`.
-3. Ansible copies `sdkperf_c` and the publisher/consumer scripts to the test hosts, then launches:
-   - **Consumers** asynchronously (started first, so they are ready before publishers)
-   - **Publishers** at the target rate for the configured `runlength` (default: 60 seconds)
-4. After the run, Ansible collects stdout from both sides. The total consumer rate is summed across all hosts and checked against the target (allowing a 5% error margin).
-5. Results are written to `results/` at the end of each testset, followed by an automated diagnostic analysis (see [Analysing results](#analysing-results) below).
-
-### Fixed-target testset format
-```
-msg_size : fanout : overall_msg_rate : parallel_hosts : msg_type
-```
-
-`overall_msg_rate` is the **total consumer rate** expected (i.e. it already includes the fanout multiplier). The playbook divides it by `parallel_hosts × fanout` to derive the per-publisher-host rate.
-
-### Binary search testset format
-```
-msg_size : fanout : parallel_hosts : msg_type
-```
-
-The target rate field is omitted — the script determines it automatically.
-
----
-
 ## Analysing results
 
 `engine/analyse-result-set.sh` is run automatically after each testset completes. It parses the result file and prints a diagnostic summary identifying common bottlenecks and configuration issues.
@@ -294,6 +326,40 @@ Key parameters in `engine/start-sdk.yaml`:
 | `ansible_port` | `ssh_port` from credentials (default `22`) | SSH port used to connect to all test hosts |
 | `sdk_publishers` | 4 | sdkperf_c publisher processes per host (match to core count) |
 | `runlength` | 120 | Default run length (overridden by calling script) |
+
+---
+
+## Repository structure
+
+```
+setup.sh                         # Interactive setup wizard — configures hosts and explains requirements
+start-benchmarking-test.sh       # Interactive menu to select and run a benchmarking test
+start-standard-discovery-test.sh  # Wrapper to run a generic discovery test (prompts for all parameters)
+start-custom-discovery-test.sh   # Builds a custom discovery testset and saves it to custom-sets/
+VERSION                          # Harness version and release date (sourced by runner scripts)
+bump-version.sh                  # Updates VERSION to a new semver and today's date
+CLAUDE.md                        # Guidance for Claude Code (architecture, commands, formats)
+CLAUDE.private.md                # Private Claude context — engagement results and notes (gitignored, not committed)
+
+engine/                          # Core test engine
+engine/run-testset.sh            # Runs a fixed-target testset (pass/fail against known rates)
+engine/run-binsearch-testset.sh  # Discovers max throughput via exponential probe + binary search
+engine/run-test.sh               # Single-test wrapper around the Ansible playbook
+engine/start-sdk.yaml            # Ansible playbook: deploys sdkperf_c, runs publishers and consumers
+engine/analyse-result-set.sh     # Parses result files and prints diagnostic guidance
+
+benchmarking-tests/              # Fixed-target testsets for known broker tiers
+discovery-tests/                 # Discovery testsets (binary search format)
+custom-sets/                     # User-generated custom discovery testsets (gitignored)
+scripts/                         # sdkpublisher.sh and sdkconsumers.sh — run on test hosts
+pubSubTools/                     # sdkperf_c binary and licences (not included in repo)
+config/host                      # Ansible inventory (publisher and consumer hosts)
+config/credentials.yaml          # Broker credentials for sdkperf (gitignored — not committed)
+config/credentials.yaml.example  # Credentials template
+docs/                            # Architecture overview, additional documentation, and LLM tool definitions
+results/                         # Test result output files
+temp/                            # Temporary per-iteration logs (cleaned up after each run)
+```
 
 ---
 
