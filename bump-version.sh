@@ -1,6 +1,6 @@
 #!/bin/bash
 # bump-version.sh — update the harness version and date in VERSION
-# Usage: ./bump-version.sh [new-version]
+# Usage:  ./bump-version.sh [new-version]
 #        e.g.  ./bump-version.sh v2.2.0
 #        If no version given, prompts interactively.
 
