@@ -191,6 +191,26 @@ for i in 1 2 3 4; do
   sub_hosts+=("${h}")
 done
 
+# --- Localhost warning ---
+is_local() { [[ "$1" == "localhost" || "$1" == "127.0.0.1" || "$1" == "::1" ]]; }
+local_warn=0
+for h in "${pub_hosts[@]}" "${sub_hosts[@]}"; do
+  is_local "${h}" && local_warn=1 && break
+done
+if [ "${local_warn}" -eq 1 ]; then
+  echo ""
+  echo "  WARNING: localhost selected for publisher or subscriber host"
+  echo "  --------------------------------------------------------"
+  echo "  Running publisher/subscriber processes on the controller"
+  echo "  is NOT recommended for performance testing. Ansible,"
+  echo "  sdkperf publisher, and sdkperf subscriber processes will"
+  echo "  all compete for the same CPU cores and network interface,"
+  echo "  producing results that understate broker capability."
+  echo ""
+  echo "  Use dedicated remote hosts for representative results."
+  echo ""
+fi
+
 # --- Broker credentials ---
 cat <<'EOF'
 ============================================================
