@@ -17,9 +17,6 @@ fi
 
 new_date="$(date +%Y-%m-%d)"
 
-cat > "${VERSION_FILE}" <<EOF
-HARNESS_VERSION="${new_version}"
-HARNESS_DATE="${new_date}"
-EOF
+printf 'HARNESS_VERSION="%s"\nHARNESS_DATE="%s"\n' "${new_version}" "${new_date}" > "${VERSION_FILE}"
 
 echo "VERSION updated: ${HARNESS_VERSION} → ${new_version} (${new_date})"
