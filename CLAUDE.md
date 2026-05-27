@@ -97,6 +97,20 @@ Upper bound overrides for capable brokers (export before calling the runner):
 
 See `discovery-tests/londonlab-discovery.sh` for an example.
 
+## CRLF and Shell Script Editing
+
+`.gitattributes` enforces `eol=lf` for all `*.sh` files, so fresh clones always get LF line endings. However, editing shell scripts through the Windows filesystem path (`/mnt/c/...`) via Claude's Edit or Write tools reintroduces CRLF, which causes `$'\r': command not found` errors when the scripts are run on Linux.
+
+**Workaround — strip CRLFs before committing any `.sh` file edited from the Windows path:**
+
+```bash
+sed -i 's/\r//' <file>.sh
+```
+
+Verify with `file <file>.sh` — output should say `ASCII text executable` or `UTF-8 text executable` with no mention of `CRLF line terminators`. Then commit normally.
+
+This applies to any shell script touched by Claude Code when operating from `/mnt/c/Users/Christian/git/solace-perftest-harness`. Scripts edited directly on a Linux filesystem clone are not affected.
+
 ## LLM Tool Definitions
 
 `docs/tools.json` contains Anthropic-format tool definitions for the harness operations. Pass the `tools` array to the Claude API `tools` parameter (or any OpenAI-compatible interface) to give an LLM the ability to run tests and analyse results programmatically.
