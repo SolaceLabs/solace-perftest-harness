@@ -7,6 +7,31 @@ script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 host_file="${script_dir}/config/host"
 creds_file="${script_dir}/config/credentials.yaml"
 
+# --- Dependency checks ---
+missing_hard=()
+missing_soft=()
+
+if ! command -v ansible-playbook &>/dev/null; then
+  missing_hard+=("ansible  (install: sudo apt install ansible  / sudo yum install ansible)")
+fi
+if ! command -v nslookup &>/dev/null && ! command -v dig &>/dev/null; then
+  missing_soft+=("dnsutils (install: sudo apt install dnsutils / sudo yum install bind-utils)")
+fi
+
+if [ ${#missing_hard[@]} -gt 0 ]; then
+  echo "ERROR: The following required dependencies are missing:"
+  for m in "${missing_hard[@]}"; do echo "  - ${m}"; done
+  echo ""
+  echo "Install them and re-run setup.sh."
+  exit 1
+fi
+if [ ${#missing_soft[@]} -gt 0 ]; then
+  echo "WARNING: The following optional dependencies are missing:"
+  for m in "${missing_soft[@]}"; do echo "  - ${m}"; done
+  echo "  (DNS lookups will not be available to validate hostnames)"
+  echo ""
+fi
+
 # --- Helper ---
 prompt() {
   local var="$1" label="$2" default="$3" value
