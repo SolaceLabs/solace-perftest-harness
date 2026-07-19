@@ -7,6 +7,7 @@ An automated test harness for measuring and validating the message throughput of
 - **Validate a broker tier before go-live** — run a pre-built benchmarking testset and get a pass/fail result against Solace-published throughput targets for your tier and message type
 - **Characterise new or unknown hardware** — automatically discover the maximum stable message rate a broker can sustain across a range of message sizes, fanout values, and message types, without needing to guess target rates upfront
 - **Reproduce Solace reference performance numbers** — independent, repeatable measurement using the same tooling and methodology as Solace's own published figures
+- **Characterise inter-broker link throughput** — measure the message throughput ceiling of a VPN bridge, MNR, or DMR link by publishing to one broker and subscribing on the other; the harness manages both sides automatically
 
 ---
 
@@ -64,6 +65,18 @@ Use this to design your own scenario matrix: choose message types, sizes, fanout
 
 ---
 
+#### Mesh — characterise a VPN bridge, MNR, or DMR link
+
+Use this when you want to measure the throughput of an inter-broker link rather than a single broker. Publishers connect to one broker; subscribers connect to the second. Messages traverse the configured link, so the measured rate is the link's throughput ceiling.
+
+```bash
+./mesh-tests/standard-mesh-discovery.sh <pub-broker-ip> <sub-broker-ip>
+```
+
+Broker IPs can also be set in `config/credentials.yaml` (`pub_broker` / `sub_broker`) and omitted from the command line. `./setup.sh` will offer to configure mesh credentials during setup.
+
+---
+
 ## How it works
 
 ```mermaid
@@ -101,6 +114,7 @@ User entry points  →  Engine runners  →  Ansible playbook  →  Remote host 
 2. **Engine runners** loop over scenarios and call the Ansible playbook for each one:
    - `engine/run-testset.sh` — fixed-target mode; each scenario has a known target rate; pass/fail within 5% margin
    - `engine/run-binsearch-testset.sh` — discovery mode; exponential probe then binary search; stops at ±1% precision
+   - `engine/run-binsearch-testset-mesh.sh` — mesh discovery mode; identical search logic but routes publishers and subscribers to separate brokers via `pub_broker`/`sub_broker`
 
 3. **Ansible playbook** (`engine/start-sdk.yaml`) copies `sdkperf_c` and the publisher/consumer scripts to test hosts over SSH, starts consumers first (async), then publishers at the target rate, polls both to completion, and collects stdout.
 
@@ -237,6 +251,77 @@ See `discovery-tests/londonlab-discovery.sh` for an example of how to override t
 
 ---
 
+## Characterising inter-broker link throughput (mesh mode)
+
+Mesh mode measures the throughput ceiling of a VPN bridge, MNR, or DMR link. Publishers connect to one broker (the entry side); subscribers connect to the other (the exit side). Messages traverse the link, so the measured rate reflects what the link itself can sustain — not the individual broker limits.
+
+```mermaid
+flowchart LR
+    ctrl["🖥️  Controller"]
+
+    subgraph pub_side["Publisher side"]
+        p1["Pubhost 1"]
+        pub_broker[("Pub broker\n(entry)")]
+    end
+
+    subgraph sub_side["Subscriber side"]
+        sub_broker[("Sub broker\n(exit)")]
+        s1["Subhost 1"]
+    end
+
+    link["🔗 VPN Bridge /\nMNR / DMR link"]
+
+    ctrl -- SSH --> p1
+    ctrl -- SSH --> s1
+    p1 -- "SMF (publish)" --> pub_broker
+    pub_broker --> link
+    link --> sub_broker
+    sub_broker -- "SMF (deliver)" --> s1
+```
+
+### Setup
+
+1. Configure mesh credentials in `config/credentials.yaml` — either by running `./setup.sh` (which offers an optional mesh setup section at the end) or by adding the fields manually using `config/credentials.yaml.example` as a template.
+
+2. Ensure the inter-broker link (VPN bridge, MNR, or DMR) is already configured and active between the two brokers before running the test.
+
+3. Run the standard mesh discovery testset:
+
+```bash
+./mesh-tests/standard-mesh-discovery.sh <pub-broker-ip> <sub-broker-ip>
+```
+
+Broker IPs can be omitted if `pub_broker` and `sub_broker` are set in `config/credentials.yaml`.
+
+### Mesh credentials
+
+The following fields must be present in `config/credentials.yaml` for mesh mode:
+
+| Field | Description |
+|---|---|
+| `pub_broker` | Publisher-side broker hostname/IP (can be overridden by CLI `$1`) |
+| `pub_broker_vpn` | VPN on the publisher-side broker |
+| `pub_broker_username` | Client username on the publisher-side broker |
+| `pub_broker_password` | Client password on the publisher-side broker |
+| `pub_broker_tls` | Connect via TLS on port 55443 (`true`/`false`) |
+| `sub_broker` | Subscriber-side broker hostname/IP (can be overridden by CLI `$2`) |
+| `sub_broker_vpn` | VPN on the subscriber-side broker |
+| `sub_broker_username` | Client username on the subscriber-side broker |
+| `sub_broker_password` | Client password on the subscriber-side broker |
+| `sub_broker_tls` | Connect via TLS on port 55443 (`true`/`false`) |
+
+### Upper bounds
+
+Override via `export` before calling `engine/run-binsearch-testset-mesh.sh`:
+
+| Variable | Default |
+|---|---|
+| `mesh_upper_bound_direct` | 5,000,000 |
+| `mesh_upper_bound_nonpersistent` | 2,000,000 |
+| `mesh_upper_bound_persistent` | 1,000,000 |
+
+---
+
 ## Analysing results
 
 `engine/analyse-result-set.sh` is run automatically after each testset completes. It parses the result file and prints a diagnostic summary identifying common bottlenecks and configuration issues.
@@ -303,6 +388,8 @@ Written by `./setup.sh` and gitignored. Required fields:
 
 The runner scripts (`run-binsearch-testset.sh`, `run-testset.sh`) validate that the three broker credential fields are present before starting any tests and abort with a clear message if any are missing. Copy `config/credentials.yaml.example` as a starting point if you are not using `setup.sh`.
 
+For mesh mode, `config/credentials.yaml.example` also documents the `pub_broker_*` / `sub_broker_*` fields — see [Mesh credentials](#mesh-credentials) above.
+
 ### run-binsearch-testset.sh parameters
 
 Key parameters in `engine/run-binsearch-testset.sh`:
@@ -342,14 +429,16 @@ CLAUDE.md                        # Guidance for Claude Code (architecture, comma
 CLAUDE.private.md                # Private Claude context — engagement results and notes (gitignored, not committed)
 
 engine/                          # Core test engine
-engine/run-testset.sh            # Runs a fixed-target testset (pass/fail against known rates)
-engine/run-binsearch-testset.sh  # Discovers max throughput via exponential probe + binary search
+engine/run-testset.sh                  # Runs a fixed-target testset (pass/fail against known rates)
+engine/run-binsearch-testset.sh        # Discovers max throughput via exponential probe + binary search
+engine/run-binsearch-testset-mesh.sh   # Mesh variant: pub and sub connect to separate brokers
 engine/run-test.sh               # Single-test wrapper around the Ansible playbook
 engine/start-sdk.yaml            # Ansible playbook: deploys sdkperf_c, runs publishers and consumers
 engine/analyse-result-set.sh     # Parses result files and prints diagnostic guidance
 
 benchmarking-tests/              # Fixed-target testsets for known broker tiers
 discovery-tests/                 # Discovery testsets (binary search format)
+mesh-tests/                      # Mesh throughput testsets (pub and sub on separate brokers)
 custom-sets/                     # User-generated custom discovery testsets (gitignored)
 scripts/                         # sdkpublisher.sh and sdkconsumers.sh — run on test hosts
 pubSubTools/                     # sdkperf_c binary and licences (not included in repo)
