@@ -33,7 +33,14 @@
     act_publishers: "{{ [[ msg_rate | int, sdk_publishers | int] | min, 1] | max }}"
     sdk_consumers: "{{ act_publishers }}" #default number of clients on each consumer hosts - needs to match publishers!
     sdk_credentials: "-cu={{ broker_username | trim }}@{{ broker_vpn | trim }} -cp={{ broker_password | trim }}"
-    broker_cip: "{{ 'tcps://' + broker + ':55443' if (broker_tls | default(false) | bool) else 'tcp://' + broker }}"
+    broker_cip: "{{ 'tcps://' + (broker | default('')) + ':55443' if (broker_tls | default(false) | bool) else 'tcp://' + (broker | default('')) }}"
+    # Mesh mode support: use pub_broker/sub_broker if defined, else fall back to broker
+    pub_broker_resolved: "{{ pub_broker | default(broker | default('')) }}"
+    sub_broker_resolved: "{{ sub_broker | default(broker | default('')) }}"
+    pub_broker_cip: "{{ 'tcps://' + pub_broker_resolved + ':55443' if (pub_broker_tls | default(broker_tls | default(false)) | bool) else 'tcp://' + pub_broker_resolved }}"
+    sub_broker_cip: "{{ 'tcps://' + sub_broker_resolved + ':55443' if (sub_broker_tls | default(broker_tls | default(false)) | bool) else 'tcp://' + sub_broker_resolved }}"
+    pub_sdk_credentials: "-cu={{ pub_broker_username | default(broker_username) | trim }}@{{ pub_broker_vpn | default(broker_vpn) | trim }} -cp={{ pub_broker_password | default(broker_password) | trim }}"
+    sub_sdk_credentials: "-cu={{ sub_broker_username | default(broker_username) | trim }}@{{ sub_broker_vpn | default(broker_vpn) | trim }} -cp={{ sub_broker_password | default(broker_password) | trim }}"
     async_retries: "{{ runlength / 10 + 5 | round | int }}" #how long ansible is waiting for the sdks to finish (in 10s intervals).
     
     # some variables for pretty printing variables/test parameters
@@ -107,7 +114,7 @@
       - { src: sdkpublisher.sh, dest: sdkpublisher.sh }
       - { src: sdkconsumers.sh, dest: sdkconsumers.sh }
   - name: 'run consumer'
-    shell:  "NO_CORES={{ sub_cores | default(4) }} {{ script_path }}/sdkconsumers.sh {{ runlength + 10 }} {{ sdk_consumers }} {{ item.topic }} {{ sdk_fanout }} -cip={{ broker_cip }} {{ sdk_credentials }} -cc={{ sdk_consumer_threads }} -mt={{ mt }} | tee sdk.log"
+    shell:  "NO_CORES={{ sub_cores | default(4) }} {{ script_path }}/sdkconsumers.sh {{ runlength + 10 }} {{ sdk_consumers }} {{ item.topic }} {{ sdk_fanout }} -cip={{ sub_broker_cip }} {{ sub_sdk_credentials }} -cc={{ sdk_consumer_threads }} -mt={{ mt }} | tee sdk.log"
     when: "item.groups in group_names and
     ( item.index|int <= parallel_hosts )"
     async: "{{ runlength + 20 }}"
@@ -119,7 +126,7 @@
     with_items:
       - { index: 1, topic: 'topic1', groups: 'subhost' }
   - name: 'run publishers'
-    shell:  "NO_CORES={{ pub_cores | default(4) }} {{ script_path }}/sdkpublisher.sh {{ runlength }} {{ msg_rate }} {{ act_publishers }} 999999999 {{ item.topic }} -cip={{ broker_cip }} {{ sdk_credentials}} -msa={{ msg_size }} -mt={{ mt }} | tee sdk.log"
+    shell:  "NO_CORES={{ pub_cores | default(4) }} {{ script_path }}/sdkpublisher.sh {{ runlength }} {{ msg_rate }} {{ act_publishers }} 999999999 {{ item.topic }} -cip={{ pub_broker_cip }} {{ pub_sdk_credentials }} -msa={{ msg_size }} -mt={{ mt }} | tee sdk.log"
     when: "item.groups in group_names and
     ( item.index|int <= parallel_hosts )"
     async: "{{ runlength + 30 }}"

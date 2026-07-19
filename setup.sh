@@ -255,6 +255,62 @@ EOF
 echo "  Done."
 echo ""
 
+# --- Mesh throughput testing (optional) ---
+cat <<'EOF'
+============================================================
+  MESH THROUGHPUT TESTING (OPTIONAL)
+============================================================
+
+Mesh throughput testing characterises the bandwidth of a
+VPN bridge, MNR, or DMR link by running publishers against
+one broker and subscribers against a second. Messages
+traverse the inter-broker link, so the measured rate is the
+link's throughput ceiling.
+
+This requires two separate Solace brokers with an active
+bridge/MNR/DMR link already configured between them.
+
+EOF
+
+read -r -p "Configure mesh throughput testing credentials? (y/N): " _mesh_yn
+if [[ "${_mesh_yn}" =~ ^[Yy]$ ]]; then
+  echo ""
+  echo "--- Publisher-side broker (messages enter here) ---"
+  prompt pub_broker          "Publisher broker hostname/IP"        ""
+  prompt pub_broker_vpn      "Publisher broker VPN name"           "perftest-harness"
+  prompt pub_broker_username "Publisher broker client username"    "perftestharness"
+  prompt pub_broker_password "Publisher broker client password"    "default"
+  prompt pub_broker_tls      "Publisher broker TLS port 55443 (true/false)" "false"
+
+  echo ""
+  echo "--- Subscriber-side broker (messages exit here) ---"
+  prompt sub_broker          "Subscriber broker hostname/IP"       ""
+  prompt sub_broker_vpn      "Subscriber broker VPN name"         "perftest-harness"
+  prompt sub_broker_username "Subscriber broker client username"   "perftestharness"
+  prompt sub_broker_password "Subscriber broker client password"   "default"
+  prompt sub_broker_tls      "Subscriber broker TLS port 55443 (true/false)" "false"
+
+  cat >> "${creds_file}" <<EOF
+
+# -- Mesh throughput testing (VPN bridge / MNR / DMR) --
+pub_broker:           ${pub_broker}
+pub_broker_vpn:       ${pub_broker_vpn}
+pub_broker_username:  ${pub_broker_username}
+pub_broker_password:  ${pub_broker_password}
+pub_broker_tls:       ${pub_broker_tls}
+
+sub_broker:           ${sub_broker}
+sub_broker_vpn:       ${sub_broker_vpn}
+sub_broker_username:  ${sub_broker_username}
+sub_broker_password:  ${sub_broker_password}
+sub_broker_tls:       ${sub_broker_tls}
+EOF
+
+  echo ""
+  echo "Mesh credentials written to ${creds_file}."
+  echo ""
+fi
+
 # --- Write config/host ---
 echo "Writing ${host_file}..."
 
@@ -298,6 +354,11 @@ echo "SSH user:         ${sshuser}"
 echo "SSH port:         ${ssh_port}"
 echo "Publisher cores:  ${pub_cores}"
 echo "Subscriber cores: ${sub_cores}"
+if [[ "${_mesh_yn}" =~ ^[Yy]$ ]]; then
+  echo ""
+  echo "Mesh pub broker:  ${pub_broker}"
+  echo "Mesh sub broker:  ${sub_broker}"
+fi
 echo ""
 
 # --- Next steps ---
@@ -327,5 +388,8 @@ cat <<'EOF'
 
      Or run a fixed-target benchmarking test:
        ./start-benchmarking-test.sh
+
+     To characterise a VPN bridge / MNR / DMR link (mesh mode):
+       ./mesh-tests/standard-mesh-discovery.sh <pub-broker-ip> <sub-broker-ip>
 
 EOF
