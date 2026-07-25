@@ -33,12 +33,29 @@
     act_publishers: "{{ [[ msg_rate | int, sdk_publishers | int] | min, 1] | max }}"
     sdk_consumers: "{{ act_publishers }}" #default number of clients on each consumer hosts - needs to match publishers!
     sdk_credentials: "-cu={{ broker_username | trim }}@{{ broker_vpn | trim }} -cp={{ broker_password | trim }}"
-    broker_cip: "{{ 'tcps://' + (broker | default('')) + ':55443' if (broker_tls | default(false) | bool) else 'tcp://' + (broker | default('')) }}"
     # Mesh mode support: use pub_broker/sub_broker if defined, else fall back to broker
     pub_broker_resolved: "{{ pub_broker | default(broker | default('')) }}"
     sub_broker_resolved: "{{ sub_broker | default(broker | default('')) }}"
-    pub_broker_cip: "{{ 'tcps://' + pub_broker_resolved + ':55443' if (pub_broker_tls | default(broker_tls | default(false)) | bool) else 'tcp://' + pub_broker_resolved }}"
-    sub_broker_cip: "{{ 'tcps://' + sub_broker_resolved + ':55443' if (sub_broker_tls | default(broker_tls | default(false)) | bool) else 'tcp://' + sub_broker_resolved }}"
+    # Port suffix helpers — use broker_port override when set, else protocol default (55443 TLS / none plaintext)
+    _broker_port_sfx: >-
+      {{ ':' + (broker_port | string) if broker_port is defined and broker_port
+         else ':55443' if (broker_tls | default(false) | bool)
+         else '' }}
+    _pub_port: "{{ pub_broker_port if pub_broker_port is defined and pub_broker_port else broker_port if broker_port is defined and broker_port else '' }}"
+    _pub_tls: "{{ pub_broker_tls | default(broker_tls | default(false)) | bool }}"
+    _pub_broker_port_sfx: >-
+      {{ ':' + (_pub_port | string) if _pub_port
+         else ':55443' if _pub_tls
+         else '' }}
+    _sub_port: "{{ sub_broker_port if sub_broker_port is defined and sub_broker_port else broker_port if broker_port is defined and broker_port else '' }}"
+    _sub_tls: "{{ sub_broker_tls | default(broker_tls | default(false)) | bool }}"
+    _sub_broker_port_sfx: >-
+      {{ ':' + (_sub_port | string) if _sub_port
+         else ':55443' if _sub_tls
+         else '' }}
+    broker_cip: "{{ ('tcps://' if (broker_tls | default(false) | bool) else 'tcp://') + (broker | default('')) + _broker_port_sfx }}"
+    pub_broker_cip: "{{ ('tcps://' if _pub_tls else 'tcp://') + pub_broker_resolved + _pub_broker_port_sfx }}"
+    sub_broker_cip: "{{ ('tcps://' if _sub_tls else 'tcp://') + sub_broker_resolved + _sub_broker_port_sfx }}"
     pub_sdk_credentials: "-cu={{ pub_broker_username | default(broker_username) | trim }}@{{ pub_broker_vpn | default(broker_vpn) | trim }} -cp={{ pub_broker_password | default(broker_password) | trim }}"
     sub_sdk_credentials: "-cu={{ sub_broker_username | default(broker_username) | trim }}@{{ sub_broker_vpn | default(broker_vpn) | trim }} -cp={{ sub_broker_password | default(broker_password) | trim }}"
     async_retries: "{{ runlength / 10 + 5 | round | int }}" #how long ansible is waiting for the sdks to finish (in 10s intervals).

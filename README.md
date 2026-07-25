@@ -304,11 +304,13 @@ The following fields must be present in `config/credentials.yaml` for mesh mode:
 | `pub_broker_username` | Client username on the publisher-side broker |
 | `pub_broker_password` | Client password on the publisher-side broker |
 | `pub_broker_tls` | Connect via TLS on port 55443 (`true`/`false`) |
+| `pub_broker_port` | Override pub broker SMF port (optional; inherits `broker_port` if set) |
 | `sub_broker` | Subscriber-side broker hostname/IP (can be overridden by CLI `$2`) |
 | `sub_broker_vpn` | VPN on the subscriber-side broker |
 | `sub_broker_username` | Client username on the subscriber-side broker |
 | `sub_broker_password` | Client password on the subscriber-side broker |
 | `sub_broker_tls` | Connect via TLS on port 55443 (`true`/`false`) |
+| `sub_broker_port` | Override sub broker SMF port (optional; inherits `broker_port` if set) |
 
 ### Upper bounds
 
@@ -385,6 +387,8 @@ Written by `./setup.sh` and gitignored. Required fields:
 | `ssh_port` | SSH port on test hosts (default: `22`) |
 | `pub_cores` | CPU cores on publisher hosts (sets parallel publisher processes) |
 | `sub_cores` | CPU cores on subscriber hosts |
+| `broker_tls` | Connect via TLS (`true`/`false`; default `false`) |
+| `broker_port` | Override broker SMF port (optional; default: `55555` plaintext / `55443` TLS) |
 
 The runner scripts (`run-binsearch-testset.sh`, `run-testset.sh`) validate that the three broker credential fields are present before starting any tests and abort with a clear message if any are missing. Copy `config/credentials.yaml.example` as a starting point if you are not using `setup.sh`.
 

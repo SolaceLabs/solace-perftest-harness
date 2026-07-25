@@ -232,6 +232,7 @@ prompt broker_vpn      "Broker VPN name"       "perftest-harness"
 prompt broker_username "Client username"        "perftestharness"
 prompt broker_password "Client password"        "default"
 prompt broker_tls      "Use TLS port 55443 (true/false)" "false"
+read -r -p "Broker SMF port override (leave blank for default: 55555 / 55443 TLS): " broker_port
 
 # --- Write config/credentials.yaml ---
 echo ""
@@ -251,6 +252,9 @@ pub_cores: ${pub_cores}
 sub_cores: ${sub_cores}
 broker_tls: ${broker_tls}
 EOF
+if [ -n "${broker_port}" ]; then
+  echo "broker_port: ${broker_port}" >> "${creds_file}"
+fi
 
 echo "  Done."
 echo ""
@@ -281,6 +285,7 @@ if [[ "${_mesh_yn}" =~ ^[Yy]$ ]]; then
   prompt pub_broker_username "Publisher broker client username"    "perftestharness"
   prompt pub_broker_password "Publisher broker client password"    "default"
   prompt pub_broker_tls      "Publisher broker TLS port 55443 (true/false)" "false"
+  read -r -p "Publisher broker SMF port override (blank = default): " pub_broker_port
 
   echo ""
   echo "--- Subscriber-side broker (messages exit here) ---"
@@ -289,6 +294,7 @@ if [[ "${_mesh_yn}" =~ ^[Yy]$ ]]; then
   prompt sub_broker_username "Subscriber broker client username"   "perftestharness"
   prompt sub_broker_password "Subscriber broker client password"   "default"
   prompt sub_broker_tls      "Subscriber broker TLS port 55443 (true/false)" "false"
+  read -r -p "Subscriber broker SMF port override (blank = default): " sub_broker_port
 
   cat >> "${creds_file}" <<EOF
 
@@ -305,6 +311,12 @@ sub_broker_username:  ${sub_broker_username}
 sub_broker_password:  ${sub_broker_password}
 sub_broker_tls:       ${sub_broker_tls}
 EOF
+  if [ -n "${pub_broker_port}" ]; then
+    echo "pub_broker_port: ${pub_broker_port}" >> "${creds_file}"
+  fi
+  if [ -n "${sub_broker_port}" ]; then
+    echo "sub_broker_port: ${sub_broker_port}" >> "${creds_file}"
+  fi
 
   echo ""
   echo "Mesh credentials written to ${creds_file}."
@@ -349,7 +361,7 @@ for h in "${sub_hosts[@]}"; do echo "  ${h}"; done
 echo ""
 echo "Broker VPN:       ${broker_vpn}"
 echo "Username:         ${broker_username}"
-echo "TLS (port 55443): ${broker_tls}"
+echo "TLS:              ${broker_tls}  Port override: ${broker_port:-default}"
 echo "SSH user:         ${sshuser}"
 echo "SSH port:         ${ssh_port}"
 echo "Publisher cores:  ${pub_cores}"
