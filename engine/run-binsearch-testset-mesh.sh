@@ -437,7 +437,7 @@ if [ ${#_sum_msg_sizes[@]} -gt 0 ]; then
       "--------" "------" "-------------" "---------------" "---------" "------"
     _pass=0; _fail=0
     for (( _i=0; _i<${#_sum_msg_sizes[@]}; _i++ )); do
-      _bw=$(awk "BEGIN { printf \"%.2f Gbps\", ${_sum_max_rates[$_i]} * ${_sum_msg_sizes[$_i]} / 1000000000 }")
+      _bw=$(awk "BEGIN { printf \"%.2f Gbps\", ${_sum_max_rates[$_i]} * ${_sum_msg_sizes[$_i]} * 8 / 1000000000 }")
       printf "  %7sB  %6d  %-13s  %15d  %10s  %s\n" \
         "${_sum_msg_sizes[$_i]}" \
         "${_sum_fanouts[$_i]}" \
