@@ -110,6 +110,25 @@ get_consumer_rate() {
   grep "all  consumers:" "$1" | awk 'BEGIN { FS=" " } { print $5 }'
 }
 
+# Run a single test, retrying once if the consumer rate cannot be parsed.
+# Sets globals: last_logfile. Returns consumer rate via stdout.
+# Usage: run_and_get_rate <msg_size> <fanout> <hosts> <mt> <target_rate> <logfile>
+run_and_get_rate() {
+  local msg_size=$1 fanout=$2 hosts=$3 mt=$4 target_rate=$5 logfile=$6
+  run_single_test ${msg_size} ${fanout} ${hosts} ${mt} ${target_rate} "${logfile}"
+  last_logfile="${logfile}"
+  local rate
+  rate=$(get_consumer_rate "${logfile}")
+  if [ -z "${rate}" ] || ! [[ "${rate}" =~ ^[0-9]+$ ]]; then
+    echo "Warning: could not parse consumer rate -- retrying once after ${inter_iteration_cooldown}s cooldown."
+    [ ${inter_iteration_cooldown} -gt 0 ] && sleep ${inter_iteration_cooldown}
+    run_single_test ${msg_size} ${fanout} ${hosts} ${mt} ${target_rate} "${logfile}"
+    last_logfile="${logfile}"
+    rate=$(get_consumer_rate "${logfile}")
+  fi
+  echo "${rate}"
+}
+
 # Exponential probe + binary search for the maximum stable consumer rate for a given scenario.
 # Sets globals: max_stable_rate, max_stable_logfile, last_logfile
 # Usage: find_max_rate <msg_size> <fanout> <hosts> <mt>
@@ -152,14 +171,11 @@ find_max_rate() {
     echo ""
     echo "Probe ${probe_iter}: target=${probe_rate} msgs/sec  [current range: ${low} - ${high}]"
 
-    run_single_test ${msg_size} ${fanout} ${hosts} ${mt} ${probe_rate} "${logfile}"
-    last_logfile="${logfile}"
-
     local receiver_rate
-    receiver_rate=$(get_consumer_rate "${logfile}")
+    receiver_rate=$(run_and_get_rate ${msg_size} ${fanout} ${hosts} ${mt} ${probe_rate} "${logfile}")
 
     if [ -z "${receiver_rate}" ] || ! [[ "${receiver_rate}" =~ ^[0-9]+$ ]]; then
-      echo "Warning: could not parse consumer rate -- treating as failure."
+      echo "Warning: could not parse consumer rate after retry -- treating as failure."
       high=${probe_rate}
       [ ${inter_iteration_cooldown} -gt 0 ] && sleep ${inter_iteration_cooldown}
       break
@@ -210,14 +226,11 @@ find_max_rate() {
     echo ""
     echo "Iteration ${iter}/${search_iterations}: target=${mid} msgs/sec  [range: ${low} - ${high}]"
 
-    run_single_test ${msg_size} ${fanout} ${hosts} ${mt} ${mid} "${logfile}"
-    last_logfile="${logfile}"
-
     local receiver_rate
-    receiver_rate=$(get_consumer_rate "${logfile}")
+    receiver_rate=$(run_and_get_rate ${msg_size} ${fanout} ${hosts} ${mt} ${mid} "${logfile}")
 
     if [ -z "${receiver_rate}" ] || ! [[ "${receiver_rate}" =~ ^[0-9]+$ ]]; then
-      echo "Warning: could not parse consumer rate -- treating as failure."
+      echo "Warning: could not parse consumer rate after retry -- treating as failure."
       high=${mid}
       [ ${inter_iteration_cooldown} -gt 0 ] && sleep ${inter_iteration_cooldown}
       continue
@@ -261,6 +274,20 @@ mapfile -t _pub_hosts < <(awk '/^\[pubhost\]/{f=1;next} /^\[/{f=0} f && /[^[:spa
 mapfile -t _sub_hosts < <(awk '/^\[subhost\]/{f=1;next} /^\[/{f=0} f && /[^[:space:]]/ && !/^#/{print $1}' "${_host_file}" 2>/dev/null)
 _pub_host_str=$(IFS=', '; echo "${_pub_hosts[*]:-none}")
 _sub_host_str=$(IFS=', '; echo "${_sub_hosts[*]:-none}")
+
+# Kill remote sdkperf processes and clear Ansible async state on interrupt/abort.
+# Prevents stale process and job-file state that causes the first probe of a restart to fail.
+cleanup_remote() {
+  echo ""
+  echo "Interrupted — killing remote sdkperf processes and clearing Ansible async state..."
+  local host
+  for host in "${_pub_hosts[@]}" "${_sub_hosts[@]}"; do
+    ssh -o StrictHostKeyChecking=no -o ConnectTimeout=5 \
+        "${sshuser}@${host}" \
+        "killall -9 sdkperf_c 2>/dev/null; rm -f ~/.ansible_async/*" 2>/dev/null || true
+  done
+}
+trap 'cleanup_remote; exit 130' INT TERM
 
 # Parse passed-in test arrays (semicolon-delimited, same convention as run-binsearch-testset.sh)
 # Args: pub_broker sub_broker testsetprefix msg_type ;testarray1 ;testarray2 ...
