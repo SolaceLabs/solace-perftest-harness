@@ -1,0 +1,44 @@
+#!/bin/bash
+# Mesh discovery testset — f=1 only.
+# Characterises the throughput of a VPN bridge, MNR, or DMR link by running
+# publishers against one broker and subscribers against a second broker.
+# Messages traverse the inter-broker link; the measured rate is the link ceiling.
+#
+# Only fanout=1 scenarios are included: at higher fanout the bridge carries a
+# fraction (1/fanout) of total consumer bandwidth, so the bottleneck shifts to
+# the subscriber-side broker and NIC rather than the inter-broker link itself.
+# f=1 is the only scenario that directly stresses the bridge link.
+#
+# Usage: ./mesh-tests/mesh-discovery.sh [pub-broker-ip] [sub-broker-ip]
+#
+# If broker IPs/hostnames are not given on the command line, they are read from
+# config/credentials.yaml (pub_broker and sub_broker fields).
+#
+# Estimated runtime:
+#   2 scenarios x ~10 min each = ~20 min
+
+pub_broker="${1:-}"
+sub_broker="${2:-}"
+testsetprefix="mesh-discovery"
+msg_type="mixed"
+
+# Raise the persistent upper bound to match direct (5M) so the exponential probe
+# starts at ~4,900 msgs/sec instead of ~976, saving ~2 probe iterations per scenario.
+export mesh_upper_bound_persistent=5000000
+
+# Tests are in the format: msg_size:fanout:number_of_publisher_hosts:msg_type
+# Adjust parallel_pub_hosts to match your config/host [pubhost] count.
+
+# --- Direct messaging ---
+testarray1=""\
+"20480:1:1:direct "\
+";"
+
+# --- Persistent (guaranteed) messaging ---
+testarray2=""\
+"20480:1:1:persistent "\
+";"
+
+${BASH_SOURCE%/*}/../engine/run-binsearch-testset-mesh.sh \
+  "${pub_broker}" "${sub_broker}" ${testsetprefix} ${msg_type} \
+  ";"${testarray1[@]} ${testarray2[@]}
