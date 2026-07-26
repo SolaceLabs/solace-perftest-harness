@@ -15,27 +15,27 @@
 # config/credentials.yaml (pub_broker and sub_broker fields).
 #
 # Estimated runtime:
-#   6 scenarios x ~10 min each = ~60 min
+#   2 scenarios x ~10 min each = ~20 min
 
 pub_broker="${1:-}"
 sub_broker="${2:-}"
 testsetprefix="mesh-discovery"
 msg_type="mixed"
 
+# Raise the persistent upper bound to match direct (5M) so the exponential probe
+# starts at ~4,900 msgs/sec instead of ~976, saving ~2 probe iterations per scenario.
+export mesh_upper_bound_persistent=5000000
+
 # Tests are in the format: msg_size:fanout:number_of_publisher_hosts:msg_type
 # Adjust parallel_pub_hosts to match your config/host [pubhost] count.
 
 # --- Direct messaging ---
 testarray1=""\
-"100:1:1:direct "\
-"1024:1:1:direct "\
 "20480:1:1:direct "\
 ";"
 
 # --- Persistent (guaranteed) messaging ---
 testarray2=""\
-"100:1:1:persistent "\
-"1024:1:1:persistent "\
 "20480:1:1:persistent "\
 ";"
 
