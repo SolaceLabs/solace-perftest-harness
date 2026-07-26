@@ -70,7 +70,7 @@ Use this to design your own scenario matrix: choose message types, sizes, fanout
 Use this when you want to measure the throughput of an inter-broker link rather than a single broker. Publishers connect to one broker; subscribers connect to the second. Messages traverse the configured link, so the measured rate is the link's throughput ceiling.
 
 ```bash
-./mesh-tests/standard-mesh-discovery.sh <pub-broker-ip> <sub-broker-ip>
+./mesh-tests/mesh-discovery.sh <pub-broker-ip> <sub-broker-ip>
 ```
 
 Broker IPs can also be set in `config/credentials.yaml` (`pub_broker` / `sub_broker`) and omitted from the command line. `./setup.sh` will offer to configure mesh credentials during setup.
@@ -288,10 +288,12 @@ flowchart LR
 3. Run the standard mesh discovery testset:
 
 ```bash
-./mesh-tests/standard-mesh-discovery.sh <pub-broker-ip> <sub-broker-ip>
+./mesh-tests/mesh-discovery.sh <pub-broker-ip> <sub-broker-ip>
 ```
 
 Broker IPs can be omitted if `pub_broker` and `sub_broker` are set in `config/credentials.yaml`.
+
+The script tests 20480B messages at fanout=1 (direct and persistent) — the optimal size for characterising link bandwidth on 1 GbE and 10 GbE links. Smaller messages hit broker CPU or IOPS limits before the link, so they measure the broker rather than the link. Estimated runtime ~20 min.
 
 ### Mesh credentials
 
@@ -314,13 +316,19 @@ The following fields must be present in `config/credentials.yaml` for mesh mode:
 
 ### Upper bounds
 
-Override via `export` before calling `engine/run-binsearch-testset-mesh.sh`:
+The exponential probe starts at `upper_bound / 1024`. Override via `export` before calling `engine/run-binsearch-testset-mesh.sh`:
 
-| Variable | Default |
-|---|---|
-| `mesh_upper_bound_direct` | 5,000,000 |
-| `mesh_upper_bound_nonpersistent` | 2,000,000 |
-| `mesh_upper_bound_persistent` | 1,000,000 |
+| Variable | Default | `mesh-discovery.sh` |
+|---|---|---|
+| `mesh_upper_bound_direct` | 5,000,000 | 5,000,000 |
+| `mesh_upper_bound_nonpersistent` | 2,000,000 | 2,000,000 |
+| `mesh_upper_bound_persistent` | 1,000,000 | **5,000,000** |
+
+`mesh-discovery.sh` raises the persistent bound to 5M to match direct, giving both scenarios the same probe start rate (~4,900 msg/s) and saving ~2 probe iterations on each persistent run.
+
+### Results
+
+The final summary table includes a **Bandwidth (Gbps)** column computed from `max_stable_rate × msg_size × 8 / 1,000,000,000`. For a 10 GbE inter-broker link with 20480B messages, expect results in the range of 8–9 Gbps (accounting for protocol overhead and flow control).
 
 ---
 
