@@ -1,17 +1,21 @@
 #!/bin/bash
-# Standard mesh discovery testset.
+# Mesh discovery testset — f=1 only.
 # Characterises the throughput of a VPN bridge, MNR, or DMR link by running
 # publishers against one broker and subscribers against a second broker.
 # Messages traverse the inter-broker link; the measured rate is the link ceiling.
 #
-# Usage: ./mesh-tests/standard-mesh-discovery.sh [pub-broker-ip] [sub-broker-ip]
+# Only fanout=1 scenarios are included: at higher fanout the bridge carries a
+# fraction (1/fanout) of total consumer bandwidth, so the bottleneck shifts to
+# the subscriber-side broker and NIC rather than the inter-broker link itself.
+# f=1 is the only scenario that directly stresses the bridge link.
+#
+# Usage: ./mesh-tests/mesh-discovery.sh [pub-broker-ip] [sub-broker-ip]
 #
 # If broker IPs/hostnames are not given on the command line, they are read from
 # config/credentials.yaml (pub_broker and sub_broker fields).
 #
 # Estimated runtime:
-#   18 scenarios x ~10 min each = ~3 hours
-#   (reduce search_iterations or runlength in run-binsearch-testset-mesh.sh to shorten)
+#   6 scenarios x ~10 min each = ~60 min
 
 pub_broker="${1:-}"
 sub_broker="${2:-}"
@@ -24,38 +28,17 @@ msg_type="mixed"
 # --- Direct messaging ---
 testarray1=""\
 "100:1:1:direct "\
-"100:5:1:direct "\
-"100:50:1:direct "\
-";"
-testarray2=""\
 "1024:1:1:direct "\
-"1024:5:1:direct "\
-"1024:50:1:direct "\
-";"
-testarray3=""\
 "20480:1:1:direct "\
-"20480:5:1:direct "\
-"20480:50:1:direct "\
 ";"
 
 # --- Persistent (guaranteed) messaging ---
-testarray4=""\
+testarray2=""\
 "100:1:1:persistent "\
-"100:5:1:persistent "\
-"100:50:1:persistent "\
-";"
-testarray5=""\
 "1024:1:1:persistent "\
-"1024:5:1:persistent "\
-"1024:50:1:persistent "\
-";"
-testarray6=""\
 "20480:1:1:persistent "\
-"20480:5:1:persistent "\
-"20480:50:1:persistent "\
 ";"
 
 ${BASH_SOURCE%/*}/../engine/run-binsearch-testset-mesh.sh \
   "${pub_broker}" "${sub_broker}" ${testsetprefix} ${msg_type} \
-  ";"${testarray1[@]} ${testarray2[@]} ${testarray3[@]} \
-  ${testarray4[@]} ${testarray5[@]} ${testarray6[@]}
+  ";"${testarray1[@]} ${testarray2[@]}
