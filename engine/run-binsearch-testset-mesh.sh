@@ -404,17 +404,19 @@ if [ ${#_sum_msg_sizes[@]} -gt 0 ]; then
     echo "============================================================"
     echo " Results summary"
     echo "============================================================"
-    printf "  %-8s  %6s  %-13s  %15s  %s\n" \
-      "Msg size" "Fanout" "Type" "Max stable rate" "Result"
-    printf "  %-8s  %6s  %-13s  %15s  %s\n" \
-      "--------" "------" "-------------" "---------------" "------"
+    printf "  %-8s  %6s  %-13s  %15s  %10s  %s\n" \
+      "Msg size" "Fanout" "Type" "Max stable rate" "Bandwidth" "Result"
+    printf "  %-8s  %6s  %-13s  %15s  %10s  %s\n" \
+      "--------" "------" "-------------" "---------------" "---------" "------"
     _pass=0; _fail=0
     for (( _i=0; _i<${#_sum_msg_sizes[@]}; _i++ )); do
-      printf "  %7sB  %6d  %-13s  %15d  %s\n" \
+      _bw=$(awk "BEGIN { printf \"%.2f Gbps\", ${_sum_max_rates[$_i]} * ${_sum_msg_sizes[$_i]} / 1000000000 }")
+      printf "  %7sB  %6d  %-13s  %15d  %10s  %s\n" \
         "${_sum_msg_sizes[$_i]}" \
         "${_sum_fanouts[$_i]}" \
         "${_sum_mts[$_i]}" \
         "${_sum_max_rates[$_i]}" \
+        "${_bw}" \
         "${_sum_results[$_i]}"
       if [ "${_sum_results[$_i]}" = "OK" ]; then
         (( _pass++ ))
