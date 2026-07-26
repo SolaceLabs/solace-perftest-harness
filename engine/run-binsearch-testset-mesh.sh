@@ -55,6 +55,7 @@ _sum_mts=()
 _sum_max_rates=()
 _sum_results=()
 _abort=false
+_rate_result=""   # return slot for run_and_get_rate (avoids stdout capture via $())
 
 checkdependencies() {
   echo "Checking dependencies..."
@@ -111,7 +112,7 @@ get_consumer_rate() {
 }
 
 # Run a single test, retrying once if the consumer rate cannot be parsed.
-# Sets globals: last_logfile. Returns consumer rate via stdout.
+# Sets globals: last_logfile, _rate_result. Must be called directly (not via $()).
 # Usage: run_and_get_rate <msg_size> <fanout> <hosts> <mt> <target_rate> <logfile>
 run_and_get_rate() {
   local msg_size=$1 fanout=$2 hosts=$3 mt=$4 target_rate=$5 logfile=$6
@@ -126,7 +127,7 @@ run_and_get_rate() {
     last_logfile="${logfile}"
     rate=$(get_consumer_rate "${logfile}")
   fi
-  echo "${rate}"
+  _rate_result="${rate}"
 }
 
 # Exponential probe + binary search for the maximum stable consumer rate for a given scenario.
@@ -171,8 +172,8 @@ find_max_rate() {
     echo ""
     echo "Probe ${probe_iter}: target=${probe_rate} msgs/sec  [current range: ${low} - ${high}]"
 
-    local receiver_rate
-    receiver_rate=$(run_and_get_rate ${msg_size} ${fanout} ${hosts} ${mt} ${probe_rate} "${logfile}")
+    run_and_get_rate ${msg_size} ${fanout} ${hosts} ${mt} ${probe_rate} "${logfile}"
+    local receiver_rate="${_rate_result}"
 
     if [ -z "${receiver_rate}" ] || ! [[ "${receiver_rate}" =~ ^[0-9]+$ ]]; then
       echo "Warning: could not parse consumer rate after retry -- treating as failure."
@@ -226,8 +227,8 @@ find_max_rate() {
     echo ""
     echo "Iteration ${iter}/${search_iterations}: target=${mid} msgs/sec  [range: ${low} - ${high}]"
 
-    local receiver_rate
-    receiver_rate=$(run_and_get_rate ${msg_size} ${fanout} ${hosts} ${mt} ${mid} "${logfile}")
+    run_and_get_rate ${msg_size} ${fanout} ${hosts} ${mt} ${mid} "${logfile}"
+    local receiver_rate="${_rate_result}"
 
     if [ -z "${receiver_rate}" ] || ! [[ "${receiver_rate}" =~ ^[0-9]+$ ]]; then
       echo "Warning: could not parse consumer rate after retry -- treating as failure."
