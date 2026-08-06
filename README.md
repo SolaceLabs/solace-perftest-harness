@@ -21,7 +21,7 @@ Run the guided setup wizard to configure your test hosts and broker credentials:
 ./setup.sh
 ```
 
-This writes `config/host` (Ansible inventory) and `config/credentials.yaml`, explains SSH key requirements, and checks that dependencies (`ansible`, `dnsutils`) are installed.
+This writes `config/host` (Ansible inventory) and `config/credentials.yaml`, explains SSH key requirements, and checks that dependencies (`ansible`, `dnsutils`) are installed. If you provide optional SEMP management credentials during setup, the wizard can also create the required client profile, ACL profile, and client username on the broker automatically.
 
 Then place the `sdkperf_c` binary in `pubSubTools/` — download it from the [Solace developer portal](https://solace.com/downloads/).
 
@@ -332,6 +332,52 @@ The final summary table includes a **Bandwidth (Gbps)** column computed from `ma
 
 ---
 
+## Pre-flight broker configuration checks
+
+When SEMP management credentials are configured, the harness runs a pre-flight check before each test run. It queries the broker via the SEMP v2 REST API and reports any configuration issues that would cause the test to fail silently — such as a publisher sending zero messages because of an ACL block.
+
+The checks cover:
+
+| Check | Condition flagged |
+|---|---|
+| VPN exists and is enabled | VPN not found, or disabled |
+| Guaranteed messaging enabled | Only checked for persistent/non-persistent tests |
+| Message spool quota > 0 | Only checked for persistent/non-persistent tests |
+| Client username exists and is enabled | |
+| Client profile: Allow Guaranteed Endpoint Create | Only checked for persistent/non-persistent tests |
+| Client profile: Allow Guaranteed Send | Only checked for persistent/non-persistent tests |
+| Client profile: Allow Guaranteed Receive | Only checked for persistent/non-persistent tests |
+| ACL profile: publish default action | Flags `disallow` unless a wildcard exception is present |
+| ACL profile: subscribe default action | Flags `disallow` unless a wildcard exception is present |
+
+Findings are printed in numbered format. If any issues are found the harness prompts `Run anyway? (Y/n):` (default: proceed). In non-interactive mode (piped output / CI) it prints findings and continues automatically.
+
+If SEMP is unreachable (e.g. the management network is not accessible from the controller), the harness warns and continues — it never blocks a test run on network failures.
+
+To enable pre-flight checks, add SEMP credentials to `config/credentials.yaml`:
+
+```yaml
+semp_host:     broker-mgmt.example.com
+semp_port:     8080
+semp_username: admin
+semp_password: admin
+semp_tls:      false
+```
+
+`./setup.sh` will prompt for these fields during the initial setup wizard. See `config/credentials.yaml.example` for a full template including the mesh per-side SEMP fields.
+
+### Broker client setup
+
+If you supply SEMP admin credentials with write access, `./setup.sh` also offers to create the required client profile, ACL profile, and client username on the broker automatically. This can be re-run at any time by calling `engine/setup-broker.sh` directly:
+
+```bash
+engine/setup-broker.sh config/credentials.yaml
+```
+
+All three operations are idempotent — safe to run on a broker that is already configured correctly.
+
+---
+
 ## Analysing results
 
 `engine/analyse-result-set.sh` is run automatically after each testset completes. It parses the result file and prints a diagnostic summary identifying common bottlenecks and configuration issues.
@@ -397,10 +443,15 @@ Written by `./setup.sh` and gitignored. Required fields:
 | `sub_cores` | CPU cores on subscriber hosts |
 | `broker_tls` | Connect via TLS (`true`/`false`; default `false`) |
 | `broker_port` | Override broker SMF port (optional; default: `55555` plaintext / `55443` TLS) |
+| `semp_host` | SEMP management hostname/IP (optional — enables pre-flight checks and broker setup) |
+| `semp_port` | SEMP HTTP port (optional; default `8080`) |
+| `semp_username` | SEMP admin username (optional; default `admin`) |
+| `semp_password` | SEMP admin password (optional; default `admin`) |
+| `semp_tls` | SEMP over HTTPS (`true`/`false`; default `false`) |
 
 The runner scripts (`run-binsearch-testset.sh`, `run-testset.sh`) validate that the three broker credential fields are present before starting any tests and abort with a clear message if any are missing. Copy `config/credentials.yaml.example` as a starting point if you are not using `setup.sh`.
 
-For mesh mode, `config/credentials.yaml.example` also documents the `pub_broker_*` / `sub_broker_*` fields — see [Mesh credentials](#mesh-credentials) above.
+For mesh mode, `config/credentials.yaml.example` also documents the `pub_broker_*` / `sub_broker_*` and per-side `pub_semp_*` / `sub_semp_*` fields — see [Mesh credentials](#mesh-credentials) above.
 
 ### run-binsearch-testset.sh parameters
 
@@ -447,6 +498,8 @@ engine/run-binsearch-testset-mesh.sh   # Mesh variant: pub and sub connect to se
 engine/run-test.sh               # Single-test wrapper around the Ansible playbook
 engine/start-sdk.yaml            # Ansible playbook: deploys sdkperf_c, runs publishers and consumers
 engine/analyse-result-set.sh     # Parses result files and prints diagnostic guidance
+engine/check-broker.sh           # Pre-flight SEMP checks — detects broker misconfigurations before a test run
+engine/setup-broker.sh           # Creates/updates client profile, ACL profile, and client username via SEMP
 
 benchmarking-tests/              # Fixed-target testsets for known broker tiers
 discovery-tests/                 # Discovery testsets (binary search format)
@@ -471,7 +524,7 @@ The harness version and release date are stored in `VERSION` at the repo root an
 To bump the version before committing a significant change:
 
 ```bash
-./bump-version.sh v2.2.0
+./bump-version.sh v2.4.0
 ```
 
 This updates `VERSION` to the new semver and sets the date to today. The `VERSION` file should be committed together with the change it describes.

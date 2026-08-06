@@ -55,7 +55,7 @@ _abort=false
 
 checkdependencies() {
   echo "Checking dependencies..."
-  for e in rm cat sed grep ls dig sleep ansible-playbook; do
+  for e in rm cat sed grep awk cut ls dig sleep tee seq ansible-playbook; do
     if ! command -v ${e} &> /dev/null; then
       echo "${e} not found in PATH. Please install or update PATH."
       exit 1
@@ -82,6 +82,44 @@ checkcredentials() {
   fi
 }
 
+checkbroker() {
+  local creds="${BASH_SOURCE%/*}/../config/credentials.yaml"
+
+  # Determine if any scenario in the testset uses persistent messaging
+  local has_persistent=0
+  echo "$@" | grep -qE ':(persistent|nonpersistent)' && has_persistent=1
+
+  # Single-broker SEMP check
+  local semp_host
+  semp_host=$(grep -m1 "^semp_host:" "${creds}" 2>/dev/null \
+    | sed 's/^semp_host://;s/#.*//;s/[[:space:]]//g;s/^"//;s/"$//')
+  if [ -n "${semp_host}" ]; then
+    "${BASH_SOURCE%/*}/check-broker.sh" "${creds}" "${has_persistent}" ""
+    local rc=$?
+    [ "${rc}" -eq 2 ] && exit 1
+  fi
+
+  # Pub-side SEMP check (mesh mode)
+  local pub_semp_host
+  pub_semp_host=$(grep -m1 "^pub_semp_host:" "${creds}" 2>/dev/null \
+    | sed 's/^pub_semp_host://;s/#.*//;s/[[:space:]]//g;s/^"//;s/"$//')
+  if [ -n "${pub_semp_host}" ]; then
+    "${BASH_SOURCE%/*}/check-broker.sh" "${creds}" "${has_persistent}" "pub"
+    local rc=$?
+    [ "${rc}" -eq 2 ] && exit 1
+  fi
+
+  # Sub-side SEMP check (mesh mode)
+  local sub_semp_host
+  sub_semp_host=$(grep -m1 "^sub_semp_host:" "${creds}" 2>/dev/null \
+    | sed 's/^sub_semp_host://;s/#.*//;s/[[:space:]]//g;s/^"//;s/"$//')
+  if [ -n "${sub_semp_host}" ]; then
+    "${BASH_SOURCE%/*}/check-broker.sh" "${creds}" "${has_persistent}" "sub"
+    local rc=$?
+    [ "${rc}" -eq 2 ] && exit 1
+  fi
+}
+
 # Run a single test and tee output to logfile.
 # Usage: run_single_test <msg_size> <fanout> <hosts> <mt> <target_rate> <logfile>
 run_single_test() {
@@ -93,6 +131,12 @@ run_single_test() {
 # Usage: get_consumer_rate <logfile>
 get_consumer_rate() {
   grep "all  consumers:" "$1" | awk 'BEGIN { FS=" " } { print $5 }'
+}
+
+# Extract the total publisher rate from a run log.
+# Usage: get_publisher_rate <logfile>
+get_publisher_rate() {
+  grep "all publishers:" "$1" | awk 'BEGIN { FS=" " } { print $5 }'
 }
 
 # Exponential probe + binary search for the maximum stable consumer rate for a given scenario.
@@ -154,6 +198,16 @@ find_max_rate() {
       break
     fi
 
+    local publisher_rate
+    publisher_rate=$(get_publisher_rate "${logfile}")
+    if [[ "${publisher_rate}" =~ ^[0-9]+$ ]] && [ "${publisher_rate}" -eq 0 ]; then
+      echo "ERROR: Publisher sent 0 messages — broker is rejecting publishes."
+      echo "Check ACL profile (publish permission), client profile 'Allow Guaranteed Send',"
+      echo "broker credentials, and broker connectivity. Aborting remaining scenarios."
+      _abort=true
+      return
+    fi
+
     local threshold=$(( probe_rate * (100 - allowed_error_margin) / 100 ))
     echo "Achieved: ${receiver_rate}  Threshold: ${threshold}  (target ${probe_rate} - ${allowed_error_margin}%)"
 
@@ -213,6 +267,16 @@ find_max_rate() {
       continue
     fi
 
+    local publisher_rate
+    publisher_rate=$(get_publisher_rate "${logfile}")
+    if [[ "${publisher_rate}" =~ ^[0-9]+$ ]] && [ "${publisher_rate}" -eq 0 ]; then
+      echo "ERROR: Publisher sent 0 messages — broker is rejecting publishes."
+      echo "Check ACL profile (publish permission), client profile 'Allow Guaranteed Send',"
+      echo "broker credentials, and broker connectivity. Aborting remaining scenarios."
+      _abort=true
+      return
+    fi
+
     local threshold=$(( mid * (100 - allowed_error_margin) / 100 ))
     echo "Achieved: ${receiver_rate}  Threshold: ${threshold}  (target ${mid} - ${allowed_error_margin}%)"
 
@@ -241,6 +305,7 @@ find_max_rate() {
 
 checkdependencies
 checkcredentials
+checkbroker "$@"
 
 # Gather host and core info for the result file header
 _host_file="${BASH_SOURCE%/*}/../config/host"
@@ -299,6 +364,9 @@ for testarray in ${testarray7} ${testarray6} ${testarray5} ${testarray4} ${testa
           fi
 
           find_max_rate ${msg_size} ${fanout} ${hosts} ${mt}
+
+          # Abort immediately if find_max_rate set _abort (e.g. publisher sent 0 messages)
+          [ "${_abort}" = "true" ] && break
 
           # Abort if no consumer rate was received at all (broker unreachable / credentials wrong)
           if [ -z "${last_logfile}" ] || ! grep -q "all  consumers:" "${last_logfile}" 2>/dev/null; then

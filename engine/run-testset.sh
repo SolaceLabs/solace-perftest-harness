@@ -44,9 +44,9 @@ _abort=false
 
 checkdependencies() {
   echo "Checking dependencies..."
-  for e in rm cat sed grep ls dig let sleep ansible-playbook; do
+  for e in rm cat sed grep awk cut ls dig sleep tee ansible-playbook; do
     if ! command -v ${e} &> /dev/null; then
-      echo ${e} " not found in PATH. Please install or update PATH"
+      echo "${e} not found in PATH. Please install or update PATH."
       exit 1
     fi
   done
@@ -71,9 +71,26 @@ checkcredentials() {
   fi
 }
 
+checkbroker() {
+  local creds="${BASH_SOURCE%/*}/../config/credentials.yaml"
+  local semp_host
+  semp_host=$(grep -m1 "^semp_host:" "${creds}" 2>/dev/null \
+    | sed 's/^semp_host://;s/#.*//;s/[[:space:]]//g;s/^"//;s/"$//')
+  [ -z "${semp_host}" ] && return 0   # SEMP not configured -- skip silently
+
+  # Determine if any scenario in the testset uses persistent messaging
+  local has_persistent=0
+  echo "$@" | grep -qE ':(persistent|nonpersistent)' && has_persistent=1
+
+  "${BASH_SOURCE%/*}/check-broker.sh" "${creds}" "${has_persistent}" ""
+  local rc=$?
+  [ "${rc}" -eq 2 ] && exit 1   # user declined to proceed
+}
+
 #main routine
 checkdependencies
 checkcredentials
+checkbroker "$@"
 
 # Gather host and core info for the result file header
 _host_file="${BASH_SOURCE%/*}/../config/host"
@@ -145,6 +162,13 @@ for testarray in ${testarray7} ${testarray6} ${testarray5} ${testarray4} ${testa
           receiver_rate=`cat ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log | grep "all  consumers:" | awk 'BEGIN { FS= " " }; { print $5 }'`
           if ! [[ "${receiver_rate}" =~ ^[0-9]+$ ]]; then
             echo "ERROR: No consumer rate received — broker may be unreachable or credentials incorrect. Aborting remaining scenarios." | tee -a ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log
+            _abort=true
+          fi
+          publisher_rate=`cat ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log | grep "all publishers:" | awk 'BEGIN { FS= " " }; { print $5 }'`
+          if [[ "${publisher_rate}" =~ ^[0-9]+$ ]] && [ "${publisher_rate}" -eq 0 ]; then
+            echo "ERROR: Publisher sent 0 messages — broker is rejecting publishes." | tee -a ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log
+            echo "Check ACL profile (publish permission), client profile 'Allow Guaranteed Send'," | tee -a ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log
+            echo "broker credentials, and broker connectivity. Aborting remaining scenarios." | tee -a ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log
             _abort=true
           fi
           echo "allowed error margin = ${allowed_error_margin} %" | tee -a ${log_dir}/${testsetprefix}_${mt}_${msg_size}_${fanout}.log

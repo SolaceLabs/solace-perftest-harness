@@ -9,6 +9,15 @@
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# ── Dependency check ───────────────────────────────────────────────────────────
+for _dep in awk find fold; do
+  if ! command -v "${_dep}" &>/dev/null; then
+    echo "Error: ${_dep} not found in PATH. Please install it."
+    exit 1
+  fi
+done
+unset _dep
+
 # ── Locate files ───────────────────────────────────────────────────────────────
 if [ $# -gt 0 ]; then
   files=()

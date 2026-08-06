@@ -70,6 +70,15 @@ cleanup() {
 #####################
 ####### main ########
 #####################
+#check dependencies
+for _dep in taskset killall; do
+  if ! command -v "${_dep}" &>/dev/null; then
+    echo "Error: ${_dep} not found in PATH. Please install it."
+    exit 1
+  fi
+done
+unset _dep
+
 #check input arguments
 if [ $# -eq 0 ]; then
   echo "usage: ./${name}.sh <timeout> <max_msg_rate> <number_of_clients> <message_number> <topic> <add_args>"

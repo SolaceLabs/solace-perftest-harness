@@ -256,6 +256,51 @@ if [ -n "${broker_port}" ]; then
   echo "broker_port: ${broker_port}" >> "${creds_file}"
 fi
 
+# --- SEMP management access (optional) ---
+cat <<'EOF'
+
+============================================================
+  SEMP MANAGEMENT ACCESS (OPTIONAL)
+============================================================
+
+Providing SEMP credentials enables two features:
+
+  Pre-flight checks (read-only SEMP):
+    Detects misconfigurations (ACL blocks, disabled guaranteed
+    messaging, etc.) before each test run.
+
+  Broker client setup (read/write SEMP admin):
+    Creates the client profile, ACL profile, and client
+    username on the broker automatically (offered below).
+
+Leave blank to skip both features.
+EOF
+read -r -p "SEMP management host (blank = skip): " semp_host
+if [ -n "${semp_host}" ]; then
+  read -r -p "SEMP port [8080]: " semp_port
+  semp_port="${semp_port:-8080}"
+  read -r -p "SEMP username [admin]: " semp_username
+  semp_username="${semp_username:-admin}"
+  read -r -p "SEMP password [admin]: " semp_password
+  semp_password="${semp_password:-admin}"
+  read -r -p "SEMP over TLS (true/false) [false]: " semp_tls
+  semp_tls="${semp_tls:-false}"
+  cat >> "${creds_file}" <<EOF
+
+# -- SEMP management access (optional -- pre-flight broker config checks) --
+semp_host: ${semp_host}
+semp_port: ${semp_port}
+semp_username: ${semp_username}
+semp_password: ${semp_password}
+semp_tls: ${semp_tls}
+EOF
+  echo ""
+  read -r -p "Create/configure client username and profiles on the broker via SEMP? (y/N): " _brk_setup_yn
+  if [[ "${_brk_setup_yn}" =~ ^[Yy]$ ]]; then
+    "${script_dir}/engine/setup-broker.sh" "${creds_file}" ""
+  fi
+fi
+
 echo "  Done."
 echo ""
 
@@ -318,6 +363,56 @@ EOF
     echo "sub_broker_port: ${sub_broker_port}" >> "${creds_file}"
   fi
 
+  # --- Mesh SEMP (optional, per side) ---
+  echo ""
+  read -r -p "Pub-side SEMP management host (blank = skip): " pub_semp_host
+  if [ -n "${pub_semp_host}" ]; then
+    read -r -p "Pub-side SEMP port [8080]: " pub_semp_port
+    pub_semp_port="${pub_semp_port:-8080}"
+    read -r -p "Pub-side SEMP username [admin]: " pub_semp_username
+    pub_semp_username="${pub_semp_username:-admin}"
+    read -r -p "Pub-side SEMP password [admin]: " pub_semp_password
+    pub_semp_password="${pub_semp_password:-admin}"
+    read -r -p "Pub-side SEMP over TLS (true/false) [false]: " pub_semp_tls
+    pub_semp_tls="${pub_semp_tls:-false}"
+    cat >> "${creds_file}" <<EOF
+pub_semp_host: ${pub_semp_host}
+pub_semp_port: ${pub_semp_port}
+pub_semp_username: ${pub_semp_username}
+pub_semp_password: ${pub_semp_password}
+pub_semp_tls: ${pub_semp_tls}
+EOF
+    echo ""
+    read -r -p "Create/configure client username and profiles on pub-side broker via SEMP? (y/N): " _brk_setup_yn
+    if [[ "${_brk_setup_yn}" =~ ^[Yy]$ ]]; then
+      "${script_dir}/engine/setup-broker.sh" "${creds_file}" "pub"
+    fi
+  fi
+
+  read -r -p "Sub-side SEMP management host (blank = skip): " sub_semp_host
+  if [ -n "${sub_semp_host}" ]; then
+    read -r -p "Sub-side SEMP port [8080]: " sub_semp_port
+    sub_semp_port="${sub_semp_port:-8080}"
+    read -r -p "Sub-side SEMP username [admin]: " sub_semp_username
+    sub_semp_username="${sub_semp_username:-admin}"
+    read -r -p "Sub-side SEMP password [admin]: " sub_semp_password
+    sub_semp_password="${sub_semp_password:-admin}"
+    read -r -p "Sub-side SEMP over TLS (true/false) [false]: " sub_semp_tls
+    sub_semp_tls="${sub_semp_tls:-false}"
+    cat >> "${creds_file}" <<EOF
+sub_semp_host: ${sub_semp_host}
+sub_semp_port: ${sub_semp_port}
+sub_semp_username: ${sub_semp_username}
+sub_semp_password: ${sub_semp_password}
+sub_semp_tls: ${sub_semp_tls}
+EOF
+    echo ""
+    read -r -p "Create/configure client username and profiles on sub-side broker via SEMP? (y/N): " _brk_setup_yn
+    if [[ "${_brk_setup_yn}" =~ ^[Yy]$ ]]; then
+      "${script_dir}/engine/setup-broker.sh" "${creds_file}" "sub"
+    fi
+  fi
+
   echo ""
   echo "Mesh credentials written to ${creds_file}."
   echo ""
@@ -366,10 +461,19 @@ echo "SSH user:         ${sshuser}"
 echo "SSH port:         ${ssh_port}"
 echo "Publisher cores:  ${pub_cores}"
 echo "Subscriber cores: ${sub_cores}"
+if [ -n "${semp_host}" ]; then
+  echo "SEMP host:        ${semp_host}:${semp_port}"
+fi
 if [[ "${_mesh_yn}" =~ ^[Yy]$ ]]; then
   echo ""
   echo "Mesh pub broker:  ${pub_broker}"
   echo "Mesh sub broker:  ${sub_broker}"
+  if [ -n "${pub_semp_host}" ]; then
+    echo "Pub SEMP host:    ${pub_semp_host}:${pub_semp_port}"
+  fi
+  if [ -n "${sub_semp_host}" ]; then
+    echo "Sub SEMP host:    ${sub_semp_host}:${sub_semp_port}"
+  fi
 fi
 echo ""
 
