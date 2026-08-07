@@ -37,12 +37,13 @@
     pub_broker_resolved: "{{ pub_broker | default(broker | default('')) }}"
     sub_broker_resolved: "{{ sub_broker | default(broker | default('')) }}"
     # Protocol selection: smf (default), mqtt, amqp
-    broker_protocol:     "{{ broker_protocol     | default('smf') }}"
-    pub_broker_protocol: "{{ pub_broker_protocol | default(broker_protocol | default('smf')) }}"
-    sub_broker_protocol: "{{ sub_broker_protocol | default(broker_protocol | default('smf')) }}"
+    # Use distinct computed names to avoid self-referential Ansible variable loops
+    _protocol:  "{{ broker_protocol     | default('smf') }}"
+    _pub_proto: "{{ pub_broker_protocol | default(_protocol) }}"
+    _sub_proto: "{{ sub_broker_protocol | default(_protocol) }}"
     # sdkperf binary filename on test host (dest); Java tools use .sh wrapper
-    _pub_sdkperf_binary: "{{ 'sdkperf_mqtt.sh' if pub_broker_protocol == 'mqtt' else 'sdkperf_jmsamqp.sh' if pub_broker_protocol == 'amqp' else 'sdkperf_c' }}"
-    _sub_sdkperf_binary: "{{ 'sdkperf_mqtt.sh' if sub_broker_protocol == 'mqtt' else 'sdkperf_jmsamqp.sh' if sub_broker_protocol == 'amqp' else 'sdkperf_c' }}"
+    _pub_sdkperf_binary: "{{ 'sdkperf_mqtt.sh' if _pub_proto == 'mqtt' else 'sdkperf_jmsamqp.sh' if _pub_proto == 'amqp' else 'sdkperf_c' }}"
+    _sub_sdkperf_binary: "{{ 'sdkperf_mqtt.sh' if _sub_proto == 'mqtt' else 'sdkperf_jmsamqp.sh' if _sub_proto == 'amqp' else 'sdkperf_c' }}"
     # TLS flags per side
     _broker_tls: "{{ broker_tls | default(false) | bool }}"
     _pub_tls: "{{ pub_broker_tls | default(broker_tls | default(false)) | bool }}"
@@ -50,48 +51,48 @@
     # Port suffix helpers — use explicit override if set, else protocol-aware default
     _broker_port_sfx: >-
       {{ ':' + (broker_port | string) if broker_port is defined and broker_port
-         else ':8883' if _broker_tls and broker_protocol == 'mqtt'
-         else ':1883' if broker_protocol == 'mqtt'
-         else ':5671' if _broker_tls and broker_protocol == 'amqp'
-         else ':5672' if broker_protocol == 'amqp'
+         else ':8883' if _broker_tls and _protocol == 'mqtt'
+         else ':1883' if _protocol == 'mqtt'
+         else ':5671' if _broker_tls and _protocol == 'amqp'
+         else ':5672' if _protocol == 'amqp'
          else ':55443' if _broker_tls
          else '' }}
     _pub_port: "{{ pub_broker_port if pub_broker_port is defined and pub_broker_port else broker_port if broker_port is defined and broker_port else '' }}"
     _pub_broker_port_sfx: >-
       {{ ':' + (_pub_port | string) if _pub_port
-         else ':8883' if _pub_tls and pub_broker_protocol == 'mqtt'
-         else ':1883' if pub_broker_protocol == 'mqtt'
-         else ':5671' if _pub_tls and pub_broker_protocol == 'amqp'
-         else ':5672' if pub_broker_protocol == 'amqp'
+         else ':8883' if _pub_tls and _pub_proto == 'mqtt'
+         else ':1883' if _pub_proto == 'mqtt'
+         else ':5671' if _pub_tls and _pub_proto == 'amqp'
+         else ':5672' if _pub_proto == 'amqp'
          else ':55443' if _pub_tls
          else '' }}
     _sub_port: "{{ sub_broker_port if sub_broker_port is defined and sub_broker_port else broker_port if broker_port is defined and broker_port else '' }}"
     _sub_broker_port_sfx: >-
       {{ ':' + (_sub_port | string) if _sub_port
-         else ':8883' if _sub_tls and sub_broker_protocol == 'mqtt'
-         else ':1883' if sub_broker_protocol == 'mqtt'
-         else ':5671' if _sub_tls and sub_broker_protocol == 'amqp'
-         else ':5672' if sub_broker_protocol == 'amqp'
+         else ':8883' if _sub_tls and _sub_proto == 'mqtt'
+         else ':1883' if _sub_proto == 'mqtt'
+         else ':5671' if _sub_tls and _sub_proto == 'amqp'
+         else ':5672' if _sub_proto == 'amqp'
          else ':55443' if _sub_tls
          else '' }}
     # URL scheme per protocol and TLS flag
     _broker_scheme: >-
-      {{ 'mqtts' if _broker_tls and broker_protocol == 'mqtt'
-         else 'amqps' if _broker_tls and broker_protocol == 'amqp'
+      {{ 'mqtts' if _broker_tls and _protocol == 'mqtt'
+         else 'amqps' if _broker_tls and _protocol == 'amqp'
          else 'tcps'  if _broker_tls
-         else 'amqp'  if broker_protocol == 'amqp'
+         else 'amqp'  if _protocol == 'amqp'
          else 'tcp' }}
     _pub_scheme: >-
-      {{ 'mqtts' if _pub_tls and pub_broker_protocol == 'mqtt'
-         else 'amqps' if _pub_tls and pub_broker_protocol == 'amqp'
+      {{ 'mqtts' if _pub_tls and _pub_proto == 'mqtt'
+         else 'amqps' if _pub_tls and _pub_proto == 'amqp'
          else 'tcps'  if _pub_tls
-         else 'amqp'  if pub_broker_protocol == 'amqp'
+         else 'amqp'  if _pub_proto == 'amqp'
          else 'tcp' }}
     _sub_scheme: >-
-      {{ 'mqtts' if _sub_tls and sub_broker_protocol == 'mqtt'
-         else 'amqps' if _sub_tls and sub_broker_protocol == 'amqp'
+      {{ 'mqtts' if _sub_tls and _sub_proto == 'mqtt'
+         else 'amqps' if _sub_tls and _sub_proto == 'amqp'
          else 'tcps'  if _sub_tls
-         else 'amqp'  if sub_broker_protocol == 'amqp'
+         else 'amqp'  if _sub_proto == 'amqp'
          else 'tcp' }}
     broker_cip: "{{ _broker_scheme + '://' + (broker | default('')) + _broker_port_sfx }}"
     pub_broker_cip: "{{ _pub_scheme + '://' + pub_broker_resolved + _pub_broker_port_sfx }}"
@@ -100,8 +101,8 @@
     sub_sdk_credentials: "-cu={{ sub_broker_username | default(broker_username) | trim }}@{{ sub_broker_vpn | default(broker_vpn) | trim }} -cp={{ sub_broker_password | default(broker_password) | trim }}"
     # Protocol-aware message-type flags
     _mqtt_qos: "{{ mt | regex_replace('^qos', '') if mt is match('^qos[012]$') else '0' }}"
-    _pub_mt_flags: "{{ '-mpq=' + _mqtt_qos if pub_broker_protocol == 'mqtt' else '-mt=' + mt }}"
-    _sub_mt_flags: "{{ '-msq=' + _mqtt_qos if sub_broker_protocol == 'mqtt' else '-mt=' + mt }}"
+    _pub_mt_flags: "{{ '-mpq=' + _mqtt_qos if _pub_proto == 'mqtt' else '-mt=' + mt }}"
+    _sub_mt_flags: "{{ '-msq=' + _mqtt_qos if _sub_proto == 'mqtt' else '-mt=' + mt }}"
     async_retries: "{{ runlength / 10 + 5 | round | int }}" #how long ansible is waiting for the sdks to finish (in 10s intervals).
 
     # some variables for pretty printing variables/test parameters
@@ -162,7 +163,7 @@
       owner: "{{ sshuser }}"
       group: "{{ sshuser }}"
       mode: "u+x"
-    when: "'pubhost' in group_names and pub_broker_protocol == 'smf'"
+    when: "'pubhost' in group_names and _pub_proto == 'smf'"
   - name: 'copy SMF binary to subhost'
     copy:
       src: ../pubSubTools/smf/sdkperf_c
@@ -170,7 +171,7 @@
       owner: "{{ sshuser }}"
       group: "{{ sshuser }}"
       mode: "u+x"
-    when: "'subhost' in group_names and sub_broker_protocol == 'smf'"
+    when: "'subhost' in group_names and _sub_proto == 'smf'"
   # MQTT: copy whole package directory (script + lib/ + lib/optional/ + licenses.txt)
   # Both pub and sub get the same package; lib/ must sit alongside the wrapper script.
   - name: 'copy MQTT package to pubhost'
@@ -179,14 +180,14 @@
       dest: "{{ script_path }}/"
       owner: "{{ sshuser }}"
       group: "{{ sshuser }}"
-    when: "'pubhost' in group_names and pub_broker_protocol == 'mqtt'"
+    when: "'pubhost' in group_names and _pub_proto == 'mqtt'"
   - name: 'copy MQTT package to subhost'
     copy:
       src: ../pubSubTools/mqtt/
       dest: "{{ script_path }}/"
       owner: "{{ sshuser }}"
       group: "{{ sshuser }}"
-    when: "'subhost' in group_names and sub_broker_protocol == 'mqtt'"
+    when: "'subhost' in group_names and _sub_proto == 'mqtt'"
   # AMQP: copy amqp/ dir first (includes wrapper, jaas/, and its own small lib/ subset),
   # then copy mqtt/lib/ on top to add the bulk of the required JARs (sol-sdkperf,
   # qpid-jms-client, proton-j, netty, etc.) which are not present in amqp/lib/.
@@ -196,28 +197,28 @@
       dest: "{{ script_path }}/"
       owner: "{{ sshuser }}"
       group: "{{ sshuser }}"
-    when: "'pubhost' in group_names and pub_broker_protocol == 'amqp'"
+    when: "'pubhost' in group_names and _pub_proto == 'amqp'"
   - name: 'copy AMQP shared lib to pubhost'
     copy:
       src: ../pubSubTools/mqtt/lib/
       dest: "{{ script_path }}/lib/"
       owner: "{{ sshuser }}"
       group: "{{ sshuser }}"
-    when: "'pubhost' in group_names and pub_broker_protocol == 'amqp'"
+    when: "'pubhost' in group_names and _pub_proto == 'amqp'"
   - name: 'copy AMQP package to subhost'
     copy:
       src: ../pubSubTools/amqp/
       dest: "{{ script_path }}/"
       owner: "{{ sshuser }}"
       group: "{{ sshuser }}"
-    when: "'subhost' in group_names and sub_broker_protocol == 'amqp'"
+    when: "'subhost' in group_names and _sub_proto == 'amqp'"
   - name: 'copy AMQP shared lib to subhost'
     copy:
       src: ../pubSubTools/mqtt/lib/
       dest: "{{ script_path }}/lib/"
       owner: "{{ sshuser }}"
       group: "{{ sshuser }}"
-    when: "'subhost' in group_names and sub_broker_protocol == 'amqp'"
+    when: "'subhost' in group_names and _sub_proto == 'amqp'"
   - name: 'copy scripts'
     copy:
       src: ../scripts/{{ item.src }}
@@ -229,7 +230,7 @@
       - { src: sdkpublisher.sh, dest: sdkpublisher.sh }
       - { src: sdkconsumers.sh, dest: sdkconsumers.sh }
   - name: 'run consumer'
-    shell:  "NO_CORES={{ sub_cores | default(4) }} SDKPERF_BINARY={{ _sub_sdkperf_binary }} PROTOCOL={{ sub_broker_protocol }} {{ script_path }}/sdkconsumers.sh {{ runlength + 10 }} {{ sdk_consumers }} {{ item.topic }} {{ sdk_fanout }} -cip={{ sub_broker_cip }} {{ sub_sdk_credentials }} -cc={{ sdk_consumer_threads }} {{ _sub_mt_flags }} | tee sdk.log"
+    shell:  "NO_CORES={{ sub_cores | default(4) }} SDKPERF_BINARY={{ _sub_sdkperf_binary }} PROTOCOL={{ _sub_proto }} {{ script_path }}/sdkconsumers.sh {{ runlength + 10 }} {{ sdk_consumers }} {{ item.topic }} {{ sdk_fanout }} -cip={{ sub_broker_cip }} {{ sub_sdk_credentials }} -cc={{ sdk_consumer_threads }} {{ _sub_mt_flags }} | tee sdk.log"
     when: "item.groups in group_names and
     ( item.index|int <= parallel_hosts )"
     async: "{{ runlength + 20 }}"
@@ -241,7 +242,7 @@
     with_items:
       - { index: 1, topic: 'topic1', groups: 'subhost' }
   - name: 'run publishers'
-    shell:  "NO_CORES={{ pub_cores | default(4) }} SDKPERF_BINARY={{ _pub_sdkperf_binary }} PROTOCOL={{ pub_broker_protocol }} {{ script_path }}/sdkpublisher.sh {{ runlength }} {{ msg_rate }} {{ act_publishers }} 999999999 {{ item.topic }} -cip={{ pub_broker_cip }} {{ pub_sdk_credentials }} -msa={{ msg_size }} {{ _pub_mt_flags }} | tee sdk.log"
+    shell:  "NO_CORES={{ pub_cores | default(4) }} SDKPERF_BINARY={{ _pub_sdkperf_binary }} PROTOCOL={{ _pub_proto }} {{ script_path }}/sdkpublisher.sh {{ runlength }} {{ msg_rate }} {{ act_publishers }} 999999999 {{ item.topic }} -cip={{ pub_broker_cip }} {{ pub_sdk_credentials }} -msa={{ msg_size }} {{ _pub_mt_flags }} | tee sdk.log"
     when: "item.groups in group_names and
     ( item.index|int <= parallel_hosts )"
     async: "{{ runlength + 30 }}"
