@@ -231,8 +231,10 @@ EOF
 prompt broker_vpn      "Broker VPN name"       "perftest-harness"
 prompt broker_username "Client username"        "perftestharness"
 prompt broker_password "Client password"        "default"
-prompt broker_tls      "Use TLS port 55443 (true/false)" "false"
-read -r -p "Broker SMF port override (leave blank for default: 55555 / 55443 TLS): " broker_port
+prompt broker_tls      "Use TLS (true/false)" "false"
+read -r -p "Broker port override (leave blank for protocol default): " broker_port
+read -r -p "Protocol (smf/mqtt/amqp) [smf]: " broker_protocol
+broker_protocol="${broker_protocol:-smf}"
 
 # --- Write config/credentials.yaml ---
 echo ""
@@ -254,6 +256,9 @@ broker_tls: ${broker_tls}
 EOF
 if [ -n "${broker_port}" ]; then
   echo "broker_port: ${broker_port}" >> "${creds_file}"
+fi
+if [ "${broker_protocol}" != "smf" ]; then
+  echo "broker_protocol: ${broker_protocol}" >> "${creds_file}"
 fi
 
 # --- SEMP management access (optional) ---
@@ -329,8 +334,10 @@ if [[ "${_mesh_yn}" =~ ^[Yy]$ ]]; then
   prompt pub_broker_vpn      "Publisher broker VPN name"           "perftest-harness"
   prompt pub_broker_username "Publisher broker client username"    "perftestharness"
   prompt pub_broker_password "Publisher broker client password"    "default"
-  prompt pub_broker_tls      "Publisher broker TLS port 55443 (true/false)" "false"
-  read -r -p "Publisher broker SMF port override (blank = default): " pub_broker_port
+  prompt pub_broker_tls      "Publisher broker TLS (true/false)" "false"
+  read -r -p "Publisher broker port override (blank = default): " pub_broker_port
+  read -r -p "Publisher broker protocol (smf/mqtt/amqp) [${broker_protocol}]: " pub_broker_protocol
+  pub_broker_protocol="${pub_broker_protocol:-${broker_protocol}}"
 
   echo ""
   echo "--- Subscriber-side broker (messages exit here) ---"
@@ -338,8 +345,10 @@ if [[ "${_mesh_yn}" =~ ^[Yy]$ ]]; then
   prompt sub_broker_vpn      "Subscriber broker VPN name"         "perftest-harness"
   prompt sub_broker_username "Subscriber broker client username"   "perftestharness"
   prompt sub_broker_password "Subscriber broker client password"   "default"
-  prompt sub_broker_tls      "Subscriber broker TLS port 55443 (true/false)" "false"
-  read -r -p "Subscriber broker SMF port override (blank = default): " sub_broker_port
+  prompt sub_broker_tls      "Subscriber broker TLS (true/false)" "false"
+  read -r -p "Subscriber broker port override (blank = default): " sub_broker_port
+  read -r -p "Subscriber broker protocol (smf/mqtt/amqp) [${broker_protocol}]: " sub_broker_protocol
+  sub_broker_protocol="${sub_broker_protocol:-${broker_protocol}}"
 
   cat >> "${creds_file}" <<EOF
 
@@ -359,8 +368,14 @@ EOF
   if [ -n "${pub_broker_port}" ]; then
     echo "pub_broker_port: ${pub_broker_port}" >> "${creds_file}"
   fi
+  if [ "${pub_broker_protocol}" != "smf" ]; then
+    echo "pub_broker_protocol: ${pub_broker_protocol}" >> "${creds_file}"
+  fi
   if [ -n "${sub_broker_port}" ]; then
     echo "sub_broker_port: ${sub_broker_port}" >> "${creds_file}"
+  fi
+  if [ "${sub_broker_protocol}" != "smf" ]; then
+    echo "sub_broker_protocol: ${sub_broker_protocol}" >> "${creds_file}"
   fi
 
   # --- Mesh SEMP (optional, per side) ---
@@ -456,6 +471,7 @@ for h in "${sub_hosts[@]}"; do echo "  ${h}"; done
 echo ""
 echo "Broker VPN:       ${broker_vpn}"
 echo "Username:         ${broker_username}"
+echo "Protocol:         ${broker_protocol}"
 echo "TLS:              ${broker_tls}  Port override: ${broker_port:-default}"
 echo "SSH user:         ${sshuser}"
 echo "SSH port:         ${ssh_port}"

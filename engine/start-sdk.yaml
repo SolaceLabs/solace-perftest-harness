@@ -22,7 +22,7 @@
     target_msg_rate: 0 #default message rate to achieve
     #more or less constant and calculated values...
     sdk_consumer_threads: 1 #default=1, increase, if you need some load balancing
-    
+
     ##section for calculating values based on input variables ##
     HOST_COUNT: "{{ parallel_hosts }}"
     HOST_COUNT_calc: "{{ [HOST_COUNT, 1] | max }}" #for calculations avoiding div by zero
@@ -36,30 +36,77 @@
     # Mesh mode support: use pub_broker/sub_broker if defined, else fall back to broker
     pub_broker_resolved: "{{ pub_broker | default(broker | default('')) }}"
     sub_broker_resolved: "{{ sub_broker | default(broker | default('')) }}"
-    # Port suffix helpers — use broker_port override when set, else protocol default (55443 TLS / none plaintext)
+    # Protocol selection: smf (default), mqtt, amqp
+    broker_protocol:     "{{ broker_protocol     | default('smf') }}"
+    pub_broker_protocol: "{{ pub_broker_protocol | default(broker_protocol | default('smf')) }}"
+    sub_broker_protocol: "{{ sub_broker_protocol | default(broker_protocol | default('smf')) }}"
+    # sdkperf binary filename on test host (dest)
+    _pub_sdkperf_binary: "{{ 'sdkperf_mqtt.sh' if pub_broker_protocol == 'mqtt' else 'sdkperf_amqp.sh' if pub_broker_protocol == 'amqp' else 'sdkperf_c' }}"
+    _sub_sdkperf_binary: "{{ 'sdkperf_mqtt.sh' if sub_broker_protocol == 'mqtt' else 'sdkperf_amqp.sh' if sub_broker_protocol == 'amqp' else 'sdkperf_c' }}"
+    # sdkperf binary source path in pubSubTools/
+    _pub_sdkperf_src: "{{ 'mqtt/sdkperf_mqtt.sh' if pub_broker_protocol == 'mqtt' else 'amqp/sdkperf_amqp.sh' if pub_broker_protocol == 'amqp' else 'sdkperf_c' }}"
+    _sub_sdkperf_src: "{{ 'mqtt/sdkperf_mqtt.sh' if sub_broker_protocol == 'mqtt' else 'amqp/sdkperf_amqp.sh' if sub_broker_protocol == 'amqp' else 'sdkperf_c' }}"
+    # TLS flags per side
+    _broker_tls: "{{ broker_tls | default(false) | bool }}"
+    _pub_tls: "{{ pub_broker_tls | default(broker_tls | default(false)) | bool }}"
+    _sub_tls: "{{ sub_broker_tls | default(broker_tls | default(false)) | bool }}"
+    # Port suffix helpers — use explicit override if set, else protocol-aware default
     _broker_port_sfx: >-
       {{ ':' + (broker_port | string) if broker_port is defined and broker_port
-         else ':55443' if (broker_tls | default(false) | bool)
+         else ':8883' if _broker_tls and broker_protocol == 'mqtt'
+         else ':1883' if broker_protocol == 'mqtt'
+         else ':5671' if _broker_tls and broker_protocol == 'amqp'
+         else ':5672' if broker_protocol == 'amqp'
+         else ':55443' if _broker_tls
          else '' }}
     _pub_port: "{{ pub_broker_port if pub_broker_port is defined and pub_broker_port else broker_port if broker_port is defined and broker_port else '' }}"
-    _pub_tls: "{{ pub_broker_tls | default(broker_tls | default(false)) | bool }}"
     _pub_broker_port_sfx: >-
       {{ ':' + (_pub_port | string) if _pub_port
+         else ':8883' if _pub_tls and pub_broker_protocol == 'mqtt'
+         else ':1883' if pub_broker_protocol == 'mqtt'
+         else ':5671' if _pub_tls and pub_broker_protocol == 'amqp'
+         else ':5672' if pub_broker_protocol == 'amqp'
          else ':55443' if _pub_tls
          else '' }}
     _sub_port: "{{ sub_broker_port if sub_broker_port is defined and sub_broker_port else broker_port if broker_port is defined and broker_port else '' }}"
-    _sub_tls: "{{ sub_broker_tls | default(broker_tls | default(false)) | bool }}"
     _sub_broker_port_sfx: >-
       {{ ':' + (_sub_port | string) if _sub_port
+         else ':8883' if _sub_tls and sub_broker_protocol == 'mqtt'
+         else ':1883' if sub_broker_protocol == 'mqtt'
+         else ':5671' if _sub_tls and sub_broker_protocol == 'amqp'
+         else ':5672' if sub_broker_protocol == 'amqp'
          else ':55443' if _sub_tls
          else '' }}
-    broker_cip: "{{ ('tcps://' if (broker_tls | default(false) | bool) else 'tcp://') + (broker | default('')) + _broker_port_sfx }}"
-    pub_broker_cip: "{{ ('tcps://' if _pub_tls else 'tcp://') + pub_broker_resolved + _pub_broker_port_sfx }}"
-    sub_broker_cip: "{{ ('tcps://' if _sub_tls else 'tcp://') + sub_broker_resolved + _sub_broker_port_sfx }}"
+    # URL scheme per protocol and TLS flag
+    _broker_scheme: >-
+      {{ 'mqtts' if _broker_tls and broker_protocol == 'mqtt'
+         else 'amqps' if _broker_tls and broker_protocol == 'amqp'
+         else 'tcps'  if _broker_tls
+         else 'amqp'  if broker_protocol == 'amqp'
+         else 'tcp' }}
+    _pub_scheme: >-
+      {{ 'mqtts' if _pub_tls and pub_broker_protocol == 'mqtt'
+         else 'amqps' if _pub_tls and pub_broker_protocol == 'amqp'
+         else 'tcps'  if _pub_tls
+         else 'amqp'  if pub_broker_protocol == 'amqp'
+         else 'tcp' }}
+    _sub_scheme: >-
+      {{ 'mqtts' if _sub_tls and sub_broker_protocol == 'mqtt'
+         else 'amqps' if _sub_tls and sub_broker_protocol == 'amqp'
+         else 'tcps'  if _sub_tls
+         else 'amqp'  if sub_broker_protocol == 'amqp'
+         else 'tcp' }}
+    broker_cip: "{{ _broker_scheme + '://' + (broker | default('')) + _broker_port_sfx }}"
+    pub_broker_cip: "{{ _pub_scheme + '://' + pub_broker_resolved + _pub_broker_port_sfx }}"
+    sub_broker_cip: "{{ _sub_scheme + '://' + sub_broker_resolved + _sub_broker_port_sfx }}"
     pub_sdk_credentials: "-cu={{ pub_broker_username | default(broker_username) | trim }}@{{ pub_broker_vpn | default(broker_vpn) | trim }} -cp={{ pub_broker_password | default(broker_password) | trim }}"
     sub_sdk_credentials: "-cu={{ sub_broker_username | default(broker_username) | trim }}@{{ sub_broker_vpn | default(broker_vpn) | trim }} -cp={{ sub_broker_password | default(broker_password) | trim }}"
+    # Protocol-aware message-type flags
+    _mqtt_qos: "{{ mt | regex_replace('^qos', '') if mt is match('^qos[012]$') else '0' }}"
+    _pub_mt_flags: "{{ '-mpq=' + _mqtt_qos if pub_broker_protocol == 'mqtt' else '-mt=' + mt }}"
+    _sub_mt_flags: "{{ '-msq=' + _mqtt_qos if sub_broker_protocol == 'mqtt' else '-mt=' + mt }}"
     async_retries: "{{ runlength / 10 + 5 | round | int }}" #how long ansible is waiting for the sdks to finish (in 10s intervals).
-    
+
     # some variables for pretty printing variables/test parameters
     filler: "            "
     str_msg_size: "{{ ([filler, msg_size] |join)[-8:] }}"
@@ -71,7 +118,7 @@
     str_publishers: "{{ ([filler, act_publishers] | join)[-8:] }}"
     str_pub_cores: "{{ ([filler, pub_cores | default(4)] | join)[-8:] }}"
     str_sub_cores: "{{ ([filler, sub_cores | default(4)] | join)[-8:] }}"
-    
+
   ######################
   ######## MAIN ########
   ######################
@@ -110,16 +157,30 @@
       path: "/home/{{ sshuser }}/pubSubTools"
       state: directory
       mode: 0755
-  - name: 'copy sdkperf'
+  - name: 'copy LICENSES'
     copy:
-      src: ../pubSubTools/{{ item.src }}
-      dest: "{{ script_path }}/{{ item.dest }}"
+      src: ../pubSubTools/LICENSES
+      dest: "{{ script_path }}/LICENSES"
+      owner: "{{ sshuser }}"
+      group: "{{ sshuser }}"
+      mode: "0644"
+    ignore_errors: true
+  - name: 'copy sdkperf to pubhost'
+    copy:
+      src: ../pubSubTools/{{ _pub_sdkperf_src }}
+      dest: "{{ script_path }}/{{ _pub_sdkperf_binary }}"
       owner: "{{ sshuser }}"
       group: "{{ sshuser }}"
       mode: "u+x"
-    with_items:
-      - { src: LICENSES, dest: LICENSES }
-      - { src: sdkperf_c, dest: sdkperf_c }
+    when: "'pubhost' in group_names"
+  - name: 'copy sdkperf to subhost'
+    copy:
+      src: ../pubSubTools/{{ _sub_sdkperf_src }}
+      dest: "{{ script_path }}/{{ _sub_sdkperf_binary }}"
+      owner: "{{ sshuser }}"
+      group: "{{ sshuser }}"
+      mode: "u+x"
+    when: "'subhost' in group_names"
   - name: 'copy scripts'
     copy:
       src: ../scripts/{{ item.src }}
@@ -131,7 +192,7 @@
       - { src: sdkpublisher.sh, dest: sdkpublisher.sh }
       - { src: sdkconsumers.sh, dest: sdkconsumers.sh }
   - name: 'run consumer'
-    shell:  "NO_CORES={{ sub_cores | default(4) }} {{ script_path }}/sdkconsumers.sh {{ runlength + 10 }} {{ sdk_consumers }} {{ item.topic }} {{ sdk_fanout }} -cip={{ sub_broker_cip }} {{ sub_sdk_credentials }} -cc={{ sdk_consumer_threads }} -mt={{ mt }} | tee sdk.log"
+    shell:  "NO_CORES={{ sub_cores | default(4) }} SDKPERF_BINARY={{ _sub_sdkperf_binary }} PROTOCOL={{ sub_broker_protocol }} {{ script_path }}/sdkconsumers.sh {{ runlength + 10 }} {{ sdk_consumers }} {{ item.topic }} {{ sdk_fanout }} -cip={{ sub_broker_cip }} {{ sub_sdk_credentials }} -cc={{ sdk_consumer_threads }} {{ _sub_mt_flags }} | tee sdk.log"
     when: "item.groups in group_names and
     ( item.index|int <= parallel_hosts )"
     async: "{{ runlength + 20 }}"
@@ -143,7 +204,7 @@
     with_items:
       - { index: 1, topic: 'topic1', groups: 'subhost' }
   - name: 'run publishers'
-    shell:  "NO_CORES={{ pub_cores | default(4) }} {{ script_path }}/sdkpublisher.sh {{ runlength }} {{ msg_rate }} {{ act_publishers }} 999999999 {{ item.topic }} -cip={{ pub_broker_cip }} {{ pub_sdk_credentials }} -msa={{ msg_size }} -mt={{ mt }} | tee sdk.log"
+    shell:  "NO_CORES={{ pub_cores | default(4) }} SDKPERF_BINARY={{ _pub_sdkperf_binary }} PROTOCOL={{ pub_broker_protocol }} {{ script_path }}/sdkpublisher.sh {{ runlength }} {{ msg_rate }} {{ act_publishers }} 999999999 {{ item.topic }} -cip={{ pub_broker_cip }} {{ pub_sdk_credentials }} -msa={{ msg_size }} {{ _pub_mt_flags }} | tee sdk.log"
     when: "item.groups in group_names and
     ( item.index|int <= parallel_hosts )"
     async: "{{ runlength + 30 }}"

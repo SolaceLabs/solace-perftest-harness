@@ -11,7 +11,7 @@
 # 
 #
 #Adjust the following according to your needs and infrastructure
-#number of cores to distribute your processes across - used by taskset to pin publishers to cores. 
+#number of cores to distribute your processes across - used by taskset to pin publishers to cores.
 #Should match the number of cores on the perf host running the publishers.
 no_cores=${NO_CORES:-4}
 core_offset=1
@@ -22,13 +22,25 @@ cleanup_at_end="true"
 #Change the following constants only,if you really have to
 name=sdkpublishers
 
-#Parameters to control connect and reconnect behaviour of the clients
-epl="SOLCLIENT_SESSION_PROP_CONNECT_TIMEOUT_MS,500,\
+# Protocol-aware binary and session properties
+sdkperf_bin="${SDKPERF_BINARY:-sdkperf_c}"
+
+# SMF-only session properties (connect/reconnect, acknowledgement window, publish send mode)
+if [ "${PROTOCOL:-smf}" = "smf" ]; then
+  epl="SOLCLIENT_SESSION_PROP_CONNECT_TIMEOUT_MS,500,\
 SOLCLIENT_SESSION_PROP_CONNECT_RETRIES,-1,\
 SOLCLIENT_SESSION_PROP_RECONNECT_RETRIES,-1,\
 SOLCLIENT_SESSION_PROP_RECONNECT_RETRY_WAIT_MS,200,\
 SOLCLIENT_SESSION_PROP_CONNECT_RETRIES_PER_HOST,1"
-rc=100
+  rc=100
+  apw_flag="-apw=255"
+  psm_flag="-psm"
+else
+  epl=""
+  rc=""
+  apw_flag=""
+  psm_flag=""
+fi
 
 #return code
 returncode=0
@@ -40,11 +52,11 @@ killallp() {
     trap '' INT TERM     # ignore INT and TERM while shutting down
     echo " "
     echo "**** Shutting down... ****"     # added double quotes
-    killall -2 sdkperf_c  2>/dev/null     # use when running script directly
+    killall -2 "${sdkperf_bin}"  2>/dev/null     # use when running script directly
     sleep 3
-    killall -15 sdkperf_c 2>/dev/null     # use when running from ansible
+    killall -15 "${sdkperf_bin}" 2>/dev/null     # use when running from ansible
     sleep 3
-    killall -9 sdkperf_c  2>/dev/null     # use when running from ansible
+    killall -9 "${sdkperf_bin}"  2>/dev/null     # use when running from ansible
     wait
 }
 #wait for background processes to finish
@@ -107,8 +119,8 @@ number_of_clients=$3
 mn=$4
 topic=$5
 add_args=${@:6}
-# Disable TLS certificate validation for test environments using tcps://
-if echo "${add_args}" | grep -q "tcps://"; then
+# Disable TLS certificate validation for SMF test environments using tcps://
+if [ "${PROTOCOL:-smf}" = "smf" ] && echo "${add_args}" | grep -q "tcps://"; then
   epl="${epl},SOLCLIENT_SESSION_PROP_SSL_VALIDATE_CERTIFICATE,0"
 fi
 export rate=$((${max_msg_rate}/${number_of_clients}))
@@ -130,8 +142,8 @@ for i in `seq 1 ${number_of_clients}`; do
   #cores are actually numbered starting from 0, so use c for core number
   c=$((${j}-1))
   #start process in background
-  echo "sdkperf_c -apw=255 -epl=${epl} -rc=${rc} -mr=${rate} -mn=${mn} -ptl=${topic}_${i} -psm -nagle ${add_args}"
-  taskset -c ${c} ./sdkperf_c -apw=255 -epl=${epl} -rc=${rc} -mr=${rate} -mn=${mn} -ptl=${topic}_${i} -psm -nagle ${add_args} &> ${name}_stats_${i}.txt &
+  echo "${sdkperf_bin} ${apw_flag} ${epl:+-epl=${epl}} ${rc:+-rc=${rc}} -mr=${rate} -mn=${mn} -ptl=${topic}_${i} ${psm_flag} -nagle ${add_args}"
+  taskset -c ${c} ./${sdkperf_bin} ${apw_flag} ${epl:+-epl=${epl}} ${rc:+-rc=${rc}} -mr=${rate} -mn=${mn} -ptl=${topic}_${i} ${psm_flag} -nagle ${add_args} &> ${name}_stats_${i}.txt &
   pid=$!
   pids="${pids} ${pid}"
   j=$((${j}+1))

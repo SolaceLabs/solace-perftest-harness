@@ -428,6 +428,38 @@ For high-fanout scenarios (f ≥ 10), the consumer-side network becomes the bind
 
 ## Configuration
 
+### Multi-protocol support
+
+The harness supports three Solace messaging protocols. Set `broker_protocol` in `config/credentials.yaml` to select the protocol. The default is `smf`.
+
+| `broker_protocol` | Binary required in `pubSubTools/` | Plaintext port | TLS port | URL scheme (plain / TLS) |
+|---|---|---|---|---|
+| `smf` (default) | `sdkperf_c` | 55555 | 55443 | `tcp://` / `tcps://` |
+| `mqtt` | `mqtt/sdkperf_mqtt.sh` | 1883 | 8883 | `tcp://` / `mqtts://` |
+| `amqp` | `amqp/sdkperf_amqp.sh` | 5672 | 5671 | `amqp://` / `amqps://` |
+
+Download the MQTT and AMQP sdkperf binaries from the [Solace developer portal](https://solace.com/downloads/) and place them in the appropriate subdirectory under `pubSubTools/`.
+
+#### MQTT message types
+
+For MQTT scenarios, set the `mt` field in the test array to a QoS level instead of a message type:
+
+| `mt` value | sdkperf pub flag | sdkperf sub flag |
+|---|---|---|
+| `qos0` | `-mpq=0` | `-msq=0` |
+| `qos1` | `-mpq=1` | `-msq=1` |
+| `qos2` | `-mpq=2` | `-msq=2` |
+
+#### AMQP message types
+
+AMQP passes `-mt=direct` and `-mt=persistent` through unchanged, the same as SMF.
+
+#### Mesh mode with mixed protocols
+
+For mesh mode, `pub_broker_protocol` and `sub_broker_protocol` override the protocol per side independently (both default to `broker_protocol`). This allows, for example, MQTT publishers to a pub-side broker and SMF subscribers on the sub-side.
+
+---
+
 ### config/credentials.yaml
 
 Written by `./setup.sh` and gitignored. Required fields:
@@ -442,7 +474,8 @@ Written by `./setup.sh` and gitignored. Required fields:
 | `pub_cores` | CPU cores on publisher hosts (sets parallel publisher processes) |
 | `sub_cores` | CPU cores on subscriber hosts |
 | `broker_tls` | Connect via TLS (`true`/`false`; default `false`) |
-| `broker_port` | Override broker SMF port (optional; default: `55555` plaintext / `55443` TLS) |
+| `broker_port` | Override broker port (optional; default varies by protocol — see table above) |
+| `broker_protocol` | Messaging protocol: `smf` (default), `mqtt`, `amqp` |
 | `semp_host` | SEMP management hostname/IP (optional — enables pre-flight checks and broker setup) |
 | `semp_port` | SEMP HTTP port (optional; default `8080`) |
 | `semp_username` | SEMP admin username (optional; default `admin`) |

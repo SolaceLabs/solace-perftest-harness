@@ -9,7 +9,7 @@
 #      add_args           = any additional arguments to pass to sdkperf
 # 
 #Adjust the following according to your needs and infrastructure
-#number of cores to distribute your processes across - used by taskset to pin consumers to cores. 
+#number of cores to distribute your processes across - used by taskset to pin consumers to cores.
 #Should match the number of cores on the perf host running the consumers.
 no_cores=${NO_CORES:-4}
 core_offset=1
@@ -24,13 +24,23 @@ endpoints="queues"
 #Change the following constants only,if you really have to
 name=sdkconsumers
 
-#Parameters to control connect and reconnect behaviour of the clients
-epl="SOLCLIENT_SESSION_PROP_CONNECT_TIMEOUT_MS,500,\
+# Protocol-aware binary and session properties
+sdkperf_bin="${SDKPERF_BINARY:-sdkperf_c}"
+
+# SMF-only session properties (connect/reconnect, acknowledgement window)
+if [ "${PROTOCOL:-smf}" = "smf" ]; then
+  epl="SOLCLIENT_SESSION_PROP_CONNECT_TIMEOUT_MS,500,\
 SOLCLIENT_SESSION_PROP_CONNECT_RETRIES,-1,\
 SOLCLIENT_SESSION_PROP_RECONNECT_RETRIES,-1,\
 SOLCLIENT_SESSION_PROP_RECONNECT_RETRY_WAIT_MS,200,\
 SOLCLIENT_SESSION_PROP_CONNECT_RETRIES_PER_HOST,1"
-rc=100
+  rc=100
+  asw_flag="-asw=255"
+else
+  epl=""
+  rc=""
+  asw_flag=""
+fi
 
 #Trap control-c to graciously shut down the clients and give chance to collect stats...
 trap 'killallp' INT
@@ -39,11 +49,11 @@ killallp() {
     trap '' INT TERM     # ignore INT and TERM while shutting down
     echo " "
     echo "**** Shutting down... ****"     # added double quotes
-    killall -2 sdkperf_c  2>/dev/null     # use when running script directly
+    killall -2 "${sdkperf_bin}"  2>/dev/null     # use when running script directly
     sleep 3
-    killall -15 sdkperf_c 2>/dev/null     # use when running from ansible
+    killall -15 "${sdkperf_bin}" 2>/dev/null     # use when running from ansible
     sleep 3
-    killall -9 sdkperf_c  2>/dev/null     # use when running from ansible
+    killall -9 "${sdkperf_bin}"  2>/dev/null     # use when running from ansible
     wait
     wait
 }
@@ -94,8 +104,8 @@ number_of_clients=$2
 topic=$3
 fanout=$4
 add_args=${@:5}
-# Disable TLS certificate validation for test environments using tcps://
-if echo "${add_args}" | grep -q "tcps://"; then
+# Disable TLS certificate validation for SMF test environments using tcps://
+if [ "${PROTOCOL:-smf}" = "smf" ] && echo "${add_args}" | grep -q "tcps://"; then
   epl="${epl},SOLCLIENT_SESSION_PROP_SSL_VALIDATE_CERTIFICATE,0"
 fi
 unset pids
@@ -114,15 +124,15 @@ for i in `seq 1 ${number_of_clients}`; do
   c=$((${j}-1))
   for ((f=1; f<=${fanout}; f++)); do
     echo "fanout:${f}/${fanout}"
-    if [[ ${add_args} == *"persistent"* ]]; then
+    if [ "${PROTOCOL:-smf}" = "smf" ] && [[ ${add_args} == *"persistent"* ]]; then
       if [[ "${endpoints}" = "queues" ]]; then
-        taskset -c ${c} ./sdkperf_c -asw=255 -epl=${epl} -rc=${rc} -stl=${topic}_${i} -pe -sql=${topic}_${i}_${f} -pea=0 -nagle ${add_args} &> ${name}_stats_${i}_${f}.txt &
-	  else     
-        taskset -c ${c} ./sdkperf_c -asw=255 -epl=${epl} -rc=${rc} -stl=${topic}_${i} -pe -tte=1 -pea=0 -nagle ${add_args} &> ${name}_stats_${i}_${f}.txt &
+        taskset -c ${c} ./${sdkperf_bin} ${asw_flag} -epl=${epl} -rc=${rc} -stl=${topic}_${i} -pe -sql=${topic}_${i}_${f} -pea=0 -nagle ${add_args} &> ${name}_stats_${i}_${f}.txt &
+      else
+        taskset -c ${c} ./${sdkperf_bin} ${asw_flag} -epl=${epl} -rc=${rc} -stl=${topic}_${i} -pe -tte=1 -pea=0 -nagle ${add_args} &> ${name}_stats_${i}_${f}.txt &
       fi
       echo
     else
-      taskset -c ${c} ./sdkperf_c -asw=255 -epl=${epl} -rc=${rc}  -stl=${topic}_${i} -nagle ${add_args} &> ${name}_stats_${i}_${f}.txt &
+      taskset -c ${c} ./${sdkperf_bin} ${asw_flag} ${epl:+-epl=${epl}} ${rc:+-rc=${rc}} -stl=${topic}_${i} -nagle ${add_args} &> ${name}_stats_${i}_${f}.txt &
     fi
     pid=$!
     pids="${pids} ${pid}"

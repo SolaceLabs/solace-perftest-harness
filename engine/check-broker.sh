@@ -60,6 +60,8 @@ semp_tls=$(_semp_field "semp_tls")
 
 broker_vpn=$(_broker_cred "broker_vpn")
 broker_user=$(_broker_cred "broker_username")
+broker_protocol=$(_field "${side_prefix:+${side_prefix}_}broker_protocol")
+: "${broker_protocol:=smf}"
 
 if [ -z "${broker_vpn}" ]; then
   echo "  WARNING: broker_vpn not set -- skipping pre-flight check."
@@ -128,8 +130,8 @@ echo ""
 echo "============================================================"
 echo " Solace Broker Pre-flight Check${_label}"
 echo "============================================================"
-printf "  Broker: %s  VPN: %s  User: %s\n\n" \
-  "${semp_host}" "${broker_vpn}" "${broker_user}"
+printf "  Broker: %s  VPN: %s  User: %s  Protocol: %s\n\n" \
+  "${semp_host}" "${broker_vpn}" "${broker_user}" "${broker_protocol}"
 
 # ---- Check 1: SEMP reachability ----
 echo "  Checking broker configuration via SEMP..."
