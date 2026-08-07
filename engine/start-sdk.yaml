@@ -181,12 +181,22 @@
       owner: "{{ sshuser }}"
       group: "{{ sshuser }}"
     when: "'pubhost' in group_names and _pub_proto == 'mqtt'"
+  - name: 'chmod MQTT wrapper on pubhost'
+    file:
+      path: "{{ script_path }}/sdkperf_mqtt.sh"
+      mode: "u+x"
+    when: "'pubhost' in group_names and _pub_proto == 'mqtt'"
   - name: 'copy MQTT package to subhost'
     copy:
       src: ../pubSubTools/mqtt/
       dest: "{{ script_path }}/"
       owner: "{{ sshuser }}"
       group: "{{ sshuser }}"
+    when: "'subhost' in group_names and _sub_proto == 'mqtt'"
+  - name: 'chmod MQTT wrapper on subhost'
+    file:
+      path: "{{ script_path }}/sdkperf_mqtt.sh"
+      mode: "u+x"
     when: "'subhost' in group_names and _sub_proto == 'mqtt'"
   # AMQP: copy amqp/ dir first (includes wrapper, jaas/, and its own small lib/ subset),
   # then copy mqtt/lib/ on top to add the bulk of the required JARs (sol-sdkperf,
@@ -197,6 +207,11 @@
       dest: "{{ script_path }}/"
       owner: "{{ sshuser }}"
       group: "{{ sshuser }}"
+    when: "'pubhost' in group_names and _pub_proto == 'amqp'"
+  - name: 'chmod AMQP wrapper on pubhost'
+    file:
+      path: "{{ script_path }}/sdkperf_jmsamqp.sh"
+      mode: "u+x"
     when: "'pubhost' in group_names and _pub_proto == 'amqp'"
   - name: 'copy AMQP shared lib to pubhost'
     copy:
@@ -211,6 +226,11 @@
       dest: "{{ script_path }}/"
       owner: "{{ sshuser }}"
       group: "{{ sshuser }}"
+    when: "'subhost' in group_names and _sub_proto == 'amqp'"
+  - name: 'chmod AMQP wrapper on subhost'
+    file:
+      path: "{{ script_path }}/sdkperf_jmsamqp.sh"
+      mode: "u+x"
     when: "'subhost' in group_names and _sub_proto == 'amqp'"
   - name: 'copy AMQP shared lib to subhost'
     copy:
