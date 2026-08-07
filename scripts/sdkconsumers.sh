@@ -36,10 +36,12 @@ SOLCLIENT_SESSION_PROP_RECONNECT_RETRY_WAIT_MS,200,\
 SOLCLIENT_SESSION_PROP_CONNECT_RETRIES_PER_HOST,1"
   rc=100
   asw_flag="-asw=255"
+  nagle_flag="-nagle"
 else
   epl=""
   rc=""
   asw_flag=""
+  nagle_flag=""
 fi
 
 #Trap control-c to graciously shut down the clients and give chance to collect stats...
@@ -136,13 +138,13 @@ for i in `seq 1 ${number_of_clients}`; do
     echo "fanout:${f}/${fanout}"
     if [ "${PROTOCOL:-smf}" = "smf" ] && [[ ${add_args} == *"persistent"* ]]; then
       if [[ "${endpoints}" = "queues" ]]; then
-        taskset -c ${c} ./${sdkperf_bin} ${asw_flag} -epl=${epl} -rc=${rc} -stl=${topic}_${i} -pe -sql=${topic}_${i}_${f} -pea=0 -nagle ${add_args} &> ${name}_stats_${i}_${f}.txt &
+        taskset -c ${c} ./${sdkperf_bin} ${asw_flag} -epl=${epl} -rc=${rc} -stl=${topic}_${i} -pe -sql=${topic}_${i}_${f} -pea=0 ${nagle_flag} ${add_args} &> ${name}_stats_${i}_${f}.txt &
       else
-        taskset -c ${c} ./${sdkperf_bin} ${asw_flag} -epl=${epl} -rc=${rc} -stl=${topic}_${i} -pe -tte=1 -pea=0 -nagle ${add_args} &> ${name}_stats_${i}_${f}.txt &
+        taskset -c ${c} ./${sdkperf_bin} ${asw_flag} -epl=${epl} -rc=${rc} -stl=${topic}_${i} -pe -tte=1 -pea=0 ${nagle_flag} ${add_args} &> ${name}_stats_${i}_${f}.txt &
       fi
       echo
     else
-      taskset -c ${c} ./${sdkperf_bin} ${asw_flag} ${epl:+-epl=${epl}} ${rc:+-rc=${rc}} -stl=${topic}_${i} -nagle ${add_args} &> ${name}_stats_${i}_${f}.txt &
+      taskset -c ${c} ./${sdkperf_bin} ${asw_flag} ${epl:+-epl=${epl}} ${rc:+-rc=${rc}} -stl=${topic}_${i} ${nagle_flag} ${add_args} &> ${name}_stats_${i}_${f}.txt &
     fi
     pid=$!
     pids="${pids} ${pid}"
@@ -161,10 +163,10 @@ waitall $pids
 sleep 2
 echo "Done, gathering stats...!"
 echo " "
-if grep -q "Computed receive" ${name}_stats_*.txt; then
+if grep -qE "Computed receive|Computed subscriber" ${name}_stats_*.txt; then
   echo "Computing results"
-  cat ${name}_stats_*.txt | grep "Computed receive" > ${name}_stats-r1.txt
-  awk 'BEGIN { FS= " " } ; { print $7 }' ${name}_stats-r1.txt > ${name}_stats-r2.txt
+  cat ${name}_stats_*.txt | grep -E "Computed receive|Computed subscriber" > ${name}_stats-r1.txt
+  awk 'BEGIN { FS= " " } ; { print $NF }' ${name}_stats-r1.txt > ${name}_stats-r2.txt
   sum=`cat ${name}_stats-r2.txt | awk '{ sum += $1; } END { print sum; }'`
   echo "Sum across consumers: ${sum} (msg/sec)" | tee result_sub.txt
   if grep -q 'Exception\|Error' ${name}_stats_*.txt; then

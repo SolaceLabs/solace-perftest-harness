@@ -35,11 +35,13 @@ SOLCLIENT_SESSION_PROP_CONNECT_RETRIES_PER_HOST,1"
   rc=100
   apw_flag="-apw=255"
   psm_flag="-psm"
+  nagle_flag="-nagle"
 else
   epl=""
   rc=""
   apw_flag=""
   psm_flag=""
+  nagle_flag=""
 fi
 
 #return code
@@ -152,8 +154,8 @@ for i in `seq 1 ${number_of_clients}`; do
   #cores are actually numbered starting from 0, so use c for core number
   c=$((${j}-1))
   #start process in background
-  echo "${sdkperf_bin} ${apw_flag} ${epl:+-epl=${epl}} ${rc:+-rc=${rc}} -mr=${rate} -mn=${mn} -ptl=${topic}_${i} ${psm_flag} -nagle ${add_args}"
-  taskset -c ${c} ./${sdkperf_bin} ${apw_flag} ${epl:+-epl=${epl}} ${rc:+-rc=${rc}} -mr=${rate} -mn=${mn} -ptl=${topic}_${i} ${psm_flag} -nagle ${add_args} &> ${name}_stats_${i}.txt &
+  echo "${sdkperf_bin} ${apw_flag} ${epl:+-epl=${epl}} ${rc:+-rc=${rc}} -mr=${rate} -mn=${mn} -ptl=${topic}_${i} ${psm_flag} ${nagle_flag} ${add_args}"
+  taskset -c ${c} ./${sdkperf_bin} ${apw_flag} ${epl:+-epl=${epl}} ${rc:+-rc=${rc}} -mr=${rate} -mn=${mn} -ptl=${topic}_${i} ${psm_flag} ${nagle_flag} ${add_args} &> ${name}_stats_${i}.txt &
   pid=$!
   pids="${pids} ${pid}"
   j=$((${j}+1))
