@@ -434,11 +434,36 @@ The harness supports three Solace messaging protocols. Set `broker_protocol` in 
 
 | `broker_protocol` | Binary required in `pubSubTools/` | Plaintext port | TLS port | URL scheme (plain / TLS) |
 |---|---|---|---|---|
-| `smf` (default) | `sdkperf_c` | 55555 | 55443 | `tcp://` / `tcps://` |
-| `mqtt` | `mqtt/sdkperf_mqtt.sh` | 1883 | 8883 | `tcp://` / `mqtts://` |
-| `amqp` | `amqp/sdkperf_amqp.sh` | 5672 | 5671 | `amqp://` / `amqps://` |
+| `smf` (default) | `smf/sdkperf_c` | 55555 | 55443 | `tcp://` / `tcps://` |
+| `mqtt` | `mqtt/sdkperf_mqtt.sh` + `mqtt/lib/` | 1883 | 8883 | `tcp://` / `mqtts://` |
+| `amqp` | `amqp/sdkperf_jmsamqp.sh` + `amqp/jaas/` | 5672 | 5671 | `amqp://` / `amqps://` |
 
-Download the MQTT and AMQP sdkperf binaries from the [Solace developer portal](https://solace.com/downloads/) and place them in the appropriate subdirectory under `pubSubTools/`.
+Download the sdkperf tools from the [Solace developer portal](https://solace.com/downloads/):
+- **SMF**: unpack `sdkperf_c` (Linux C binary) into `pubSubTools/smf/`
+- **MQTT / AMQP**: both come from the same **Java sdkperf** package (`sdkperf_java`). Unpack the download, then:
+  - Copy the `sdkperf_mqtt.sh` wrapper and the `lib/` directory tree into `pubSubTools/mqtt/`
+  - Copy the `sdkperf_jmsamqp.sh` wrapper, the `jaas/` directory, and the tool's own `lib/` (small subset) into `pubSubTools/amqp/`
+  - The harness additionally copies `pubSubTools/mqtt/lib/` when deploying AMQP to provide the bulk of the required JARs (`sol-sdkperf`, `qpid-jms-client`, `proton-j`, `netty`, etc.) that are not present in `amqp/lib/`
+
+The expected directory layout:
+
+```
+pubSubTools/
+  smf/
+    sdkperf_c          ← native C binary
+    LICENSES
+  mqtt/
+    sdkperf_mqtt.sh    ← Java wrapper (invokes java -cp lib/*.jar SDKPerf_java -api=MQTT)
+    lib/               ← all JAR dependencies (Paho, Netty, sol-sdkperf, etc.)
+      optional/        ← log4j JARs + log4j2.xml
+    licenses.txt
+  amqp/
+    sdkperf_jmsamqp.sh ← Java wrapper (invokes java -cp lib/*.jar SDKPerf_java -api=THIRDPARTY)
+    jaas/              ← Kerberos/JAAS config (login.conf)
+    licenses.txt
+```
+
+> **Java required on test hosts** for MQTT and AMQP: `java` must be on `$PATH` on every publisher and consumer test host (JRE 8+ is sufficient). The Ansible playbook does not install Java automatically.
 
 #### MQTT message types
 

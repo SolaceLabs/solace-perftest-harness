@@ -48,12 +48,22 @@ trap 'killallp' INT
 killallp() {
     trap '' INT TERM     # ignore INT and TERM while shutting down
     echo " "
-    echo "**** Shutting down... ****"     # added double quotes
-    killall -2 "${sdkperf_bin}"  2>/dev/null     # use when running script directly
-    sleep 3
-    killall -15 "${sdkperf_bin}" 2>/dev/null     # use when running from ansible
-    sleep 3
-    killall -9 "${sdkperf_bin}"  2>/dev/null     # use when running from ansible
+    echo "**** Shutting down... ****"
+    # Java-based tools (mqtt/amqp) spawn a 'java' process; kill that.
+    # SMF (sdkperf_c) is a native binary; kill by binary name.
+    if [ "${PROTOCOL:-smf}" = "smf" ]; then
+      killall -2 "${sdkperf_bin}"  2>/dev/null
+      sleep 3
+      killall -15 "${sdkperf_bin}" 2>/dev/null
+      sleep 3
+      killall -9 "${sdkperf_bin}"  2>/dev/null
+    else
+      killall -2 java  2>/dev/null
+      sleep 3
+      killall -15 java 2>/dev/null
+      sleep 3
+      killall -9 java  2>/dev/null
+    fi
     wait
     wait
 }

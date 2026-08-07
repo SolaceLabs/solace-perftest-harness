@@ -40,12 +40,9 @@
     broker_protocol:     "{{ broker_protocol     | default('smf') }}"
     pub_broker_protocol: "{{ pub_broker_protocol | default(broker_protocol | default('smf')) }}"
     sub_broker_protocol: "{{ sub_broker_protocol | default(broker_protocol | default('smf')) }}"
-    # sdkperf binary filename on test host (dest)
-    _pub_sdkperf_binary: "{{ 'sdkperf_mqtt.sh' if pub_broker_protocol == 'mqtt' else 'sdkperf_amqp.sh' if pub_broker_protocol == 'amqp' else 'sdkperf_c' }}"
-    _sub_sdkperf_binary: "{{ 'sdkperf_mqtt.sh' if sub_broker_protocol == 'mqtt' else 'sdkperf_amqp.sh' if sub_broker_protocol == 'amqp' else 'sdkperf_c' }}"
-    # sdkperf binary source path in pubSubTools/
-    _pub_sdkperf_src: "{{ 'mqtt/sdkperf_mqtt.sh' if pub_broker_protocol == 'mqtt' else 'amqp/sdkperf_amqp.sh' if pub_broker_protocol == 'amqp' else 'sdkperf_c' }}"
-    _sub_sdkperf_src: "{{ 'mqtt/sdkperf_mqtt.sh' if sub_broker_protocol == 'mqtt' else 'amqp/sdkperf_amqp.sh' if sub_broker_protocol == 'amqp' else 'sdkperf_c' }}"
+    # sdkperf binary filename on test host (dest); Java tools use .sh wrapper
+    _pub_sdkperf_binary: "{{ 'sdkperf_mqtt.sh' if pub_broker_protocol == 'mqtt' else 'sdkperf_jmsamqp.sh' if pub_broker_protocol == 'amqp' else 'sdkperf_c' }}"
+    _sub_sdkperf_binary: "{{ 'sdkperf_mqtt.sh' if sub_broker_protocol == 'mqtt' else 'sdkperf_jmsamqp.sh' if sub_broker_protocol == 'amqp' else 'sdkperf_c' }}"
     # TLS flags per side
     _broker_tls: "{{ broker_tls | default(false) | bool }}"
     _pub_tls: "{{ pub_broker_tls | default(broker_tls | default(false)) | bool }}"
@@ -157,30 +154,70 @@
       path: "/home/{{ sshuser }}/pubSubTools"
       state: directory
       mode: 0755
-  - name: 'copy LICENSES'
+  # SMF: copy single binary from pubSubTools/smf/
+  - name: 'copy SMF binary to pubhost'
     copy:
-      src: ../pubSubTools/LICENSES
-      dest: "{{ script_path }}/LICENSES"
-      owner: "{{ sshuser }}"
-      group: "{{ sshuser }}"
-      mode: "0644"
-    ignore_errors: true
-  - name: 'copy sdkperf to pubhost'
-    copy:
-      src: ../pubSubTools/{{ _pub_sdkperf_src }}
-      dest: "{{ script_path }}/{{ _pub_sdkperf_binary }}"
+      src: ../pubSubTools/smf/sdkperf_c
+      dest: "{{ script_path }}/sdkperf_c"
       owner: "{{ sshuser }}"
       group: "{{ sshuser }}"
       mode: "u+x"
-    when: "'pubhost' in group_names"
-  - name: 'copy sdkperf to subhost'
+    when: "'pubhost' in group_names and pub_broker_protocol == 'smf'"
+  - name: 'copy SMF binary to subhost'
     copy:
-      src: ../pubSubTools/{{ _sub_sdkperf_src }}
-      dest: "{{ script_path }}/{{ _sub_sdkperf_binary }}"
+      src: ../pubSubTools/smf/sdkperf_c
+      dest: "{{ script_path }}/sdkperf_c"
       owner: "{{ sshuser }}"
       group: "{{ sshuser }}"
       mode: "u+x"
-    when: "'subhost' in group_names"
+    when: "'subhost' in group_names and sub_broker_protocol == 'smf'"
+  # MQTT: copy whole package directory (script + lib/ + lib/optional/ + licenses.txt)
+  # Both pub and sub get the same package; lib/ must sit alongside the wrapper script.
+  - name: 'copy MQTT package to pubhost'
+    copy:
+      src: ../pubSubTools/mqtt/
+      dest: "{{ script_path }}/"
+      owner: "{{ sshuser }}"
+      group: "{{ sshuser }}"
+    when: "'pubhost' in group_names and pub_broker_protocol == 'mqtt'"
+  - name: 'copy MQTT package to subhost'
+    copy:
+      src: ../pubSubTools/mqtt/
+      dest: "{{ script_path }}/"
+      owner: "{{ sshuser }}"
+      group: "{{ sshuser }}"
+    when: "'subhost' in group_names and sub_broker_protocol == 'mqtt'"
+  # AMQP: copy amqp/ dir first (includes wrapper, jaas/, and its own small lib/ subset),
+  # then copy mqtt/lib/ on top to add the bulk of the required JARs (sol-sdkperf,
+  # qpid-jms-client, proton-j, netty, etc.) which are not present in amqp/lib/.
+  - name: 'copy AMQP package to pubhost'
+    copy:
+      src: ../pubSubTools/amqp/
+      dest: "{{ script_path }}/"
+      owner: "{{ sshuser }}"
+      group: "{{ sshuser }}"
+    when: "'pubhost' in group_names and pub_broker_protocol == 'amqp'"
+  - name: 'copy AMQP shared lib to pubhost'
+    copy:
+      src: ../pubSubTools/mqtt/lib/
+      dest: "{{ script_path }}/lib/"
+      owner: "{{ sshuser }}"
+      group: "{{ sshuser }}"
+    when: "'pubhost' in group_names and pub_broker_protocol == 'amqp'"
+  - name: 'copy AMQP package to subhost'
+    copy:
+      src: ../pubSubTools/amqp/
+      dest: "{{ script_path }}/"
+      owner: "{{ sshuser }}"
+      group: "{{ sshuser }}"
+    when: "'subhost' in group_names and sub_broker_protocol == 'amqp'"
+  - name: 'copy AMQP shared lib to subhost'
+    copy:
+      src: ../pubSubTools/mqtt/lib/
+      dest: "{{ script_path }}/lib/"
+      owner: "{{ sshuser }}"
+      group: "{{ sshuser }}"
+    when: "'subhost' in group_names and sub_broker_protocol == 'amqp'"
   - name: 'copy scripts'
     copy:
       src: ../scripts/{{ item.src }}
