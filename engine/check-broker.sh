@@ -214,12 +214,20 @@ if [ "${_skip}" = "false" ]; then
       fi
     fi
 
-    # ---- Checks 10-11: ACL profile publish/subscribe default actions ----
+    # ---- Checks 10-12: ACL profile connect/publish/subscribe default actions ----
     if [ -n "${_acl_name}" ]; then
       _acl_resp=$(_get "msgVpns/${broker_vpn}/aclProfiles/${_acl_name}")
       if echo "${_acl_resp}" | grep -q '"meta"'; then
+        _connect_default=$(_jf "${_acl_resp}" "clientConnectDefaultAction")
         _pub_default=$(_jf "${_acl_resp}" "publishTopicDefaultAction")
         _sub_default=$(_jf "${_acl_resp}" "subscribeTopicDefaultAction")
+
+        if [ "${_connect_default}" = "disallow" ]; then
+          _exc=$(_get "msgVpns/${broker_vpn}/aclProfiles/${_acl_name}/clientConnectExceptions")
+          if ! echo "${_exc}" | grep -qE '"clientConnectException"'; then
+            _add "ACL profile '${_acl_name}' blocks client connections by default and has no exceptions. All sdkperf clients will be refused with CLIENT_ACL_DENIED (403). Set clientConnectDefaultAction to 'allow' in the ACL profile."
+          fi
+        fi
 
         if [ "${_pub_default}" = "disallow" ]; then
           _exc=$(_get "msgVpns/${broker_vpn}/aclProfiles/${_acl_name}/publishTopicExceptions")

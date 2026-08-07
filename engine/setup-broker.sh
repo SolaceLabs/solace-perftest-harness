@@ -168,7 +168,7 @@ fi
 # Step 2: ACL profile
 # ===========================================================================
 _acl_path="msgVpns/$(_je "${broker_vpn}")/aclProfiles/$(_je "${_profile}")"
-_acl_settings='"publishTopicDefaultAction":"allow","subscribeTopicDefaultAction":"allow"'
+_acl_settings='"clientConnectDefaultAction":"allow","publishTopicDefaultAction":"allow","subscribeTopicDefaultAction":"allow"'
 
 _acl_exist=$(_curl_get "${_acl_path}")
 if echo "${_acl_exist}" | grep -q '"NOT_FOUND"'; then
@@ -179,7 +179,7 @@ if echo "${_acl_exist}" | grep -q '"NOT_FOUND"'; then
     _err "ACL profile '${_profile}': create failed — $(_semp_error_msg "${_r}")"
   else
     _ok "ACL profile '${_profile}': created"
-    echo "      Publish default: allow  Subscribe default: allow"
+    echo "      Connect default: allow  Publish default: allow  Subscribe default: allow"
   fi
 else
   _r=$(_curl_patch "{${_acl_settings}}" "${_acl_path}")
@@ -187,7 +187,7 @@ else
     _err "ACL profile '${_profile}': update failed — $(_semp_error_msg "${_r}")"
   else
     _ok "ACL profile '${_profile}': already exists — settings confirmed"
-    echo "      Publish default: allow  Subscribe default: allow"
+    echo "      Connect default: allow  Publish default: allow  Subscribe default: allow"
   fi
 fi
 
