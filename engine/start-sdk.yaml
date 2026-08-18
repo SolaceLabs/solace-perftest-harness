@@ -155,10 +155,16 @@
       path: "/home/{{ sshuser }}/pubSubTools"
       state: directory
       mode: 0755
-  # SMF: copy single binary from pubSubTools/smf/
+  # SMF: copy single binary. New layout: pubSubTools/smf/sdkperf_c; legacy: pubSubTools/sdkperf_c.
+  # The stat runs on localhost (the controller) once per host so each host has _smf_binary_stat.
+  - name: 'detect SMF binary path (pubSubTools/smf/ vs legacy pubSubTools/)'
+    stat:
+      path: "{{ playbook_dir }}/../pubSubTools/smf/sdkperf_c"
+    register: _smf_binary_stat
+    delegate_to: localhost
   - name: 'copy SMF binary to pubhost'
     copy:
-      src: ../pubSubTools/smf/sdkperf_c
+      src: "{{ '../pubSubTools/smf/sdkperf_c' if _smf_binary_stat.stat.exists else '../pubSubTools/sdkperf_c' }}"
       dest: "{{ script_path }}/sdkperf_c"
       owner: "{{ sshuser }}"
       group: "{{ sshuser }}"
@@ -166,7 +172,7 @@
     when: "'pubhost' in group_names and _pub_proto == 'smf'"
   - name: 'copy SMF binary to subhost'
     copy:
-      src: ../pubSubTools/smf/sdkperf_c
+      src: "{{ '../pubSubTools/smf/sdkperf_c' if _smf_binary_stat.stat.exists else '../pubSubTools/sdkperf_c' }}"
       dest: "{{ script_path }}/sdkperf_c"
       owner: "{{ sshuser }}"
       group: "{{ sshuser }}"

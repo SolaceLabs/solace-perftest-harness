@@ -33,22 +33,28 @@ echo "Running ansible-playbook start-sdk.yaml with args: " $@
 ansible-playbook -i "${script_dir}/../config/host" "${script_dir}/start-sdk.yaml" $@ | tee "${script_dir}/run-tests.log"
 echo
 printf "RESULT ****************************************\n"
-if grep -q 'Exception\|Error' "${script_dir}/run-tests.log"; then
-  #Check if any exceptions were logged by sdkperf processes and log them
+# Always parse rates first. Teardown exceptions from sdkperf -pea=0 queue cleanup are
+# non-fatal and must not suppress valid rate data. Only fall back to the error branch
+# if no rates were actually computed (i.e. publisher or consumer produced 0 msg/s).
+#first publishers
+cat "${script_dir}/run-tests.log" | sed 's/\x1B\[[0-9;]*m//g' | sed 's/\\n/\n/g' | grep 'Sum across publishers:' | grep -v ansible | \
+awk 'BEGIN { FS= " " } ; { print $1" "$2" "$3" "$4" "$5 }' > "${script_dir}/sum-pub.txt"
+sum_pub=`awk 'BEGIN { FS= " " }; { print $4 }' "${script_dir}/sum-pub.txt" | awk '{ sum += $1; } END { print sum; }'`
+#then consumers
+cat "${script_dir}/run-tests.log" | sed 's/\x1B\[[0-9;]*m//g' | sed 's/\\n/\n/g' | grep 'Sum across consumers:' | grep -v ansible | \
+awk 'BEGIN { FS= " " } ; { print $1" "$2" "$3" "$4" "$5 }' > "${script_dir}/sum-sub.txt"
+sum_sub=`awk 'BEGIN { FS= " " }; { print $4 }' "${script_dir}/sum-sub.txt" | awk '{ sum += $1; } END { print sum; }'`
+if [[ -n "${sum_pub}" && "${sum_pub}" != "0" && -n "${sum_sub}" && "${sum_sub}" != "0" ]]; then
+  printf "Sum across all publishers: %9.0f (msgs/sec)\n" ${sum_pub}
+  printf "Sum across all  consumers: %9.0f (msgs/sec)\n" ${sum_sub}
+  if grep -q 'Exception\|Error' "${script_dir}/run-tests.log"; then
+    echo "Warnings (non-fatal errors in sdkperf output, rates were still computed):"
+    cat "${script_dir}/run-tests.log" | sed 's/\\n/\n/g' | grep 'Exception\|Error' | grep -v ansible | sort | uniq -c | sort -nr
+  fi
+else
+  #No valid rates found - report errors
   echo "Errors occured during run:"
   cat "${script_dir}/run-tests.log" | sed 's/\\n/\n/g' | grep 'Exception\|Error' | grep -v ansible | sort | uniq -c | sort -nr
-else
-  #If no exceptions occured, parse and print out achieved message rates
-  #first publishers
-  cat "${script_dir}/run-tests.log" | sed 's/\x1B\[[0-9;]*m//g' | sed 's/\\n/\n/g' | grep 'Sum across publishers:' | grep -v ansible | \
-  awk 'BEGIN { FS= " " } ; { print $1" "$2" "$3" "$4" "$5 }' > "${script_dir}/sum-pub.txt"
-  sum_pub=`awk 'BEGIN { FS= " " }; { print $4 }' "${script_dir}/sum-pub.txt" | awk '{ sum += $1; } END { print sum; }'`
-  printf "Sum across all publishers: %9.0f (msgs/sec)\n" ${sum_pub}
-  #then consumers
-  cat "${script_dir}/run-tests.log" | sed 's/\x1B\[[0-9;]*m//g' | sed 's/\\n/\n/g' | grep 'Sum across consumers:' | grep -v ansible | \
-  awk 'BEGIN { FS= " " } ; { print $1" "$2" "$3" "$4" "$5 }' > "${script_dir}/sum-sub.txt"
-  sum_sub=`awk 'BEGIN { FS= " " }; { print $4 }' "${script_dir}/sum-sub.txt" | awk '{ sum += $1; } END { print sum; }'`
-  printf "Sum across all  consumers: %9.0f (msgs/sec)\n" ${sum_sub}
 fi
 echo
 if [[ "${cleanup_at_end}" = "true" ]]; then
