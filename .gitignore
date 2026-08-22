@@ -6,6 +6,3 @@ config/credentials.yaml
 CLAUDE.private.md
 /docs/ent-vs-cloud-target-comparison.md
 /results/
-/pubSubTools/smf/
-/pubSubTools/mqtt/
-/pubSubTools/amqp/
