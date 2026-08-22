@@ -23,7 +23,7 @@ Run the guided setup wizard to configure your test hosts and broker credentials:
 
 This writes `config/host` (Ansible inventory) and `config/credentials.yaml`, explains SSH key requirements, and checks that dependencies (`ansible`, `dnsutils`) are installed. If you provide optional SEMP management credentials during setup, the wizard can also create the required client profile, ACL profile, and client username on the broker automatically.
 
-Then place the `sdkperf_c` binary in `pubSubTools/` — download it from the [Solace developer portal](https://solace.com/downloads/).
+The repo includes sdkperf binaries for all three supported protocols in `pubSubTools/smf/`, `pubSubTools/mqtt/`, and `pubSubTools/amqp/`. If you need to update or replace them, download the latest from the [Solace developer portal](https://solace.com/downloads/) and unpack into the appropriate subdirectory — see [Multi-protocol support](#multi-protocol-support) for the expected layout.
 
 ---
 
@@ -131,7 +131,7 @@ For a visual walkthrough see `docs/Perf Test Harness-Overview-2026.pptx`.
 - A controller host (Linux) with Ansible installed and SSH access to all test hosts
 - SSH keys from the controller installed on all test hosts
 - A client username on the broker VPN with publish, subscribe, and guaranteed endpoint create permissions
-- `sdkperf_c` binary placed in `pubSubTools/` on the controller (copied to test hosts by Ansible at run time)
+- sdkperf binaries in `pubSubTools/smf/`, `pubSubTools/mqtt/`, and `pubSubTools/amqp/` — included in the repo; replace with a newer version from the [Solace developer portal](https://solace.com/downloads/) if needed (copied to test hosts by Ansible at run time)
 
 > For minimal testing a single publisher host and a single consumer host is sufficient, but will limit achievable rates — especially for direct messaging at small message sizes where multiple publisher hosts are needed to saturate the broker.
 
@@ -564,7 +564,9 @@ discovery-tests/                 # Discovery testsets (binary search format)
 mesh-tests/                      # Mesh throughput testsets (pub and sub on separate brokers)
 custom-sets/                     # User-generated custom discovery testsets (gitignored)
 scripts/                         # sdkpublisher.sh and sdkconsumers.sh — run on test hosts
-pubSubTools/                     # sdkperf_c binary and licences (not included in repo)
+pubSubTools/smf/                 # sdkperf_c (C binary) and LICENSES
+pubSubTools/mqtt/                # sdkperf_mqtt.sh wrapper and Java lib/ dependencies
+pubSubTools/amqp/                # sdkperf_jmsamqp.sh wrapper, jaas/ config, and lib/
 config/host                      # Ansible inventory (publisher and consumer hosts)
 config/credentials.yaml          # Broker credentials for sdkperf (gitignored — not committed)
 config/credentials.yaml.example  # Credentials template
