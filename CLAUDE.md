@@ -9,7 +9,7 @@ If `CLAUDE.private.md` exists in the repo root, read it at the start of the sess
 - Ansible installed on the controller host (`sudo apt install ansible` / `sudo yum install ansible`)
 - `dnsutils` installed for hostname validation (`sudo apt install dnsutils` / `sudo yum install bind-utils`)
 - SSH access to publisher/consumer test hosts (Linux)
-- `sdkperf_c` binary placed in `pubSubTools/` (not included in repo)
+- sdkperf binaries in `pubSubTools/smf/` (C binary), `pubSubTools/mqtt/`, and `pubSubTools/amqp/` — included in the repo; replace from the Solace developer portal if a newer version is needed
 - `config/credentials.yaml` present (gitignored — copy from `config/credentials.yaml.example`)
 
 `setup.sh` checks for both: missing `ansible` aborts setup; missing `dnsutils` prints a warning but continues.
