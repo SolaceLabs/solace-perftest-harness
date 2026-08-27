@@ -67,8 +67,26 @@ for file in "${files[@]}"; do
   # ── Parse all scenarios from the file ─────────────────────────────────────────
   # awk emits one TSV line per completed scenario:
   # msg_size fanout msg_type parallel_hosts parallel_procs target_rate pub_rate con_rate is_discovery result clock_errors has_errors
-  mapfile -t scenario_lines < <(awk '
-    BEGIN { reset() }
+
+  # Pre-scan the Results summary table for runner verdicts.  The runner writes
+  # "Test: OK/Fail" only to per-scenario temp logs (cleaned up after the run);
+  # the compiled result file only has the Results summary table at the end.
+  # Build a "size,fanout,type=verdict" lookup so the main awk can use it instead
+  # of unconditionally defaulting to "Fail" for every scenario.
+  _verdicts=$(awk '
+    /^ Results summary$/ { in_s=1; seen=0; next }
+    in_s && $1 ~ /^[0-9]+B$/ { sz=$1; sub(/B$/, "", sz); printf "%s,%s,%s=%s|", sz, $2, $3, $NF; seen=1 }
+    in_s && seen && /^===/    { in_s=0 }
+  ' "${file}")
+
+  mapfile -t scenario_lines < <(awk -v verdicts_str="${_verdicts}" '
+    BEGIN {
+      reset()
+      n = split(verdicts_str, _pairs, "|")
+      for (_i=1; _i<=n; _i++) {
+        if (split(_pairs[_i], _kv, "=") == 2) verdicts[_kv[1]] = _kv[2]
+      }
+    }
 
     function reset() {
       sz=""; fo=""; mt=""; ph=""; pp=""
@@ -90,7 +108,11 @@ for file in "${files[@]}"; do
     /TASK \[echo_end\]/ { emit(); in_echo=1; in_result=0; in_err=0; next }
     /^RESULT \*+/       { in_result=1; in_echo=0; in_err=0; next }
     /^Errors occured/   { in_err=1; he=1; next }
-    /^--$/              { if (in_result && sz != "" && res == "") { res="Fail"; emit() }
+    /^--$/              { if (in_result && sz != "" && res == "") {
+                            _k = sz","fo","mt
+                            res = (_k in verdicts) ? verdicts[_k] : "Fail"
+                            emit()
+                          }
                           in_err=0 }
 
     in_echo && /Message size/      { match($0,/[0-9]+/); sz=substr($0,RSTART,RLENGTH) }
@@ -111,7 +133,13 @@ for file in "${files[@]}"; do
     in_err && /Error in clock/  { ce++ }
     in_err && /Error|Exception/ { he=1 }
 
-    END { emit() }
+    END {
+      if (sz != "" && res == "") {
+        _k = sz","fo","mt
+        res = (_k in verdicts) ? verdicts[_k] : "Fail"
+      }
+      emit()
+    }
   ' "${file}")
 
   if [ ${#scenario_lines[@]} -eq 0 ]; then
