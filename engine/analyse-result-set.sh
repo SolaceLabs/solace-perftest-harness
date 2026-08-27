@@ -316,6 +316,10 @@ for file in "${files[@]}"; do
     fi
 
     # Fanout delivery integrity: consumer rate should be ≈ pub_rate × fanout.
+    # A shortfall means consumers cannot keep up in real time — for direct messaging
+    # this implies message loss; for persistent messaging messages accumulate in
+    # queues and are discarded at teardown, but either way the broker has not
+    # sustained real-time delivery at the target rate.
     # Suppress when publisher itself is the bottleneck (fanout drop is a symptom,
     # not an independent issue) or when the test passed (minor rounding is fine).
     if ! ${pub_bottleneck_flagged} && [ "${res}" = "Fail" ] && \
@@ -324,7 +328,11 @@ for file in "${files[@]}"; do
       threshold=$(( expected * 90 / 100 ))
       if [ "${cr}" -lt "${threshold}" ] 2>/dev/null; then
         pct=$(( cr * 100 / (expected > 0 ? expected : 1) ))
-        note "${sz}B ${mt} f=${fo}: Consumer received ${cr} msg/sec but expected ${pr}×${fo}=${expected} (~${pct}% delivery). Messages are being dropped or not delivered to all subscribers. Check: VPN message spool quota, ACL restrictions on subscriptions, or subscriber connection errors."
+        if [ "${mt}" = "persistent" ]; then
+          note "${sz}B ${mt} f=${fo}: Consumers received ${cr} msg/sec but the target requires ${pr}×${fo}=${expected} (~${pct}% of expected). Consumers cannot sustain real-time delivery at this rate — messages are accumulating in queues. Check broker CPU, subscriber host NIC/CPU, and whether the broker storage tier can sustain the required IOPS."
+        else
+          note "${sz}B ${mt} f=${fo}: Consumer received ${cr} msg/sec but expected ${pr}×${fo}=${expected} (~${pct}% delivery). Messages are being dropped or not delivered to all subscribers. Check: VPN message spool quota, ACL restrictions on subscriptions, or subscriber connection errors."
+        fi
       fi
     fi
   done
