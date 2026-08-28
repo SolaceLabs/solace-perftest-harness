@@ -41,6 +41,8 @@ benchmarking-tests/ent-10k-gm-ha.sh <broker-ip>
 
 Each scenario reports **PASS** or **FAIL** against the published target rate (within a 5% margin).
 
+> **Occasional outliers are normal.** Performance measurements are sensitive to transient conditions — CPU scheduler jitter, garbage collection pauses, background I/O, network congestion, or VM resource contention. An isolated failure on an otherwise clean run is more likely to be environment noise than a real broker ceiling, especially if the failed scenario is surrounded by passing ones or the result is non-monotonic (e.g. a lower rate at f=10 than at f=5 or f=50). If a scenario fails unexpectedly, re-run the testset to confirm whether the failure is repeatable before drawing conclusions.
+
 ---
 
 #### Characterise — discover the maximum throughput of an unknown broker
